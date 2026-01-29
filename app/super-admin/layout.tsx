@@ -51,13 +51,9 @@ export default function SuperAdminLayout({
             >
                 {/* Logo */}
                 <div className="h-16 flex items-center justify-between px-4 border-b border-white border-opacity-20">
-                    <div className="flex items-center gap-2 text-white">
-                        <div className="bg-white rounded-md p-1">
-                            <img src="/logo.png" alt="Lalelilo" className="h-8 w-auto object-contain" />
-                        </div>
-                        <div>
-                            <span className="font-bold text-lg block text-white drop-shadow-sm">Lalelilo</span>
-                            <span className="text-xs opacity-90 text-white">Super Admin</span>
+                    <div className="flex items-center justify-center w-full">
+                        <div className="bg-white rounded-md p-1.5 shadow-sm">
+                            <img src="/logo.png" alt="Lalelilo" className="h-10 w-auto object-contain" />
                         </div>
                     </div>
                     <button
