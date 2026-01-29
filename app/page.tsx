@@ -37,12 +37,12 @@ export default function HomePage() {
       // TODO: Replace with actual API calls
       setTimeout(() => {
         setProducts([
-          { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&q=80&w=400', category: 'Vestidos', is_featured: true },
-          { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://images.unsplash.com/photo-1621452773781-0f992ee03598?auto=format&fit=crop&q=80&w=400', category: 'Conjuntos', is_featured: true },
-          { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://images.unsplash.com/photo-1519238806043-5131e1cadd52?auto=format&fit=crop&q=80&w=400', category: 'Calças', is_featured: true },
-          { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://images.unsplash.com/photo-1519457431-44cd6e6962f3?auto=format&fit=crop&q=80&w=400', category: 'Camisetas', is_featured: true },
-          { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://images.unsplash.com/photo-1621452773781-0f992ee03598?auto=format&fit=crop&q=80&w=400', category: 'Vestidos', is_featured: true },
-          { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?auto=format&fit=crop&q=80&w=400', category: 'Shorts', is_featured: true }
+          { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?w=500&q=80', category: 'Vestidos', is_featured: true },
+          { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://images.unsplash.com/photo-1519238263496-6323a72b0c3f?w=500&q=80', category: 'Conjuntos', is_featured: true },
+          { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://images.unsplash.com/photo-1519238806043-5131e1cadd52?w=500&q=80', category: 'Calças', is_featured: true },
+          { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://images.unsplash.com/photo-1519457431-44cd6e6962f3?w=500&q=80', category: 'Camisetas', is_featured: true },
+          { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://images.unsplash.com/photo-1471286174826-bba928a3036a?w=500&q=80', category: 'Vestidos', is_featured: true },
+          { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?w=500&q=80', category: 'Shorts', is_featured: true }
         ]);
 
         setNearbyShops([
