@@ -89,9 +89,14 @@ export default function CheckoutPage() {
                                 Voltar
                             </Button>
                         </Link>
-                        <div>
-                            <h1 className="text-xl md:text-2xl font-bold">Finalizar Pedido</h1>
-                            <p className="text-xs md:text-sm opacity-90">{cartItems.length} itens no carrinho</p>
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white rounded-lg p-1.5 shadow-sm">
+                                <img src="/logo.png" alt="Lalelilo" className="h-8 md:h-10 w-auto object-contain" />
+                            </div>
+                            <div>
+                                <h1 className="text-xl md:text-2xl font-bold">Checkout</h1>
+                                <p className="text-xs md:text-sm opacity-90">{cartItems.length} itens no carrinho</p>
+                            </div>
                         </div>
                     </div>
                 </div>
