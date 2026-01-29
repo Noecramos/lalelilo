@@ -32,14 +32,14 @@ export default function ProductsPage() {
             // TODO: Replace with actual API call
             setTimeout(() => {
                 const allProducts = [
-                    { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://picsum.photos/seed/girl/400/500', category: 'Vestidos', stock: 15, rating: 4.8 },
-                    { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://picsum.photos/seed/boy/400/500', category: 'Conjuntos', stock: 12, rating: 4.9 },
-                    { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://picsum.photos/seed/jeans/400/500', category: 'Calças', stock: 20, rating: 4.7 },
-                    { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://picsum.photos/seed/tshirt/400/500', category: 'Camisetas', stock: 30, rating: 4.6 },
-                    { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://picsum.photos/seed/flower/400/500', category: 'Vestidos', stock: 8, rating: 4.9 },
-                    { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://picsum.photos/seed/shorts/400/500', category: 'Shorts', stock: 18, rating: 4.5 },
-                    { id: '7', name: 'Conjunto Moletom', price: 95.00, image_url: 'https://picsum.photos/seed/winter/400/500', category: 'Conjuntos', stock: 10, rating: 4.8 },
-                    { id: '8', name: 'Vestido Princesa', price: 120.00, image_url: 'https://picsum.photos/seed/princess/400/500', category: 'Vestidos', stock: 5, rating: 5.0 },
+                    { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://images.pexels.com/photos/3661349/pexels-photo-3661349.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Vestidos', stock: 15, rating: 4.8 },
+                    { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://images.pexels.com/photos/11003460/pexels-photo-11003460.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Conjuntos', stock: 12, rating: 4.9 },
+                    { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://images.pexels.com/photos/1598104/pexels-photo-1598104.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Calças', stock: 20, rating: 4.7 },
+                    { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://images.pexels.com/photos/2292919/pexels-photo-2292919.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Camisetas', stock: 30, rating: 4.6 },
+                    { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://images.pexels.com/photos/9383617/pexels-photo-9383617.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Vestidos', stock: 8, rating: 4.9 },
+                    { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://images.pexels.com/photos/5560019/pexels-photo-5560019.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Shorts', stock: 18, rating: 4.5 },
+                    { id: '7', name: 'Conjunto Moletom', price: 95.00, image_url: 'https://images.pexels.com/photos/6349547/pexels-photo-6349547.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Conjuntos', stock: 10, rating: 4.8 },
+                    { id: '8', name: 'Vestido Princesa', price: 120.00, image_url: 'https://images.pexels.com/photos/1619655/pexels-photo-1619655.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Vestidos', stock: 5, rating: 5.0 },
                 ];
                 setProducts(allProducts);
                 setLoading(false);
