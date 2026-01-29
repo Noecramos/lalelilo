@@ -32,14 +32,14 @@ export default function ProductsPage() {
             // TODO: Replace with actual API call
             setTimeout(() => {
                 const allProducts = [
-                    { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://placehold.co/400x500/ff94a4/ffffff?text=Vestido+Rosa', category: 'Vestidos', stock: 15, rating: 4.8 },
-                    { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://placehold.co/400x500/8daca6/ffffff?text=Conjunto+Azul', category: 'Conjuntos', stock: 12, rating: 4.9 },
-                    { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://placehold.co/400x500/ffb950/ffffff?text=Calça+Jeans', category: 'Calças', stock: 20, rating: 4.7 },
-                    { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://placehold.co/400x500/a6ce39/ffffff?text=Camiseta', category: 'Camisetas', stock: 30, rating: 4.6 },
-                    { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://placehold.co/400x500/ff94a4/ffffff?text=Vestido+Logo', category: 'Vestidos', stock: 8, rating: 4.9 },
-                    { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://placehold.co/400x500/8daca6/ffffff?text=Shorts', category: 'Shorts', stock: 18, rating: 4.5 },
-                    { id: '7', name: 'Conjunto Moletom', price: 95.00, image_url: 'https://placehold.co/400x500/ffb950/ffffff?text=Moletom', category: 'Conjuntos', stock: 10, rating: 4.8 },
-                    { id: '8', name: 'Vestido Princesa', price: 120.00, image_url: 'https://placehold.co/400x500/ff94a4/ffffff?text=Princesa', category: 'Vestidos', stock: 5, rating: 5.0 },
+                    { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://picsum.photos/seed/girl/400/500', category: 'Vestidos', stock: 15, rating: 4.8 },
+                    { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://picsum.photos/seed/boy/400/500', category: 'Conjuntos', stock: 12, rating: 4.9 },
+                    { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://picsum.photos/seed/jeans/400/500', category: 'Calças', stock: 20, rating: 4.7 },
+                    { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://picsum.photos/seed/tshirt/400/500', category: 'Camisetas', stock: 30, rating: 4.6 },
+                    { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://picsum.photos/seed/flower/400/500', category: 'Vestidos', stock: 8, rating: 4.9 },
+                    { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://picsum.photos/seed/shorts/400/500', category: 'Shorts', stock: 18, rating: 4.5 },
+                    { id: '7', name: 'Conjunto Moletom', price: 95.00, image_url: 'https://picsum.photos/seed/winter/400/500', category: 'Conjuntos', stock: 10, rating: 4.8 },
+                    { id: '8', name: 'Vestido Princesa', price: 120.00, image_url: 'https://picsum.photos/seed/princess/400/500', category: 'Vestidos', stock: 5, rating: 5.0 },
                 ];
                 setProducts(allProducts);
                 setLoading(false);

@@ -37,12 +37,12 @@ export default function HomePage() {
       // TODO: Replace with actual API calls
       setTimeout(() => {
         setProducts([
-          { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://placehold.co/400x500/ff94a4/ffffff?text=Vestido+Rosa', category: 'Vestidos', is_featured: true },
-          { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://placehold.co/400x500/8daca6/ffffff?text=Conjunto+Azul', category: 'Conjuntos', is_featured: true },
-          { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://placehold.co/400x500/ffb950/ffffff?text=Calça+Jeans', category: 'Calças', is_featured: true },
-          { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://placehold.co/400x500/a6ce39/ffffff?text=Camiseta+Branca', category: 'Camisetas', is_featured: true },
-          { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://placehold.co/400x500/ff94a4/ffffff?text=Vestido+Logo', category: 'Vestidos', is_featured: true },
-          { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://placehold.co/400x500/8daca6/ffffff?text=Shorts+Jeans', category: 'Shorts', is_featured: true }
+          { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://picsum.photos/seed/girl/400/500', category: 'Vestidos', is_featured: true },
+          { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://picsum.photos/seed/boy/400/500', category: 'Conjuntos', is_featured: true },
+          { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://picsum.photos/seed/jeans/400/500', category: 'Calças', is_featured: true },
+          { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://picsum.photos/seed/tshirt/400/500', category: 'Camisetas', is_featured: true },
+          { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://picsum.photos/seed/flower/400/500', category: 'Vestidos', is_featured: true },
+          { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://picsum.photos/seed/shorts/400/500', category: 'Shorts', is_featured: true }
         ]);
 
         setNearbyShops([
