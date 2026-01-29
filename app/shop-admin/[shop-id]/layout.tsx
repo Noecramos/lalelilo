@@ -55,8 +55,8 @@ export default function ShopAdminLayout({
                 {/* Logo */}
                 <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
                     <div className="flex items-center gap-2">
-                        <Store className="text-[#ffa944]" size={24} />
-                        <span className="font-bold text-lg">Lalelilo</span>
+                        <img src="/logo.png" alt="Lalelilo" className="h-8 w-auto object-contain" />
+                        <span className="font-bold text-lg text-gray-900">Portal do Lojista</span>
                     </div>
                     <button
                         onClick={() => setSidebarOpen(false)}
@@ -79,8 +79,8 @@ export default function ShopAdminLayout({
                                 className={`
                   flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
                   ${active
-                                        ? 'bg-[#ffa944] text-white'
-                                        : 'text-gray-700 hover:bg-gray-100'
+                                        ? 'bg-lale-orange text-white shadow-md'
+                                        : 'text-gray-700 hover:bg-lale-bg-pink hover:text-lale-orange'
                                     }
                 `}
                                 onClick={() => setSidebarOpen(false)}
@@ -120,7 +120,7 @@ export default function ShopAdminLayout({
 
                     <div className="flex items-center gap-4">
                         {/* User menu would go here */}
-                        <div className="h-8 w-8 rounded-full bg-[#ffa944] flex items-center justify-center text-white font-medium">
+                        <div className="h-8 w-8 rounded-full bg-lale-orange flex items-center justify-center text-white font-medium shadow-sm">
                             A
                         </div>
                     </div>

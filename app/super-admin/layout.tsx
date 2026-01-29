@@ -43,7 +43,7 @@ export default function SuperAdminLayout({
             {/* Sidebar */}
             <aside
                 className={`
-          fixed top-0 left-0 z-50 h-full w-64 bg-gradient-to-b from-[#ffa944] to-[#ff8f9b]
+          fixed top-0 left-0 z-50 h-full w-64 bg-gradient-to-b from-lale-pink to-lale-orange
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
@@ -52,10 +52,12 @@ export default function SuperAdminLayout({
                 {/* Logo */}
                 <div className="h-16 flex items-center justify-between px-4 border-b border-white border-opacity-20">
                     <div className="flex items-center gap-2 text-white">
-                        <Crown size={28} />
+                        <div className="bg-white rounded-md p-1">
+                            <img src="/logo.png" alt="Lalelilo" className="h-8 w-auto object-contain" />
+                        </div>
                         <div>
-                            <span className="font-bold text-lg block">Lalelilo</span>
-                            <span className="text-xs opacity-90">Super Admin</span>
+                            <span className="font-bold text-lg block text-white drop-shadow-sm">Lalelilo</span>
+                            <span className="text-xs opacity-90 text-white">Super Admin</span>
                         </div>
                     </div>
                     <button
@@ -79,7 +81,7 @@ export default function SuperAdminLayout({
                                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
                   ${active
-                                        ? 'bg-white text-[#ffa944] shadow-md'
+                                        ? 'bg-white text-lale-orange shadow-md'
                                         : 'text-white hover:bg-white hover:bg-opacity-20'
                                     }
                 `}
@@ -123,7 +125,7 @@ export default function SuperAdminLayout({
                             <p className="text-sm font-medium text-gray-900">Admin Master</p>
                             <p className="text-xs text-gray-500">Lalelilo Brasil</p>
                         </div>
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#ffa944] to-[#ff8f9b] flex items-center justify-center text-white font-bold">
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-lale-pink to-lale-orange flex items-center justify-center text-white font-bold">
                             L
                         </div>
                     </div>
