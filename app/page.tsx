@@ -1,65 +1,241 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState, useEffect } from 'react';
+import { Card, Button, Badge, Loading } from '@/components/ui';
+import { MapPin, ShoppingBag, Heart, Star, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string;
+  category: string;
+  is_featured: boolean;
+}
+
+interface Shop {
+  id: string;
+  name: string;
+  city: string;
+  distance?: number;
+}
+
+export default function HomePage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [nearbyShops, setNearbyShops] = useState<Shop[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // TODO: Replace with actual API calls
+      setTimeout(() => {
+        setProducts([
+          { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://via.placeholder.com/300x400/FFB6C1/FFFFFF?text=Vestido+Rosa', category: 'Vestidos', is_featured: true },
+          { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://via.placeholder.com/300x400/87CEEB/FFFFFF?text=Conjunto+Azul', category: 'Conjuntos', is_featured: true },
+          { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://via.placeholder.com/300x400/4682B4/FFFFFF?text=Calça+Jeans', category: 'Calças', is_featured: true },
+          { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://via.placeholder.com/300x400/F5F5F5/333333?text=Camiseta', category: 'Camisetas', is_featured: true },
+          { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://via.placeholder.com/300x400/FFE4E1/FF69B4?text=Vestido+Floral', category: 'Vestidos', is_featured: true },
+          { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://via.placeholder.com/300x400/6495ED/FFFFFF?text=Shorts', category: 'Shorts', is_featured: true }
+        ]);
+
+        setNearbyShops([
+          { id: '1', name: 'Lalelilo Centro', city: 'Recife', distance: 1.2 },
+          { id: '2', name: 'Lalelilo Boa Viagem', city: 'Recife', distance: 3.5 },
+          { id: '3', name: 'Lalelilo Shopping', city: 'Recife', distance: 5.8 }
+        ]);
+
+        setLoading(false);
+      }, 1000);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <Loading size="lg" text="Carregando produtos..." fullScreen />;
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-lale-bg-pink">
+      {/* Header */}
+      <header className="bg-gradient-to-r from-lale-pink to-lale-orange text-white">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-white rounded-lg p-1.5 shadow-sm">
+                <img src="/logo.png" alt="Lalelilo" className="h-8 md:h-10 w-auto object-contain" />
+              </div>
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold drop-shadow-sm">Lalelilo</h1>
+                <p className="text-xs md:text-sm opacity-90 hidden sm:block font-medium">Moda Infantil com Amor</p>
+              </div>
+            </div>
+            <Link href="/cart">
+              <Button variant="outline" className="bg-white text-lale-orange hover:bg-gray-50 border-white/50">
+                <ShoppingBag size={18} className="mr-2" />
+                Carrinho (0)
+              </Button>
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </header>
+
+      {/* Location selector */}
+      <section className="bg-white border-b border-gray-200 py-4">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin size={20} className="text-lale-teal" />
+              <span className="text-sm text-gray-600">
+                {selectedLocation ? `Entrega em: ${selectedLocation}` : 'Escolha sua localização'}
+              </span>
+            </div>
+            <Link href="/location">
+              <Button size="sm" variant="outline">
+                Alterar
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Hero section */}
+      <section className="bg-lale-bg-blue">
+        <div className="w-full">
+          <Link href="/products">
+            <img
+              src="/banner.png"
+              alt="Liquida Férias - Até 70% OFF"
+              className="w-full h-auto object-cover hover:opacity-95 transition-opacity cursor-pointer"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </Link>
         </div>
-      </main>
+      </section>
+
+      {/* Featured products */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold text-gray-900">Produtos em Destaque</h3>
+            <Link href="/products" className="text-[#ffa944] hover:text-[#ff9a30] font-medium">
+              Ver todos →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {products.map((product) => (
+              <Card key={product.id} padding="none" hover className="overflow-hidden">
+                <div className="relative">
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="w-full h-64 object-cover"
+                  />
+                  <button className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors">
+                    <Heart size={18} className="text-gray-600" />
+                  </button>
+                  {product.is_featured && (
+                    <Badge
+                      variant="warning"
+                      className="absolute top-3 left-3"
+                    >
+                      Destaque
+                    </Badge>
+                  )}
+                </div>
+                <div className="p-4">
+                  <p className="text-xs text-gray-500 mb-1">{product.category}</p>
+                  <h4 className="font-semibold text-gray-900 mb-2">{product.name}</h4>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xl font-bold text-lale-orange">
+                      R$ {product.price.toFixed(2)}
+                    </p>
+                    <div className="flex items-center gap-1 text-yellow-500">
+                      <Star size={14} fill="currentColor" />
+                      <span className="text-xs text-gray-600">4.8</span>
+                    </div>
+                  </div>
+                  <Link href="/checkout">
+                    <Button variant="primary" className="w-full mt-3">
+                      Adicionar ao Carrinho
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Nearby shops */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">Lojas Próximas</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {nearbyShops.map((shop) => (
+              <Card key={shop.id} padding="md" hover>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">{shop.name}</h4>
+                    <p className="text-sm text-gray-600 flex items-center gap-1">
+                      <MapPin size={14} />
+                      {shop.city}
+                    </p>
+                  </div>
+                  {shop.distance && (
+                    <Badge variant="info">{shop.distance} km</Badge>
+                  )}
+                </div>
+                <Link href={`/shop/${shop.id}`}>
+                  <Button variant="outline" size="sm" className="w-full mt-3">
+                    Ver Loja
+                  </Button>
+                </Link>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-8">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h4 className="font-bold mb-3">Lalelilo</h4>
+              <p className="text-sm text-gray-400">
+                Moda infantil com amor e qualidade. 30 lojas em todo Brasil.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-bold mb-3">Links Rápidos</h4>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li><Link href="/products" className="hover:text-white">Produtos</Link></li>
+                <li><Link href="/location" className="hover:text-white">Lojas</Link></li>
+                <li><Link href="/about" className="hover:text-white">Sobre</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold mb-3">Contato</h4>
+              <p className="text-sm text-gray-400">
+                Email: contato@lalelilo.com.br<br />
+                WhatsApp: (81) 99999-9999
+              </p>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-6 text-center text-sm text-gray-400">
+            © 2026 Lalelilo. Todos os direitos reservados.
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

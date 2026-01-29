@@ -1,0 +1,139 @@
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+    LayoutDashboard,
+    Store,
+    BarChart3,
+    FileText,
+    Menu,
+    X,
+    Crown
+} from 'lucide-react';
+
+export default function SuperAdminLayout({
+    children
+}: {
+    children: React.ReactNode;
+}) {
+    const pathname = usePathname();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const navigation = [
+        { name: 'Visão Geral', href: '/super-admin', icon: LayoutDashboard },
+        { name: 'Lojas', href: '/super-admin/shops', icon: Store },
+        { name: 'Analytics', href: '/super-admin/analytics', icon: BarChart3 },
+        { name: 'Relatórios', href: '/super-admin/reports', icon: FileText },
+    ];
+
+    const isActive = (href: string) => pathname === href;
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            {/* Mobile sidebar backdrop */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
+            {/* Sidebar */}
+            <aside
+                className={`
+          fixed top-0 left-0 z-50 h-full w-64 bg-gradient-to-b from-[#ffa944] to-[#ff8f9b]
+          transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0
+        `}
+            >
+                {/* Logo */}
+                <div className="h-16 flex items-center justify-between px-4 border-b border-white border-opacity-20">
+                    <div className="flex items-center gap-2 text-white">
+                        <Crown size={28} />
+                        <div>
+                            <span className="font-bold text-lg block">Lalelilo</span>
+                            <span className="text-xs opacity-90">Super Admin</span>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => setSidebarOpen(false)}
+                        className="lg:hidden text-white hover:bg-white hover:bg-opacity-20 rounded p-1"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {/* Navigation */}
+                <nav className="p-4 space-y-1">
+                    {navigation.map((item) => {
+                        const Icon = item.icon;
+                        const active = isActive(item.href);
+
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                className={`
+                  flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
+                  ${active
+                                        ? 'bg-white text-[#ffa944] shadow-md'
+                                        : 'text-white hover:bg-white hover:bg-opacity-20'
+                                    }
+                `}
+                                onClick={() => setSidebarOpen(false)}
+                            >
+                                <Icon size={20} />
+                                <span className="font-medium">{item.name}</span>
+                            </Link>
+                        );
+                    })}
+                </nav>
+
+                {/* Stats summary */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-20">
+                    <div className="bg-white bg-opacity-10 rounded-lg p-3 text-white">
+                        <p className="text-xs opacity-90 mb-1">Total de Lojas</p>
+                        <p className="text-2xl font-bold">30</p>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Main content */}
+            <div className="lg:pl-64">
+                {/* Top bar */}
+                <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6">
+                    <button
+                        onClick={() => setSidebarOpen(true)}
+                        className="lg:hidden text-gray-500 hover:text-gray-700"
+                    >
+                        <Menu size={24} />
+                    </button>
+
+                    <div className="flex-1 lg:flex-none">
+                        <h1 className="text-xl font-semibold text-gray-900">
+                            Painel Super Admin
+                        </h1>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <div className="text-right hidden sm:block">
+                            <p className="text-sm font-medium text-gray-900">Admin Master</p>
+                            <p className="text-xs text-gray-500">Lalelilo Brasil</p>
+                        </div>
+                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#ffa944] to-[#ff8f9b] flex items-center justify-center text-white font-bold">
+                            L
+                        </div>
+                    </div>
+                </header>
+
+                {/* Page content */}
+                <main className="p-4 lg:p-6">
+                    {children}
+                </main>
+            </div>
+        </div>
+    );
+}

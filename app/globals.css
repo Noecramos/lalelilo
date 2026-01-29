@@ -10,6 +10,14 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Lalelilo Brand Colors */
+  --color-lale-pink: #ff94a4;
+  --color-lale-teal: #8daca6;
+  --color-lale-orange: #ffb950;
+  --color-lale-green: #a6ce39;
+  --color-lale-bg-pink: #fff5f7;
+  --color-lale-bg-blue: #f0f9fa;
 }
 
 @media (prefers-color-scheme: dark) {
