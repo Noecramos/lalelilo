@@ -17,8 +17,8 @@ interface CartItem {
 export default function CheckoutPage() {
     const router = useRouter();
     const [cartItems, setCartItems] = useState<CartItem[]>([
-        { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, quantity: 2, image_url: 'https://via.placeholder.com/100x100/FFB6C1/FFFFFF?text=Vestido' },
-        { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, quantity: 1, image_url: 'https://via.placeholder.com/100x100/87CEEB/FFFFFF?text=Conjunto' }
+        { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, quantity: 2, image_url: 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&q=80&w=200' },
+        { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, quantity: 1, image_url: 'https://images.unsplash.com/photo-1621452773781-0f992ee03598?auto=format&fit=crop&q=80&w=200' }
     ]);
 
     const [customerInfo, setCustomerInfo] = useState({
