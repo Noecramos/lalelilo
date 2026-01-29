@@ -70,12 +70,8 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="bg-white rounded-lg p-1.5 shadow-sm">
-                <img src="/logo.png" alt="Lalelilo" className="h-8 md:h-10 w-auto object-contain" />
-              </div>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold drop-shadow-sm">Lalelilo</h1>
-                <p className="text-xs md:text-sm opacity-90 hidden sm:block font-medium">Moda Infantil com Amor</p>
+              <div className="bg-white rounded-lg p-2 shadow-sm">
+                <img src="/logo.png" alt="Lalelilo" className="h-10 md:h-12 w-auto object-contain" />
               </div>
             </div>
             <Link href="/cart">
@@ -123,11 +119,32 @@ export default function HomePage() {
       {/* Featured products */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold text-gray-900">Produtos em Destaque</h3>
-            <Link href="/products" className="text-[#ffa944] hover:text-[#ff9a30] font-medium">
+            <Link href="/products" className="text-lale-orange hover:text-[#ff9a30] font-medium">
               Ver todos →
             </Link>
+          </div>
+
+          {/* Category Pills */}
+          <div className="flex gap-3 overflow-x-auto pb-6 scrollbar-hide">
+            {[
+              { name: 'Vestidos', icon: '👗' },
+              { name: 'Conjuntos', icon: '👕' },
+              { name: 'Calças', icon: '👖' },
+              { name: 'Camisetas', icon: '👚' },
+              { name: 'Shorts', icon: '🩳' },
+              { name: 'Acessórios', icon: '🎀' },
+              { name: 'Sapatos', icon: '👟' }
+            ].map((cat) => (
+              <button
+                key={cat.name}
+                className="flex items-center gap-2 px-6 py-2.5 bg-white border border-gray-100 rounded-full shadow-sm hover:shadow-md hover:border-lale-pink transition-all whitespace-nowrap group"
+              >
+                <span className="text-xl group-hover:scale-110 transition-transform">{cat.icon}</span>
+                <span className="font-medium text-gray-700 group-hover:text-lale-pink">{cat.name}</span>
+              </button>
+            ))}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
