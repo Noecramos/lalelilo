@@ -56,7 +56,7 @@ export default function InventoryPage({
                             name: 'Vestido Infantil Rosa',
                             sku: 'VEST-001',
                             price: 75.00,
-                            image_url: 'https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&q=80&w=200'
+                            image_url: 'https://placehold.co/200x200/ff94a4/ffffff?text=Vestido+Rosa'
                         }
                     },
                     {
@@ -69,7 +69,7 @@ export default function InventoryPage({
                             name: 'Conjunto Infantil Azul',
                             sku: 'CONJ-002',
                             price: 89.90,
-                            image_url: 'https://images.unsplash.com/photo-1621452773781-0f992ee03598?auto=format&fit=crop&q=80&w=200'
+                            image_url: 'https://placehold.co/200x200/8daca6/ffffff?text=Conjunto+Azul'
                         }
                     },
                     {
@@ -82,7 +82,7 @@ export default function InventoryPage({
                             name: 'Calça Jeans Infantil',
                             sku: 'CALC-003',
                             price: 65.00,
-                            image_url: 'https://images.unsplash.com/photo-1519238806043-5131e1cadd52?auto=format&fit=crop&q=80&w=200'
+                            image_url: 'https://placehold.co/200x200/ffb950/ffffff?text=Calça+Jeans'
                         }
                     },
                     {
@@ -95,7 +95,7 @@ export default function InventoryPage({
                             name: 'Camiseta Básica Branca',
                             sku: 'CAM-004',
                             price: 35.00,
-                            image_url: 'https://images.unsplash.com/photo-1519457431-44cd6e6962f3?auto=format&fit=crop&q=80&w=200'
+                            image_url: 'https://placehold.co/200x200/a6ce39/ffffff?text=Camiseta'
                         }
                     }
                 ]);
