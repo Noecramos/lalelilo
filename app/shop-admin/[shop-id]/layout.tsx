@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, use } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -18,10 +18,10 @@ export default function ShopAdminLayout({
     params
 }: {
     children: React.ReactNode;
-    params: { 'shop-id': string };
+    params: Promise<{ 'shop-id': string }>;
 }) {
     const pathname = usePathname();
-    const shopId = params['shop-id'];
+    const { 'shop-id': shopId } = use(params);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const navigation = [

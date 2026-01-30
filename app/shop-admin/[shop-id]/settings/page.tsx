@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, use } from 'react';
 import { Card, Button, Input, Loading } from '@/components/ui';
 import { Save, MapPin, Phone, Mail, Clock } from 'lucide-react';
 
 export default function SettingsPage({
     params
 }: {
-    params: { 'shop-id': string };
+    params: Promise<{ 'shop-id': string }>;
 }) {
-    const shopId = params['shop-id'];
+    const { 'shop-id': shopId } = use(params);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 

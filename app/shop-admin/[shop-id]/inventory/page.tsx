@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, use } from 'react';
 import { Card, Button, Input, Modal, Loading, Badge } from '@/components/ui';
 import { Package, AlertTriangle, Plus, Edit, Search } from 'lucide-react';
 
@@ -21,9 +21,9 @@ interface InventoryItem {
 export default function InventoryPage({
     params
 }: {
-    params: { 'shop-id': string };
+    params: Promise<{ 'shop-id': string }>;
 }) {
-    const shopId = params['shop-id'];
+    const { 'shop-id': shopId } = use(params);
     const [inventory, setInventory] = useState<InventoryItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');

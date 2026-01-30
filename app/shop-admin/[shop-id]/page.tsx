@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, use } from 'react';
 import { Card, Badge, Loading, getOrderStatusBadge } from '@/components/ui';
 import {
     TrendingUp,
@@ -20,9 +20,9 @@ interface DashboardStats {
 export default function ShopAdminDashboard({
     params
 }: {
-    params: { 'shop-id': string };
+    params: Promise<{ 'shop-id': string }>;
 }) {
-    const shopId = params['shop-id'];
+    const { 'shop-id': shopId } = use(params);
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [recentOrders, setRecentOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
