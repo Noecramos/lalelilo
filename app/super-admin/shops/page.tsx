@@ -48,6 +48,41 @@ export default function ShopsManagementPage() {
         }
     };
 
+    const saveShop = async (shop: Shop) => {
+        try {
+            const response = await fetch(`/api/shops/${shop.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: shop.name,
+                    slug: shop.slug,
+                    city: shop.city,
+                    state: shop.state,
+                    phone: shop.phone,
+                    is_active: shop.is_active,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to update shop');
+            }
+
+            // Update local state
+            setShops(shops.map(s => s.id === shop.id ? shop : s));
+            setEditingShop(null);
+
+            // Show success message
+            alert('Loja atualizada com sucesso!');
+        } catch (error) {
+            console.error('Error saving shop:', error);
+            alert(error instanceof Error ? error.message : 'Erro ao salvar alterações');
+        }
+    };
+
     const filteredShops = shops.filter(shop => {
         const matchesSearch = shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             shop.city.toLowerCase().includes(searchTerm.toLowerCase());
@@ -264,11 +299,7 @@ export default function ShopsManagementPage() {
                             </Button>
                             <Button
                                 variant="primary"
-                                onClick={() => {
-                                    // TODO: Implement save functionality
-                                    alert('Funcionalidade de salvar será implementada em breve!');
-                                    setEditingShop(null);
-                                }}
+                                onClick={() => editingShop && saveShop(editingShop)}
                             >
                                 Salvar Alterações
                             </Button>

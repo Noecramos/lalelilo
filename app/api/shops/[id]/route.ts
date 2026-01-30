@@ -4,10 +4,10 @@ import { supabase } from '@/lib/supabase';
 // GET /api/shops/[id] - Get shop by ID
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
 
         const { data: shop, error } = await supabase
             .from('shops')
@@ -45,10 +45,10 @@ export async function GET(
 // PUT /api/shops/[id] - Update shop
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
         const body = await request.json();
 
         // Remove fields that shouldn't be updated directly
@@ -91,10 +91,10 @@ export async function PUT(
 // DELETE /api/shops/[id] - Delete shop (soft delete by setting is_active = false)
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
 
         // Soft delete by setting is_active to false
         const { data: shop, error } = await supabase
