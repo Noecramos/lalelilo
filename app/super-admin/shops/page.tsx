@@ -22,6 +22,7 @@ export default function ShopsManagementPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
+    const [editingShop, setEditingShop] = useState<Shop | null>(null);
 
     useEffect(() => {
         fetchShops();
@@ -228,7 +229,11 @@ export default function ShopsManagementPage() {
                                                         Ver
                                                     </Button>
                                                 </Link>
-                                                <Button size="sm" variant="outline">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => setEditingShop(shop)}
+                                                >
                                                     <Edit size={14} className="mr-1" />
                                                     Editar
                                                 </Button>
@@ -241,6 +246,84 @@ export default function ShopsManagementPage() {
                     </div>
                 )}
             </Card>
+
+            {/* Edit Shop Modal */}
+            {editingShop && (
+                <Modal
+                    isOpen={!!editingShop}
+                    onClose={() => setEditingShop(null)}
+                    title={`Editar Loja: ${editingShop.name}`}
+                    size="lg"
+                    footer={
+                        <>
+                            <Button
+                                variant="outline"
+                                onClick={() => setEditingShop(null)}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={() => {
+                                    // TODO: Implement save functionality
+                                    alert('Funcionalidade de salvar será implementada em breve!');
+                                    setEditingShop(null);
+                                }}
+                            >
+                                Salvar Alterações
+                            </Button>
+                        </>
+                    }
+                >
+                    <div className="space-y-4">
+                        <Input
+                            label="Nome da Loja"
+                            value={editingShop.name}
+                            onChange={(e) => setEditingShop({ ...editingShop, name: e.target.value })}
+                            required
+                        />
+                        <Input
+                            label="Slug (URL)"
+                            value={editingShop.slug}
+                            onChange={(e) => setEditingShop({ ...editingShop, slug: e.target.value })}
+                            required
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label="Cidade"
+                                value={editingShop.city}
+                                onChange={(e) => setEditingShop({ ...editingShop, city: e.target.value })}
+                                required
+                            />
+                            <Input
+                                label="Estado"
+                                value={editingShop.state}
+                                onChange={(e) => setEditingShop({ ...editingShop, state: e.target.value })}
+                                maxLength={2}
+                                required
+                            />
+                        </div>
+                        <Input
+                            label="Telefone"
+                            value={editingShop.phone}
+                            onChange={(e) => setEditingShop({ ...editingShop, phone: e.target.value })}
+                            required
+                        />
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="is_active"
+                                checked={editingShop.is_active}
+                                onChange={(e) => setEditingShop({ ...editingShop, is_active: e.target.checked })}
+                                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <label htmlFor="is_active" className="text-sm text-gray-700">
+                                Loja Ativa
+                            </label>
+                        </div>
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 }
