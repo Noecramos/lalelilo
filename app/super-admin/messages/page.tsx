@@ -319,7 +319,7 @@ export default function MessagesPage() {
                                         placeholder="Digite o anúncio..."
                                         value={broadcastMessage}
                                         onChange={(e) => setBroadcastMessage(e.target.value)}
-                                        className="w-full p-2 border border-gray-300 rounded-lg resize-none"
+                                        className="w-full p-2 border border-gray-300 rounded-lg resize-none text-gray-900"
                                         rows={3}
                                     />
                                     <Button
