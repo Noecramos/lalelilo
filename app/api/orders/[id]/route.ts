@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
 // GET /api/orders/[id] - Get order by ID
+// GET /api/orders/[id] - Get order by ID
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
 
         const { data: order, error } = await supabase
             .from('orders')
@@ -43,12 +44,13 @@ export async function GET(
 }
 
 // PUT /api/orders/[id] - Update order (mainly for status updates)
+// PUT /api/orders/[id] - Update order (mainly for status updates)
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
         const body = await request.json();
 
         // Extract allowed update fields
@@ -120,12 +122,13 @@ export async function PUT(
 }
 
 // DELETE /api/orders/[id] - Cancel order
+// DELETE /api/orders/[id] - Cancel order
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
 
         const { data: order, error } = await supabase
             .from('orders')

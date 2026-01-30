@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
 // GET /api/products/[id] - Get product by ID
+// GET /api/products/[id] - Get product by ID
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
 
         const { data: product, error } = await supabase
             .from('products')
@@ -43,12 +44,13 @@ export async function GET(
 }
 
 // PUT /api/products/[id] - Update product
+// PUT /api/products/[id] - Update product
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
         const body = await request.json();
 
         // Remove fields that shouldn't be updated directly
@@ -100,12 +102,13 @@ export async function PUT(
 }
 
 // DELETE /api/products/[id] - Delete product (soft delete)
+// DELETE /api/products/[id] - Delete product (soft delete)
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = params;
+        const { id } = await params;
 
         // Soft delete by setting is_active to false
         const { data: product, error } = await supabase
