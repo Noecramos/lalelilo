@@ -28,38 +28,80 @@ export default function ShopMessagesPage({
     }, [shopId]);
 
     const fetchMessages = async () => {
-        // TODO: Replace with actual API call
-        setTimeout(() => {
-            setMessages([
-                { id: '1', sender: 'super-admin', content: 'Olá! Como posso ajudar?', created_at: '2026-01-30T09:00:00', read_at: '2026-01-30T09:05:00' },
-                { id: '2', sender: 'shop', content: 'Preciso de informações sobre o novo sistema de pagamento.', created_at: '2026-01-30T09:10:00', read_at: '2026-01-30T09:12:00' },
-                { id: '3', sender: 'super-admin', content: 'Claro! O novo sistema será implementado na próxima semana.', created_at: '2026-01-30T09:15:00', read_at: '2026-01-30T09:20:00' },
-                { id: '4', sender: 'shop', content: 'Obrigado pela informação!', created_at: '2026-01-30T09:30:00' },
-                { id: '5', sender: 'super-admin', content: 'ANÚNCIO: Novo sistema de relatórios disponível a partir de segunda-feira!', created_at: '2026-01-29T14:00:00', is_broadcast: true },
-            ]);
-            setUnreadCount(2);
-        }, 500);
+        try {
+            const response = await fetch(`/api/messages?shopId=${shopId}`);
+            const data = await response.json();
+
+            if (data.messages) {
+                setMessages(data.messages);
+
+                // Calculate unread
+                const unread = data.messages.filter(
+                    (m: Message) => m.sender === 'super-admin' && !m.read_at
+                ).length;
+                setUnreadCount(unread);
+            }
+        } catch (error) {
+            console.error('Failed to fetch messages:', error);
+        }
     };
 
-    const sendMessage = () => {
+    const sendMessage = async () => {
         if (!newMessage.trim()) return;
 
-        const message: Message = {
-            id: Date.now().toString(),
-            sender: 'shop',
-            content: newMessage,
-            created_at: new Date().toISOString(),
-        };
+        try {
+            const response = await fetch('/api/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sender_type: 'shop',
+                    sender_id: shopId,
+                    recipient_id: 'super-admin',
+                    content: newMessage
+                })
+            });
 
-        setMessages([...messages, message]);
-        setNewMessage('');
+            const data = await response.json();
 
-        // TODO: Send to API
+            if (data.success && data.message) {
+                setMessages([...messages, data.message]);
+                setNewMessage('');
+            }
+        } catch (error) {
+            console.error('Failed to send message:', error);
+            alert('Erro ao enviar mensagem');
+        }
     };
 
-    const markAsRead = () => {
-        // TODO: Mark all messages as read via API
-        setUnreadCount(0);
+    const markAsRead = async () => {
+        try {
+            // Get IDs of unread messages from super-admin
+            const unreadIds = messages
+                .filter(m => m.sender === 'super-admin' && !m.read_at)
+                .map(m => m.id);
+
+            if (unreadIds.length === 0) return;
+
+            const response = await fetch('/api/messages', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message_ids: unreadIds
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setUnreadCount(0);
+                // Update local messages state to show as read
+                setMessages(messages.map(m =>
+                    unreadIds.includes(m.id) ? { ...m, read_at: new Date().toISOString() } : m
+                ));
+            }
+        } catch (error) {
+            console.error('Failed to mark as read:', error);
+        }
     };
 
     return (
@@ -136,8 +178,8 @@ export default function ShopMessagesPage({
                                     >
                                         <div
                                             className={`max-w-[70%] rounded-lg p-3 ${msg.sender === 'shop'
-                                                    ? 'bg-purple-600 text-white'
-                                                    : 'bg-gray-200 text-gray-900'
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-gray-200 text-gray-900'
                                                 }`}
                                         >
                                             <p className="text-sm">{msg.content}</p>

