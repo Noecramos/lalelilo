@@ -10,7 +10,8 @@ import {
     Settings,
     Menu,
     X,
-    Store
+    Store,
+    MessageSquare
 } from 'lucide-react';
 
 export default function ShopAdminLayout({
@@ -28,6 +29,7 @@ export default function ShopAdminLayout({
         { name: 'Dashboard', href: `/shop-admin/${shopId}`, icon: LayoutDashboard },
         { name: 'Pedidos', href: `/shop-admin/${shopId}/orders`, icon: ShoppingBag },
         { name: 'Estoque', href: `/shop-admin/${shopId}/inventory`, icon: Package },
+        { name: 'Mensagens', href: `/shop-admin/${shopId}/messages`, icon: MessageSquare },
         { name: 'Configurações', href: `/shop-admin/${shopId}/settings`, icon: Settings },
     ];
 

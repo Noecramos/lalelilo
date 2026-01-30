@@ -10,7 +10,8 @@ import {
     FileText,
     Menu,
     X,
-    Crown
+    Crown,
+    MessageSquare
 } from 'lucide-react';
 
 export default function SuperAdminLayout({
@@ -24,6 +25,7 @@ export default function SuperAdminLayout({
     const navigation = [
         { name: 'Visão Geral', href: '/super-admin', icon: LayoutDashboard },
         { name: 'Lojas', href: '/super-admin/shops', icon: Store },
+        { name: 'Mensagens', href: '/super-admin/messages', icon: MessageSquare },
         { name: 'Analytics', href: '/super-admin/analytics', icon: BarChart3 },
         { name: 'Relatórios', href: '/super-admin/reports', icon: FileText },
     ];
