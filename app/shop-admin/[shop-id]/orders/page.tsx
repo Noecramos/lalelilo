@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, use } from 'react';
 import { Card, Badge, Button, Select, Modal, Loading, getOrderStatusBadge } from '@/components/ui';
 import { Eye, Filter, Download } from 'lucide-react';
 import { Order, OrderStatus } from '@/lib/types';
@@ -8,9 +8,9 @@ import { Order, OrderStatus } from '@/lib/types';
 export default function OrdersPage({
     params
 }: {
-    params: { 'shop-id': string };
+    params: Promise<{ 'shop-id': string }>;
 }) {
-    const shopId = params['shop-id'];
+    const { 'shop-id': shopId } = use(params);
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
