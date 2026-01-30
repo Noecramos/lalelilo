@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface CardProps {
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
     children: React.ReactNode;
     title?: string;
     subtitle?: string;
@@ -17,7 +17,8 @@ export default function Card({
     headerAction,
     className = '',
     padding = 'md',
-    hover = false
+    hover = false,
+    ...props
 }: CardProps) {
     const paddingClasses = {
         none: '',
@@ -33,6 +34,7 @@ export default function Card({
         ${hover ? 'hover:shadow-md transition-shadow duration-200' : ''}
         ${className}
       `}
+            {...props}
         >
             {(title || subtitle || headerAction) && (
                 <div className={`border-b border-gray-200 ${paddingClasses[padding]} flex items-center justify-between`}>

@@ -180,11 +180,26 @@ export default function LocationPage() {
                                             <p>📞 {shop.phone}</p>
                                         </div>
                                     </div>
-                                    {selectedShop === shop.id && (
-                                        <div className="bg-lale-orange text-white rounded-full p-2">
-                                            <Check size={20} />
-                                        </div>
-                                    )}
+                                    <div className="flex flex-col items-end gap-2">
+                                        {selectedShop === shop.id && (
+                                            <div className="bg-lale-orange text-white rounded-full p-2 mb-2">
+                                                <Check size={20} />
+                                            </div>
+                                        )}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const address = encodeURIComponent(`${shop.address}, ${shop.city} - ${shop.state}`);
+                                                window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+                                            }}
+                                            className="whitespace-nowrap z-10 relative"
+                                        >
+                                            <Navigation size={14} className="mr-1" />
+                                            Como chegar
+                                        </Button>
+                                    </div>
                                 </div>
                             </Card>
                         ))}
@@ -208,6 +223,6 @@ export default function LocationPage() {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }
