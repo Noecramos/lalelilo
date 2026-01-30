@@ -50,6 +50,8 @@ export default function ShopsManagementPage() {
 
     const saveShop = async (shop: Shop) => {
         try {
+            // TODO: Uncomment when database is connected
+            /*
             const response = await fetch(`/api/shops/${shop.id}`, {
                 method: 'PUT',
                 headers: {
@@ -65,11 +67,17 @@ export default function ShopsManagementPage() {
                 }),
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to update shop');
+                const contentType = response.headers.get('content-type');
+                if (contentType?.includes('application/json')) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to update shop');
+                }
+                throw new Error(`Server error: ${response.status}`);
             }
+
+            const data = await response.json();
+            */
 
             // Update local state
             setShops(shops.map(s => s.id === shop.id ? shop : s));
