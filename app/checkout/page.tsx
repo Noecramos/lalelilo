@@ -5,6 +5,7 @@ import { Card, Button, Input, Select, Badge } from '@/components/ui';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, CreditCard, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 interface CartItem {
     id: string;
@@ -388,6 +389,9 @@ export default function CheckoutPage() {
                     </div>
                 </form>
             </div >
+
+            {/* Floating WhatsApp Button */}
+            <WhatsAppButton phoneNumber="5581999999999" />
         </div >
     );
 }

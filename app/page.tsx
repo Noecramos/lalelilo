@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Loading } from '@/components/ui';
 import { MapPin, ShoppingBag, Heart, Star, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 interface Product {
   id: string;
@@ -253,6 +254,9 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Floating WhatsApp Button */}
+      <WhatsAppButton phoneNumber="5581999999999" />
     </div>
   );
 }

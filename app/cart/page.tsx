@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, Button } from '@/components/ui';
 import { ShoppingBag, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 export default function CartPage() {
     const router = useRouter();
@@ -66,6 +67,9 @@ export default function CartPage() {
                     </Link>
                 </div>
             </div>
+
+            {/* Floating WhatsApp Button */}
+            <WhatsAppButton phoneNumber="5581999999999" />
         </div>
     );
 }

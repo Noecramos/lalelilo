@@ -5,6 +5,7 @@ import { Card, Button, Input, Badge, Loading } from '@/components/ui';
 import { MapPin, Search, Navigation, ArrowLeft, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 interface Shop {
     id: string;
@@ -223,6 +224,9 @@ export default function LocationPage() {
                     </div>
                 )}
             </div>
+
+            {/* Floating WhatsApp Button */}
+            <WhatsAppButton phoneNumber="5581999999999" />
         </div >
     );
 }
