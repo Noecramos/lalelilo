@@ -72,7 +72,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-white rounded-lg p-2 shadow-sm">
-                <img src="/logo.png" alt="Lalelilo" className="h-10 md:h-12 w-auto object-contain" />
+                <img src="/lalelilo-logo.jpg" alt="Lalelilo" className="h-10 md:h-12 w-auto object-contain" />
               </div>
             </div>
             <Link href="/cart">

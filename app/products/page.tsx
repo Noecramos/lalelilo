@@ -81,7 +81,7 @@ export default function ProductsPage() {
                             </Link>
                             <div className="flex items-center gap-3">
                                 <div className="bg-white rounded-lg p-1.5 shadow-sm">
-                                    <img src="/logo.png" alt="Lalelilo" className="h-8 md:h-10 w-auto object-contain" />
+                                    <img src="/lalelilo-logo.jpg" alt="Lalelilo" className="h-8 md:h-10 w-auto object-contain" />
                                 </div>
                                 <div>
                                     <h1 className="text-xl md:text-2xl font-bold">Catálogo</h1>

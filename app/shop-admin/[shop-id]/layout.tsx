@@ -57,7 +57,7 @@ export default function ShopAdminLayout({
                 {/* Logo */}
                 <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
                     <div className="flex items-center justify-center w-full">
-                        <img src="/logo.png" alt="Lalelilo" className="h-10 w-auto object-contain" />
+                        <img src="/lalelilo-logo.jpg" alt="Lalelilo" className="h-10 w-auto object-contain" />
                     </div>
                     <button
                         onClick={() => setSidebarOpen(false)}
