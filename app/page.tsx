@@ -69,12 +69,15 @@ export default function HomePage() {
       {/* Header */}
       {/* Hero Header with Banner & Logo */}
       <div className="relative mb-16">
-        {/* Banner Image */}
-        <div className="w-full h-48 md:h-64 relative bg-gray-200">
-          <img
-            src="/header-banner.jpg"
-            alt="Lalelilo Banner"
-            className="w-full h-full object-cover"
+        {/* Banner Video */}
+        <div className="w-full relative shadow-inner overflow-hidden">
+          <video
+            src="/teaser.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-auto object-contain"
           />
           {/* Cart Button (Floating) */}
           <div className="absolute top-4 right-4 z-10">
