@@ -69,14 +69,11 @@ export default function HomePage() {
       {/* Header */}
       {/* Hero Header with Banner & Logo */}
       <div className="relative mb-16">
-        {/* Banner Video */}
+        {/* Banner GIF - Optimized for mobile autoplay */}
         <div className="w-full relative shadow-inner overflow-hidden">
-          <video
-            src="/teaser.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
+          <img
+            src="/teaser.gif"
+            alt="Lalelilo Teaser"
             className="w-full h-auto object-contain"
           />
           {/* Cart Button (Floating) */}
