@@ -67,23 +67,43 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-lale-bg-pink">
       {/* Header */}
-      <header className="bg-gradient-to-r from-lale-pink to-lale-orange text-white">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-white rounded-lg p-2 shadow-sm">
-                <img src="/lalelilo-logo.jpg" alt="Lalelilo" className="h-10 md:h-12 w-auto object-contain" />
-              </div>
-            </div>
+      {/* Hero Header with Banner & Logo */}
+      <div className="relative mb-16">
+        {/* Banner Image */}
+        <div className="w-full h-48 md:h-64 relative bg-gray-200">
+          <img
+            src="/header-banner.jpg"
+            alt="Lalelilo Banner"
+            className="w-full h-full object-cover"
+          />
+          {/* Cart Button (Floating) */}
+          <div className="absolute top-4 right-4 z-10">
             <Link href="/cart">
-              <Button variant="outline" className="bg-white text-lale-orange hover:bg-gray-50 border-white/50">
+              <Button variant="outline" className="bg-white/90 backdrop-blur-sm text-lale-orange hover:bg-white border-white/50 shadow-sm">
                 <ShoppingBag size={18} className="mr-2" />
-                Carrinho (0)
+                Carrinho
               </Button>
             </Link>
           </div>
         </div>
-      </header>
+
+        {/* Overlapping Logo */}
+        <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 z-20">
+          <div className="bg-white rounded-full p-2 shadow-lg w-32 h-32 md:w-40 md:h-40 flex items-center justify-center border-4 border-white">
+            <img
+              src="/lalelilo-logo.jpg"
+              alt="Lalelilo"
+              className="w-full h-full object-cover rounded-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Brand Name & Info */}
+      <div className="text-center mb-8 px-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Lalelilo Moda Infantil</h1>
+        <p className="text-gray-600 mt-2">Roupa de Criança com Amor e Estilo</p>
+      </div>
 
       {/* Location selector */}
       <section className="bg-white border-b border-gray-200 py-4">
