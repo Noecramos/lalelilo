@@ -29,16 +29,10 @@ export async function GET(request: NextRequest) {
                 // Alternatively, client filters. For now fetch last 500 to keep it simple
                 query = query.limit(500);
             }
+        } else if (shopId) {
             // Shop Admin: Fetch messages for this shop AND broadcasts
             // We need to be careful with UUID vs Slug. shopId passed here is likely a UUID if called from internal logic,
             // but if called from frontend using slug, we need to handle that.
-            // Assumption: The frontend resolves slug to ID before calling, OR we resolve it here.
-            // Let's assume the frontend passes the database ID (UUID) for now to be safe, 
-            // OR we fix the frontend to pass the UUID.
-
-            // Actually, looking at the previous step, the frontend passes `shopId` which comes from `params['shop-id']`.
-            // In the frontend code, `shopId` is the SLUG (e.g. 'lalelilo-centro').
-            // The database stores UUIDs. We MUST resolve the slug to UUID first.
 
             let targetShopId = shopId || '';
 
