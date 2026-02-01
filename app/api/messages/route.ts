@@ -3,6 +3,12 @@ import { supabaseAdmin as supabase } from '@/lib/supabase';
 
 // GET /api/messages - Fetch messages for a specific shop or super-admin
 export async function GET(request: NextRequest) {
+    // Debug: Check if service Key is available (don't log the actual key)
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        console.error('CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment variables');
+        return NextResponse.json({ error: 'Configuration Error: Missing Service Role Key' }, { status: 500 });
+    }
+
     try {
         const searchParams = request.nextUrl.searchParams;
         const shopId = searchParams.get('shopId'); // If present, fetching for this shop
