@@ -12,7 +12,8 @@ import {
     X,
     Store,
     MessageSquare,
-    Users
+    Users,
+    Phone
 } from 'lucide-react';
 
 export default function ShopAdminLayout({
@@ -33,6 +34,7 @@ export default function ShopAdminLayout({
         { name: 'Estoque', href: `/shop-admin/${shopId}/inventory`, icon: Package },
         { name: 'Mensagens', href: `/shop-admin/${shopId}/messages`, icon: MessageSquare },
         { name: 'Configurações', href: `/shop-admin/${shopId}/settings`, icon: Settings },
+        { name: 'Suporte Whats', href: 'https://wa.me/558183920320', icon: Phone, external: true },
     ];
 
     const isActive = (href: string) => pathname === href;
@@ -74,6 +76,21 @@ export default function ShopAdminLayout({
                     {navigation.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.href);
+
+                        if (item.external) {
+                            return (
+                                <a
+                                    key={item.name}
+                                    href={item.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-gray-700 hover:bg-green-50 hover:text-green-600 mt-4 border border-gray-100"
+                                >
+                                    <Icon size={20} className="text-green-500" />
+                                    <span className="font-medium">{item.name}</span>
+                                </a>
+                            );
+                        }
 
                         return (
                             <Link

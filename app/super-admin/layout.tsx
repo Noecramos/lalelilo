@@ -11,7 +11,8 @@ import {
     Menu,
     X,
     Crown,
-    MessageSquare
+    MessageSquare,
+    Phone
 } from 'lucide-react';
 
 export default function SuperAdminLayout({
@@ -29,6 +30,7 @@ export default function SuperAdminLayout({
         { name: 'Mensagens', href: '/super-admin/messages', icon: MessageSquare },
         { name: 'Analytics', href: '/super-admin/analytics', icon: BarChart3 },
         { name: 'Relatórios', href: '/super-admin/reports', icon: FileText },
+        { name: 'Suporte', href: 'https://wa.me/558183920320', icon: Phone, external: true },
     ];
 
     const isActive = (href: string) => pathname === href;
@@ -73,6 +75,21 @@ export default function SuperAdminLayout({
                         const Icon = item.icon;
                         const active = isActive(item.href);
 
+                        if (item.external) {
+                            return (
+                                <a
+                                    key={item.name}
+                                    href={item.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-white hover:bg-white hover:bg-opacity-20 mt-4 border border-white border-opacity-20 bg-white bg-opacity-5"
+                                >
+                                    <Icon size={20} className="text-green-400" />
+                                    <span className="font-medium">{item.name}</span>
+                                </a>
+                            );
+                        }
+
                         return (
                             <Link
                                 key={item.name}
@@ -93,12 +110,13 @@ export default function SuperAdminLayout({
                     })}
                 </nav>
 
-                {/* Stats summary */}
+                {/* Noviapp Branding */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-20">
-                    <div className="bg-white bg-opacity-10 rounded-lg p-3 text-white">
-                        <p className="text-xs opacity-90 mb-1">Total de Lojas</p>
-                        <p className="text-2xl font-bold">30</p>
-                    </div>
+                    <a href="https://www.noviapp.com.br" target="_blank" rel="noopener noreferrer">
+                        <div className="bg-white rounded-lg p-3 shadow-md flex items-center justify-center h-16">
+                            <img src="/noviapp-logo.png" alt="Noviapp" className="max-h-full w-auto object-contain" />
+                        </div>
+                    </a>
                 </div>
             </aside>
 
