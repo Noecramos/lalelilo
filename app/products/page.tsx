@@ -30,23 +30,15 @@ export default function ProductsPage() {
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            // TODO: Replace with actual API call
-            setTimeout(() => {
-                const allProducts = [
-                    { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://images.pexels.com/photos/3661349/pexels-photo-3661349.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Vestidos', stock: 15, rating: 4.8 },
-                    { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://images.pexels.com/photos/11003460/pexels-photo-11003460.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Conjuntos', stock: 12, rating: 4.9 },
-                    { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://images.pexels.com/photos/1598104/pexels-photo-1598104.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Calças', stock: 20, rating: 4.7 },
-                    { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://images.pexels.com/photos/2292919/pexels-photo-2292919.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Camisetas', stock: 30, rating: 4.6 },
-                    { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://images.pexels.com/photos/9383617/pexels-photo-9383617.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Vestidos', stock: 8, rating: 4.9 },
-                    { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://images.pexels.com/photos/5560019/pexels-photo-5560019.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Shorts', stock: 18, rating: 4.5 },
-                    { id: '7', name: 'Conjunto Moletom', price: 95.00, image_url: 'https://images.pexels.com/photos/6349547/pexels-photo-6349547.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Conjuntos', stock: 10, rating: 4.8 },
-                    { id: '8', name: 'Vestido Princesa', price: 120.00, image_url: 'https://images.pexels.com/photos/1619655/pexels-photo-1619655.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Vestidos', stock: 5, rating: 5.0 },
-                ];
-                setProducts(allProducts);
-                setLoading(false);
-            }, 800);
+            const response = await fetch('/api/products');
+            const data = await response.json();
+
+            if (data.success) {
+                setProducts(data.products);
+            }
         } catch (error) {
             console.error('Error fetching products:', error);
+        } finally {
             setLoading(false);
         }
     };
@@ -159,7 +151,7 @@ export default function ProductsPage() {
                                     )}
                                 </div>
                                 <div className="p-4">
-                                    <p className="text-xs text-gray-500 mb-1">{product.category}</p>
+                                    <p className="text-xs text-gray-500 mb-1">{(product as any).categories?.name || 'Geral'}</p>
                                     <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.name}</h4>
                                     <div className="flex items-center gap-1 mb-2">
                                         {[...Array(5)].map((_, i) => (

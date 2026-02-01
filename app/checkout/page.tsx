@@ -18,8 +18,8 @@ interface CartItem {
 export default function CheckoutPage() {
     const router = useRouter();
     const [cartItems, setCartItems] = useState<CartItem[]>([
-        { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, quantity: 2, image_url: 'https://placehold.co/200x200/ff94a4/ffffff?text=Vestido' },
-        { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, quantity: 1, image_url: 'https://placehold.co/200x200/8daca6/ffffff?text=Conjunto' }
+        { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, quantity: 2, image_url: '/demo/Image 1.jpg' },
+        { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, quantity: 1, image_url: '/demo/Image 2.jpg' }
     ]);
 
     const [customerInfo, setCustomerInfo] = useState({

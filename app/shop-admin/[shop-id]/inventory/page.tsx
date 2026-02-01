@@ -38,98 +38,51 @@ export default function InventoryPage({
     const fetchInventory = async () => {
         setLoading(true);
         try {
-            // TODO: Replace with actual API call
-            // const url = `/api/inventory?shop_id=${shopId}${showLowStockOnly ? '&low_stock=true' : ''}`;
-            // const response = await fetch(url);
-            // const data = await response.json();
+            const url = `/api/inventory?shop_id=${shopId}${showLowStockOnly ? '&low_stock=true' : ''}`;
+            const response = await fetch(url);
+            const data = await response.json();
 
-            // Mock data for now
-            setTimeout(() => {
-                setInventory([
-                    {
-                        id: '1',
-                        shop_id: shopId,
-                        product_id: 'prod-1',
-                        quantity: 25,
-                        low_stock_threshold: 10,
-                        product: {
-                            name: 'Vestido Infantil Rosa',
-                            sku: 'VEST-001',
-                            price: 75.00,
-                            image_url: 'https://placehold.co/200x200/ff94a4/ffffff?text=Vestido+Rosa'
-                        }
-                    },
-                    {
-                        id: '2',
-                        shop_id: shopId,
-                        product_id: 'prod-2',
-                        quantity: 5,
-                        low_stock_threshold: 10,
-                        product: {
-                            name: 'Conjunto Infantil Azul',
-                            sku: 'CONJ-002',
-                            price: 89.90,
-                            image_url: 'https://placehold.co/200x200/8daca6/ffffff?text=Conjunto+Azul'
-                        }
-                    },
-                    {
-                        id: '3',
-                        shop_id: shopId,
-                        product_id: 'prod-3',
-                        quantity: 2,
-                        low_stock_threshold: 5,
-                        product: {
-                            name: 'Calça Jeans Infantil',
-                            sku: 'CALC-003',
-                            price: 65.00,
-                            image_url: 'https://placehold.co/200x200/ffb950/ffffff?text=Calça+Jeans'
-                        }
-                    },
-                    {
-                        id: '4',
-                        shop_id: shopId,
-                        product_id: 'prod-4',
-                        quantity: 50,
-                        low_stock_threshold: 15,
-                        product: {
-                            name: 'Camiseta Básica Branca',
-                            sku: 'CAM-004',
-                            price: 35.00,
-                            image_url: 'https://placehold.co/200x200/a6ce39/ffffff?text=Camiseta'
-                        }
-                    }
-                ]);
-                setLoading(false);
-            }, 1000);
+            if (data.success) {
+                setInventory(data.inventory || []);
+            }
         } catch (error) {
             console.error('Error fetching inventory:', error);
+        } finally {
             setLoading(false);
         }
     };
 
     const updateInventory = async (itemId: string, quantity: number) => {
         try {
-            // TODO: Replace with actual API call
-            // await fetch(`/api/inventory`, {
-            //   method: 'POST',
-            //   headers: { 'Content-Type': 'application/json' },
-            //   body: JSON.stringify({
-            //     shop_id: shopId,
-            //     product_id: editingItem?.product_id,
-            //     quantity
-            //   })
-            // });
+            const itemToUpdate = inventory.find(i => i.id === itemId);
+            if (!itemToUpdate) return;
 
-            // Update local state
-            setInventory(inventory.map(item =>
-                item.id === itemId
-                    ? { ...item, quantity }
-                    : item
-            ));
+            const response = await fetch('/api/inventory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    shop_id: shopId,
+                    product_id: itemToUpdate.product_id,
+                    quantity
+                })
+            });
 
-            setEditingItem(null);
-            setNewQuantity('');
-            alert('Estoque atualizado com sucesso!');
+            const data = await response.json();
+
+            if (data.success) {
+                // Update local state
+                setInventory(inventory.map(item =>
+                    item.id === itemId
+                        ? { ...item, quantity }
+                        : item
+                ));
+
+                setEditingItem(null);
+                setNewQuantity('');
+                alert('Estoque atualizado com sucesso!');
+            } else {
+                throw new Error(data.error || 'Failed to update');
+            }
         } catch (error) {
             console.error('Error updating inventory:', error);
             alert('Erro ao atualizar estoque');
