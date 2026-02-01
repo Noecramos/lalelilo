@@ -32,7 +32,10 @@ export default function ShopMessagesPage({
             const response = await fetch(`/api/messages?shopId=${shopId}`);
             const data = await response.json();
 
-            if (data.messages) {
+            if (data.error) {
+                console.error('API Error:', data.error);
+                // alert('Erro ao carregar mensagens: ' + data.error); 
+            } else if (data.messages) {
                 setMessages(data.messages);
 
                 // Calculate unread
