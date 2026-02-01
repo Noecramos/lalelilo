@@ -342,7 +342,17 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-6 text-center text-sm text-gray-400">
-            © 2026 Lalelilo. Todos os direitos reservados.
+            © 2026 Noviapp Sistemas IA. Todos os direitos reservados.
+            <div className="mt-2">
+              <a 
+                href="https://www.noviapp.com.br" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-white transition-colors"
+              >
+                www.noviapp.com.br
+              </a>
+            </div>
           </div>
         </div>
       </footer>
