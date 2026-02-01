@@ -41,7 +41,7 @@ export default function Input({
                         }
             focus:outline-none focus:ring-2 focus:ring-opacity-50
             disabled:bg-gray-100 disabled:cursor-not-allowed
-            text-gray-900
+            text-gray-800 placeholder:text-gray-500
             ${className}
           `}
                     {...props}

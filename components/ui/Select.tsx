@@ -39,6 +39,7 @@ export default function Select({
                     }
           focus:outline-none focus:ring-2 focus:ring-opacity-50
           disabled:bg-gray-100 disabled:cursor-not-allowed
+          text-gray-800
           ${className}
         `}
                 {...props}
