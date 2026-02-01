@@ -93,7 +93,15 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Action Icons Row - Below Logo/Banner */}
+
+
+      {/* Brand Name & Info */}
+      <div className="text-center mb-8 px-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Lalelilo Moda Infantil</h1>
+        <p className="text-gray-600 mt-2">Roupa de Criança com Amor e Estilo</p>
+      </div>
+
+      {/* Action Icons Row - Below Title */}
       <div className="flex justify-center gap-12 mt-4 mb-8">
         <Link href="/register" title="Cadastre-se">
           <div className="group flex flex-col items-center gap-1">
@@ -112,12 +120,6 @@ export default function HomePage() {
             <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 group-hover:text-lale-orange transition-colors">Carrinho</span>
           </div>
         </Link>
-      </div>
-
-      {/* Brand Name & Info */}
-      <div className="text-center mb-8 px-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Lalelilo Moda Infantil</h1>
-        <p className="text-gray-600 mt-2">Roupa de Criança com Amor e Estilo</p>
       </div>
 
       {/* Location selector */}
