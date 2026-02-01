@@ -91,7 +91,7 @@ export default function DebugPage() {
             <div className="mt-8">
                 <h3 className="font-bold mb-2">Troubleshooting Guide:</h3>
                 <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-                    <li>If <b>Service Role Key</b> is missing: Go to Vercel > Settings > Environment Variables and add <code>SUPABASE_SERVICE_ROLE_KEY</code>.</li>
+                    <li>If <b>Service Role Key</b> is missing: Go to Vercel &gt; Settings &gt; Environment Variables and add <code>SUPABASE_SERVICE_ROLE_KEY</code>.</li>
                     <li>If <b>Write Failed</b> with "relation messages does not exist": You need to run the SQL migration table creation script in Supabase.</li>
                     <li>If <b>Write Failed</b> with other database errors: Check Supabase logs.</li>
                 </ul>
