@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Loading, Modal } from '@/components/ui';
-import { MapPin, ShoppingBag, Heart, Star, ChevronRight, User } from 'lucide-react';
+import { MapPin, ShoppingBag, Heart, Star, ChevronRight, User, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import WhatsAppButton from '@/components/WhatsAppButton';
 
@@ -78,23 +78,7 @@ export default function HomePage() {
             alt="Lalelilo Teaser"
             className="w-full h-auto object-contain"
           />
-          {/* Register Icon (Top Left) */}
-          <div className="absolute top-4 left-4 z-10">
-            <Link href="/register">
-              <Button variant="outline" className="w-12 h-12 rounded-full p-0 bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white border-white/50 shadow-lg flex items-center justify-center">
-                <User size={24} />
-              </Button>
-            </Link>
-          </div>
 
-          {/* Cart Icon (Top Right) */}
-          <div className="absolute top-4 right-4 z-10">
-            <Link href="/cart">
-              <Button variant="outline" className="w-12 h-12 rounded-full p-0 bg-white/90 backdrop-blur-sm text-lale-orange hover:bg-white border-white/50 shadow-lg flex items-center justify-center">
-                <ShoppingBag size={24} />
-              </Button>
-            </Link>
-          </div>
         </div>
 
         {/* Overlapping Logo */}
@@ -107,6 +91,27 @@ export default function HomePage() {
             />
           </div>
         </div>
+      </div>
+
+      {/* Action Icons Row - Below Logo/Banner */}
+      <div className="flex justify-center gap-12 mt-4 mb-8">
+        <Link href="/register" title="Cadastre-se">
+          <div className="group flex flex-col items-center gap-1">
+            <div className="w-14 h-14 rounded-full bg-white shadow-md flex items-center justify-center text-gray-700 border border-gray-100 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:text-lale-pink group-hover:border-lale-pink/30">
+              <User size={28} />
+            </div>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 group-hover:text-lale-pink transition-colors">Conta</span>
+          </div>
+        </Link>
+
+        <Link href="/cart" title="Carrinho">
+          <div className="group flex flex-col items-center gap-1">
+            <div className="w-14 h-14 rounded-full bg-white shadow-md flex items-center justify-center text-lale-orange border border-gray-100 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:text-lale-orange group-hover:border-lale-orange/30">
+              <ShoppingCart size={28} />
+            </div>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 group-hover:text-lale-orange transition-colors">Carrinho</span>
+          </div>
+        </Link>
       </div>
 
       {/* Brand Name & Info */}
