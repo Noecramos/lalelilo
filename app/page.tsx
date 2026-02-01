@@ -35,25 +35,23 @@ export default function HomePage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API calls
-      setTimeout(() => {
-        setProducts([
-          { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, image_url: 'https://images.pexels.com/photos/3661349/pexels-photo-3661349.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Vestidos', is_featured: true },
-          { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, image_url: 'https://images.pexels.com/photos/11003460/pexels-photo-11003460.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Conjuntos', is_featured: true },
-          { id: '3', name: 'Calça Jeans Infantil', price: 65.00, image_url: 'https://images.pexels.com/photos/1598104/pexels-photo-1598104.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Calças', is_featured: true },
-          { id: '4', name: 'Camiseta Básica Branca', price: 35.00, image_url: 'https://images.pexels.com/photos/2292919/pexels-photo-2292919.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Camisetas', is_featured: true },
-          { id: '5', name: 'Vestido Floral Verão', price: 82.00, image_url: 'https://images.pexels.com/photos/9383617/pexels-photo-9383617.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Vestidos', is_featured: true },
-          { id: '6', name: 'Shorts Jeans Kids', price: 45.00, image_url: 'https://images.pexels.com/photos/5560019/pexels-photo-5560019.jpeg?auto=compress&cs=tinysrgb&w=600', category: 'Shorts', is_featured: true }
-        ]);
+      const [productsRes, shopsRes] = await Promise.all([
+        fetch('/api/products?limit=10'),
+        fetch('/api/shops?limit=5')
+      ]);
 
-        setNearbyShops([
-          { id: '1', name: 'Lalelilo Centro', city: 'Recife', distance: 1.2 },
-          { id: '2', name: 'Lalelilo Boa Viagem', city: 'Recife', distance: 3.5 },
-          { id: '3', name: 'Lalelilo Shopping', city: 'Recife', distance: 5.8 }
-        ]);
+      const productsData = await productsRes.json();
+      const shopsData = await shopsRes.json();
 
-        setLoading(false);
-      }, 1000);
+      if (productsData.success) {
+        setProducts(productsData.products || []);
+      }
+
+      if (shopsData.success) {
+        setNearbyShops(shopsData.shops || []);
+      }
+
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
       setLoading(false);

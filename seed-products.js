@@ -48,7 +48,6 @@ async function seed() {
                 name: 'Lalelilo Demo Shop',
                 slug: 'lalelilo-demo',
                 city: 'Recife',
-                address: 'Av. Principal, 123',
                 is_active: true
             })
             .select()
@@ -77,7 +76,6 @@ async function seed() {
             slug: slug,
             description: `Esta é uma descrição detalhada para o ${name}. Perfeito para crianças de todas as idades, combinando conforto e estilo.`,
             price: price,
-            compare_at_price: price + 20,
             image_url: `/demo/Image ${i}.jpg`,
             images: [`/demo/Image ${i}.jpg`],
             is_active: true,
