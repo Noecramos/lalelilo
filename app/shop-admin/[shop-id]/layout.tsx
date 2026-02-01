@@ -112,11 +112,15 @@ export default function ShopAdminLayout({
                     })}
                 </nav>
 
-                {/* Shop info */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-                    <div className="text-sm text-gray-500">
-                        <p className="font-medium text-gray-900">Loja Atual</p>
-                        <p className="truncate">ID: {shopId}</p>
+                {/* Noviapp Branding */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 text-center">
+                    <div className="text-xs text-gray-500">
+                        <p>© 2026 Noviapp Sistemas IA.</p>
+                        <p>Todos os direitos reservados.</p>
+                        <a href="https://www.noviapp.com.br" target="_blank" rel="noopener noreferrer" className="block my-1 text-lale-orange hover:underline">
+                            www.noviapp.com.br
+                        </a>
+                        <img src="/noviapp-logo.png" alt="Noviapp" className="h-4 mx-auto mt-2 opacity-50 grayscale hover:grayscale-0 transition-all" />
                     </div>
                 </div>
             </aside>

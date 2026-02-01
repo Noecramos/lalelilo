@@ -82,7 +82,7 @@ export default function SuperAdminLayout({
                                     href={item.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-white hover:bg-white hover:bg-opacity-20 mt-4 border border-white border-opacity-20 bg-white bg-opacity-5"
+                                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-green-400 hover:bg-white hover:bg-opacity-20 mt-4 border border-green-400 border-opacity-30 bg-white bg-opacity-5"
                                 >
                                     <Icon size={20} className="text-green-400" />
                                     <span className="font-medium">{item.name}</span>
@@ -111,12 +111,15 @@ export default function SuperAdminLayout({
                 </nav>
 
                 {/* Noviapp Branding */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-20">
-                    <a href="https://www.noviapp.com.br" target="_blank" rel="noopener noreferrer">
-                        <div className="bg-white rounded-lg p-3 shadow-md flex items-center justify-center h-16">
-                            <img src="/noviapp-logo.png" alt="Noviapp" className="max-h-full w-auto object-contain" />
-                        </div>
-                    </a>
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-20 text-center">
+                    <div className="bg-white/10 rounded-lg p-3 text-xs text-white/80">
+                        <p>© 2026 Noviapp Sistemas IA.</p>
+                        <p>Todos os direitos reservados.</p>
+                        <a href="https://www.noviapp.com.br" target="_blank" rel="noopener noreferrer" className="block my-1 text-white hover:underline">
+                            www.noviapp.com.br
+                        </a>
+                        <img src="/noviapp-logo.png" alt="Noviapp" className="h-4 mx-auto mt-2 opacity-70" style={{ filter: 'brightness(0) invert(1)' }} />
+                    </div>
                 </div>
             </aside>
 
