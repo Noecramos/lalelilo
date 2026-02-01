@@ -12,6 +12,7 @@ interface Shop {
 interface Message {
     id: string;
     sender: 'super-admin' | 'shop';
+    sender_id: string;
     recipient_id: string | 'all';
     content: string;
     created_at: string;
@@ -54,21 +55,94 @@ export default function MessagesPage() {
             const data = await response.json();
 
             if (data.messages) {
-                // Group messages by shop_id to create conversations
-                // This is a simplified client-side grouping. Ideally, the API should return conversations.
+                const msgs = data.messages as (Message & { sender_id: string })[];
                 const grouped = new Map<string, Conversation>();
 
-                // We need shops names, so fetch shops first if not loaded
-                // But for now, let's assume we can map from available data or fetch shops
-                // Let's rely on fetchShops being called in parallel
+                // Get all unique shop IDs from messages
+                const shopIds = new Set<string>();
+                msgs.forEach(m => {
+                    if (m.sender === 'shop') shopIds.add(m.sender_id);
+                    if (m.recipient_id !== 'all' && m.recipient_id !== 'super-admin') shopIds.add(m.recipient_id);
+                });
 
-                // We'll process this after fetching shops or just use IDs for now
-                // Actually, let's fetch shops inside here or ensure shops are loaded
+                // Helper to get shop name (optimistic or fallback)
+                const getShopName = (id: string) => {
+                    return shops.find(s => s.id === id)?.name || 'Carregando...';
+                };
+
+                msgs.forEach(msg => {
+                    // Determine the other party in the conversation
+                    const otherPartyId = msg.sender === 'shop' ? msg.sender_id : msg.recipient_id;
+
+                    if (otherPartyId === 'all' || otherPartyId === 'super-admin') return;
+
+                    if (!grouped.has(otherPartyId)) {
+                        grouped.set(otherPartyId, {
+                            shop_id: otherPartyId,
+                            shop_name: getShopName(otherPartyId),
+                            last_message: msg.content,
+                            last_message_time: msg.created_at,
+                            unread_count: 0
+                        });
+                    }
+
+                    const conv = grouped.get(otherPartyId)!;
+
+                    // Update last message if this one is newer
+                    if (new Date(msg.created_at) > new Date(conv.last_message_time)) {
+                        conv.last_message = msg.content;
+                        conv.last_message_time = msg.created_at;
+                    }
+
+                    // Count unread (messages FROM shop that are NOT read)
+                    if (msg.sender === 'shop' && !msg.read_at) {
+                        conv.unread_count++;
+                    }
+                });
+
+                // Merge with existing shops that might not have messages yet
+                const activeConversations = Array.from(grouped.values());
+
+                // If we also want to show shops with NO messages yet:
+                const existingShopIds = new Set(activeConversations.map(c => c.shop_id));
+                shops.forEach(shop => {
+                    if (!existingShopIds.has(shop.id)) {
+                        activeConversations.push({
+                            shop_id: shop.id,
+                            shop_name: shop.name,
+                            last_message: 'Nenhuma mensagem',
+                            last_message_time: new Date(0).toISOString(), // Old date to put at bottom
+                            unread_count: 0
+                        });
+                    }
+                });
+
+                // Sort by last message time
+                activeConversations.sort((a, b) =>
+                    new Date(b.last_message_time).getTime() - new Date(a.last_message_time).getTime()
+                );
+
+                setConversations(activeConversations);
             }
         } catch (error) {
             console.error('Failed to fetch conversations:', error);
         }
     };
+
+    // Refresh conversations when shops are loaded to update names
+    useEffect(() => {
+        if (shops.length > 0) {
+            fetchConversations();
+        }
+    }, [shops]);
+
+    // Polling for new messages
+    useEffect(() => {
+        const interval = setInterval(fetchConversations, 10000);
+        return () => clearInterval(interval);
+    }, [shops]);
+
+    // Existing fetchShops... (keep it as is, but ensure it runs)
 
     const fetchShops = async () => {
         try {
