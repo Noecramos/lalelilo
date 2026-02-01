@@ -28,7 +28,9 @@ export default function ShopMessagesPage({
     }, [shopId]);
 
     const fetchMessages = async () => {
+        if (!shopId) return;
         try {
+            // Pass shopId. Backend handles slug->uuid resolution.
             const response = await fetch(`/api/messages?shopId=${shopId}`);
             const data = await response.json();
 

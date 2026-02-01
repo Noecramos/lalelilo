@@ -170,6 +170,8 @@ export default function MessagesPage() {
 
     const fetchMessages = async (shopId: string) => {
         try {
+            // Fix: ensure we pass isAdmin=true so backend knows it's a super-admin request
+            // AND pass shopId to get conversation with that specific shop
             const response = await fetch(`/api/messages?isAdmin=true&shopId=${shopId}`);
             const data = await response.json();
             if (data.messages) {
