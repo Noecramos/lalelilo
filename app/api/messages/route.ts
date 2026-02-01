@@ -23,9 +23,37 @@ export async function GET(request: NextRequest) {
                 // Alternatively, client filters. For now fetch last 500 to keep it simple
                 query = query.limit(500);
             }
-        } else if (shopId) {
             // Shop Admin: Fetch messages for this shop AND broadcasts
-            query = query.or(`recipient_id.eq.${shopId},sender_id.eq.${shopId},recipient_id.eq.all`);
+            // We need to be careful with UUID vs Slug. shopId passed here is likely a UUID if called from internal logic,
+            // but if called from frontend using slug, we need to handle that.
+            // Assumption: The frontend resolves slug to ID before calling, OR we resolve it here.
+            // Let's assume the frontend passes the database ID (UUID) for now to be safe, 
+            // OR we fix the frontend to pass the UUID.
+
+            // Actually, looking at the previous step, the frontend passes `shopId` which comes from `params['shop-id']`.
+            // In the frontend code, `shopId` is the SLUG (e.g. 'lalelilo-centro').
+            // The database stores UUIDs. We MUST resolve the slug to UUID first.
+
+            let targetShopId = shopId;
+
+            // Simple check: is it a valid UUID? If not, treat as slug.
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(shopId);
+
+            if (!isUuid) {
+                const { data: shop } = await supabase
+                    .from('shops')
+                    .select('id')
+                    .eq('slug', shopId)
+                    .single();
+
+                if (shop) {
+                    targetShopId = shop.id;
+                } else {
+                    return NextResponse.json({ messages: [] }); // or error
+                }
+            }
+
+            query = query.or(`recipient_id.eq.${targetShopId},sender_id.eq.${targetShopId},recipient_id.eq.all`);
         } else {
             return NextResponse.json({ error: 'Missing shopId or isAdmin param' }, { status: 400 });
         }
@@ -55,11 +83,29 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
+        let finalSenderId = sender_id;
+
+        // If sender is a shop and ID looks like a slug, resolve it
+        if (sender_type === 'shop') {
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sender_id);
+            if (!isUuid) {
+                const { data: shop } = await supabase
+                    .from('shops')
+                    .select('id')
+                    .eq('slug', sender_id)
+                    .single();
+
+                if (shop) {
+                    finalSenderId = shop.id;
+                }
+            }
+        }
+
         const { data: message, error } = await supabase
             .from('messages')
             .insert({
                 sender_type,
-                sender_id,
+                sender_id: finalSenderId,
                 recipient_id,
                 content,
                 is_broadcast: is_broadcast || false,
