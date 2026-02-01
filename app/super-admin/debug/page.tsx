@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Badge } from '@/components/ui';
+import { Card, Button, Badge, Input } from '@/components/ui';
 
 export default function DebugPage() {
     const [status, setStatus] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [testResult, setTestResult] = useState<string>('');
+    const [shopSlug, setShopSlug] = useState('lalelilo-centro');
+    const [getMessageResult, setGetMessageResult] = useState('');
 
     useEffect(() => {
         checkSystem();
@@ -54,6 +56,25 @@ export default function DebugPage() {
         }
     };
 
+    const testGetMessages = async (asAdmin: boolean) => {
+        setGetMessageResult('Fetching...');
+        try {
+            const url = asAdmin
+                ? `/api/messages?isAdmin=true&shopId=${shopSlug}`
+                : `/api/messages?shopId=${shopSlug}`;
+
+            const res = await fetch(url);
+            const data = await res.json();
+
+            setGetMessageResult(
+                `Status: ${res.status}\n` +
+                JSON.stringify(data, null, 2)
+            );
+        } catch (e: any) {
+            setGetMessageResult('Error: ' + e.message);
+        }
+    };
+
     return (
         <div className="p-8 space-y-6">
             <h1 className="text-2xl font-bold">System Diagnostics</h1>
@@ -86,6 +107,32 @@ export default function DebugPage() {
                         {testResult}
                     </div>
                 )}
+            </Card>
+
+            <Card title="Message Retrieval Check">
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Shop Slug or ID</label>
+                        <Input
+                            value={shopSlug}
+                            onChange={(e) => setShopSlug(e.target.value)}
+                            placeholder="e.g. lalelilo-centro"
+                        />
+                    </div>
+                    <div className="flex gap-2">
+                        <Button onClick={() => testGetMessages(false)} variant="outline">
+                            Simulate Shop Fetch
+                        </Button>
+                        <Button onClick={() => testGetMessages(true)} variant="outline">
+                            Simulate Super Admin Fetch
+                        </Button>
+                    </div>
+                    {getMessageResult && (
+                        <div className="mt-4 p-4 bg-gray-100 rounded border border-gray-200 font-mono text-sm whitespace-pre-wrap max-h-60 overflow-auto">
+                            {getMessageResult}
+                        </div>
+                    )}
+                </div>
             </Card>
 
             <div className="mt-8">
