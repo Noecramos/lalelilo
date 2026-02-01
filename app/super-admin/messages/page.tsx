@@ -256,10 +256,20 @@ export default function MessagesPage() {
                     <h2 className="text-2xl font-bold text-gray-900">Mensagens</h2>
                     <p className="text-gray-600 mt-1">Comunique-se com as lojas</p>
                 </div>
-                <Button variant="primary" onClick={() => setShowNewMessageModal(true)}>
-                    <Plus size={16} className="mr-2" />
-                    Nova Mensagem
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={async () => {
+                        if (confirm('Tem certeza? Isso apagará todas as mensagens.')) {
+                            await fetch('/api/debug/messages', { method: 'DELETE' });
+                            window.location.reload();
+                        }
+                    }}>
+                        Resetar Mensagens
+                    </Button>
+                    <Button variant="primary" onClick={() => setShowNewMessageModal(true)}>
+                        <Plus size={16} className="mr-2" />
+                        Nova Mensagem
+                    </Button>
+                </div>
             </div>
 
             {/* Chat Interface */}
