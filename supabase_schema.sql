@@ -90,3 +90,21 @@ CREATE POLICY "Enable all for everyone" ON shops FOR ALL USING (true) WITH CHECK
 CREATE POLICY "Enable all for everyone" ON categories FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Enable all for everyone" ON products FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Enable all for everyone" ON orders FOR ALL USING (true) WITH CHECK (true);
+
+-- 5. Users (Customers)
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    full_name TEXT NOT NULL,
+    email TEXT UNIQUE,
+    whatsapp TEXT NOT NULL UNIQUE,
+    address TEXT,
+    city TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- Simple permissive policies
+CREATE POLICY "Enable all for everyone" ON users FOR ALL USING (true) WITH CHECK (true);

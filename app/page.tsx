@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Badge, Loading } from '@/components/ui';
-import { MapPin, ShoppingBag, Heart, Star, ChevronRight } from 'lucide-react';
+import { Card, Button, Badge, Loading, Modal } from '@/components/ui';
+import { MapPin, ShoppingBag, Heart, Star, ChevronRight, User } from 'lucide-react';
 import Link from 'next/link';
 import WhatsAppButton from '@/components/WhatsAppButton';
 
@@ -13,6 +13,9 @@ interface Product {
   image_url: string;
   category: string;
   is_featured: boolean;
+  description?: string;
+  images?: string[];
+  sizes?: string[];
 }
 
 interface Shop {
@@ -27,6 +30,7 @@ export default function HomePage() {
   const [nearbyShops, setNearbyShops] = useState<Shop[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -74,8 +78,13 @@ export default function HomePage() {
             alt="Lalelilo Teaser"
             className="w-full h-auto object-contain"
           />
-          {/* Cart Button (Floating) */}
-          <div className="absolute top-4 right-4 z-10">
+          <div className="absolute top-4 right-4 z-10 flex gap-2">
+            <Link href="/register">
+              <Button variant="outline" className="bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white border-white/50 shadow-sm">
+                <User size={18} className="mr-2" />
+                Cadastre-se
+              </Button>
+            </Link>
             <Link href="/cart">
               <Button variant="outline" className="bg-white/90 backdrop-blur-sm text-lale-orange hover:bg-white border-white/50 shadow-sm">
                 <ShoppingBag size={18} className="mr-2" />
@@ -122,18 +131,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Hero section */}
-      <section className="bg-lale-bg-blue">
-        <div className="w-full">
-          <Link href="/products">
-            <img
-              src="/banner.png"
-              alt="Liquida Férias - Até 70% OFF"
-              className="w-full h-auto object-cover hover:opacity-95 transition-opacity cursor-pointer"
-            />
-          </Link>
-        </div>
-      </section>
+
 
       {/* Featured products */}
       <section className="py-12">
@@ -166,50 +164,105 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {products.map((product) => (
-              <Card key={product.id} padding="none" hover className="overflow-hidden">
-                <div className="relative">
+              <Card
+                key={product.id}
+                padding="none"
+                hover
+                className="overflow-hidden cursor-pointer group"
+                onClick={() => setSelectedProduct(product)}
+              >
+                <div className="relative aspect-[3/4] overflow-hidden">
                   <img
                     src={product.image_url}
                     alt={product.name}
-                    className="w-full h-64 object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <button className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors">
-                    <Heart size={18} className="text-gray-600" />
+                  <button
+                    className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full p-1.5 shadow-sm hover:bg-white transition-colors"
+                    onClick={(e) => { e.stopPropagation(); /* Favorite logic */ }}
+                  >
+                    <Heart size={14} className="text-gray-600" />
                   </button>
-                  {product.is_featured && (
-                    <Badge
-                      variant="warning"
-                      className="absolute top-3 left-3"
-                    >
-                      Destaque
-                    </Badge>
-                  )}
                 </div>
-                <div className="p-4">
-                  <p className="text-xs text-gray-500 mb-1">{product.category}</p>
-                  <h4 className="font-semibold text-gray-900 mb-2">{product.name}</h4>
+                <div className="p-2 md:p-3">
+                  <h4 className="font-medium text-gray-900 text-xs md:text-sm truncate mb-1">{product.name}</h4>
                   <div className="flex items-center justify-between">
-                    <p className="text-xl font-bold text-lale-orange">
-                      R$ {product.price.toFixed(2)}
+                    <p className="font-bold text-lale-orange text-sm md:text-base">
+                      R$ {Number(product.price).toFixed(2)}
                     </p>
-                    <div className="flex items-center gap-1 text-yellow-500">
-                      <Star size={14} fill="currentColor" />
-                      <span className="text-xs text-gray-600">4.8</span>
-                    </div>
                   </div>
-                  <Link href="/checkout">
-                    <Button variant="primary" className="w-full mt-3">
-                      Adicionar ao Carrinho
-                    </Button>
-                  </Link>
                 </div>
               </Card>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Product Detail Modal */}
+      <Modal
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        title={selectedProduct?.name}
+        size="lg"
+      >
+        {selectedProduct && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100">
+                <img
+                  src={selectedProduct.image_url}
+                  alt={selectedProduct.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {selectedProduct.images?.slice(0, 3).map((img: string, idx: number) => (
+                  <div key={idx} className="aspect-square rounded-md overflow-hidden bg-gray-100 border border-gray-200">
+                    <img src={img} alt={`${selectedProduct.name} ${idx}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col h-full">
+              <div className="flex-1">
+                <p className="text-2xl font-bold text-lale-orange mb-2">
+                  R$ {Number(selectedProduct.price).toFixed(2)}
+                </p>
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Descrição</h4>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {selectedProduct.description || 'Nenhuma descrição disponível.'}
+                  </p>
+                </div>
+                {selectedProduct.sizes && selectedProduct.sizes.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Tamanhos Disponíveis</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProduct.sizes.map((size: string) => (
+                        <span key={size} className="px-3 py-1 border border-gray-200 rounded text-sm text-gray-700">
+                          {size}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="mt-6 space-y-3">
+                <Link href="/cart" className="block" onClick={() => setSelectedProduct(null)}>
+                  <Button variant="primary" className="w-full py-3 text-lg">
+                    Adicionar ao Carrinho
+                  </Button>
+                </Link>
+                <Button variant="outline" className="w-full" onClick={() => setSelectedProduct(null)}>
+                  Continuar Comprando
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Nearby shops */}
       <section className="py-12 bg-white">

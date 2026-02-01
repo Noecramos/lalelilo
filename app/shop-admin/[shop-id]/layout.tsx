@@ -11,7 +11,8 @@ import {
     Menu,
     X,
     Store,
-    MessageSquare
+    MessageSquare,
+    Users
 } from 'lucide-react';
 
 export default function ShopAdminLayout({
@@ -28,6 +29,7 @@ export default function ShopAdminLayout({
     const navigation = [
         { name: 'Dashboard', href: `/shop-admin/${shopId}`, icon: LayoutDashboard },
         { name: 'Pedidos', href: `/shop-admin/${shopId}/orders`, icon: ShoppingBag },
+        { name: 'Clientes', href: `/shop-admin/${shopId}/users`, icon: Users },
         { name: 'Estoque', href: `/shop-admin/${shopId}/inventory`, icon: Package },
         { name: 'Mensagens', href: `/shop-admin/${shopId}/messages`, icon: MessageSquare },
         { name: 'Configurações', href: `/shop-admin/${shopId}/settings`, icon: Settings },

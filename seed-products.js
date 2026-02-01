@@ -70,14 +70,21 @@ async function seed() {
         const slug = `produto-infantil-demo-${i}`;
         const price = Math.floor(Math.random() * (120 - 45 + 1)) + 45;
 
+        // Pick 3 random images for the gallery
+        const galleryImages = [
+            `/demo/Image ${i}.jpg`,
+            `/demo/Image ${((i + 1) % 10) || 10}.jpg`,
+            `/demo/Image ${((i + 2) % 10) || 10}.jpg`
+        ];
+
         products.push({
             client_id: shop.id,
             name: name,
             slug: slug,
-            description: `Esta é uma descrição detalhada para o ${name}. Perfeito para crianças de todas as idades, combinando conforto e estilo.`,
+            description: `Esta é uma descrição detalhada para o ${name}. Perfeito para crianças de todas as idades, combinando conforto e estilo. Produzido com os melhores materiais para garantir durabilidade e maciez na pele do seu filho.`,
             price: price,
             image_url: `/demo/Image ${i}.jpg`,
-            images: [`/demo/Image ${i}.jpg`],
+            images: galleryImages,
             is_active: true,
             created_at: new Date().toISOString()
         });
