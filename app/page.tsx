@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Loading, Modal } from '@/components/ui';
-import { MapPin, ShoppingBag, Heart, Star, ChevronRight, User, ShoppingCart } from 'lucide-react';
+import { MapPin, ShoppingBag, Heart, Star, ChevronRight, User, ShoppingCart, Instagram } from 'lucide-react';
 import Link from 'next/link';
 import WhatsAppButton from '@/components/WhatsAppButton';
 
@@ -96,9 +96,20 @@ export default function HomePage() {
 
 
       {/* Brand Name & Info */}
-      <div className="text-center mb-8 px-4">
+      <div className="text-center mb-6 px-4">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Lalelilo Moda Infantil</h1>
         <p className="text-gray-600 mt-2">Roupa de Criança com Amor e Estilo</p>
+        <div className="mt-4 flex justify-center">
+          <a
+            href="https://www.instagram.com/lalelilokids/?hl=pt"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105 active:scale-95 group"
+          >
+            <Instagram size={20} className="group-hover:rotate-12 transition-transform" />
+            <span className="font-semibold text-sm tracking-wide">Siga-nos no Instagram</span>
+          </a>
+        </div>
       </div>
 
       {/* Action Icons Row - Below Title */}
