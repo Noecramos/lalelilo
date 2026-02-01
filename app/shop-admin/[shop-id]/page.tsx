@@ -28,37 +28,31 @@ export default function ShopAdminDashboard({
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // TODO: Fetch real data from API
-        // For now, using mock data
-        setTimeout(() => {
-            setStats({
-                todayRevenue: 1250.50,
-                todayOrders: 15,
-                pendingOrders: 3,
-                lowStockItems: 5
-            });
+        const fetchDashboardData = async () => {
+            if (!shopId) return;
 
-            setRecentOrders([
-                {
-                    id: '1',
-                    order_number: 'LAL-001',
-                    customer_name: 'João Silva',
-                    total_amount: 89.90,
-                    status: 'pending',
-                    created_at: new Date().toISOString()
-                },
-                {
-                    id: '2',
-                    order_number: 'LAL-002',
-                    customer_name: 'Maria Santos',
-                    total_amount: 125.00,
-                    status: 'confirmed',
-                    created_at: new Date().toISOString()
+            try {
+                // Fetch analytics for this shop
+                const response = await fetch(`/api/analytics/dashboard?shop_slug=${shopId}&period=30`);
+                const data = await response.json();
+
+                if (data.success) {
+                    setStats({
+                        todayRevenue: data.metrics.totalRevenue,
+                        todayOrders: data.metrics.totalOrders,
+                        pendingOrders: data.recentOrders.filter((o: any) => o.status === 'pending').length,
+                        lowStockItems: 0 // TODO: Fetch from inventory API
+                    });
+                    setRecentOrders(data.recentOrders || []);
                 }
-            ]);
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-            setLoading(false);
-        }, 1000);
+        fetchDashboardData();
     }, [shopId]);
 
     if (loading) {
@@ -67,14 +61,14 @@ export default function ShopAdminDashboard({
 
     const statCards = [
         {
-            title: 'Vendas Hoje',
+            title: 'Vendas (30d)',
             value: `R$ ${stats?.todayRevenue.toFixed(2)}`,
             icon: DollarSign,
             color: 'text-green-600',
             bgColor: 'bg-green-100'
         },
         {
-            title: 'Pedidos Hoje',
+            title: 'Pedidos (30d)',
             value: stats?.todayOrders.toString() || '0',
             icon: ShoppingBag,
             color: 'text-blue-600',

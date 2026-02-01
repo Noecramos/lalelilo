@@ -38,27 +38,23 @@ export default function SuperAdminOverview() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // TODO: Fetch real data from API
-        setTimeout(() => {
-            setStats({
-                totalRevenue: 125450.80,
-                totalOrders: 1247,
-                activeShops: 30,
-                avgTicket: 100.52,
-                revenueGrowth: 12.5,
-                ordersGrowth: 8.3
-            });
+        const fetchAnalytics = async () => {
+            try {
+                const response = await fetch('/api/analytics/dashboard');
+                const data = await response.json();
 
-            setTopShops([
-                { id: '1', name: 'Lalelilo Centro', city: 'Recife', revenue: 15200.00, orders: 145, growth: 15.2 },
-                { id: '2', name: 'Lalelilo Boa Viagem', city: 'Recife', revenue: 14800.00, orders: 138, growth: 12.8 },
-                { id: '3', name: 'Lalelilo Shopping', city: 'Recife', revenue: 13500.00, orders: 125, growth: 10.5 },
-                { id: '4', name: 'Lalelilo Olinda', city: 'Olinda', revenue: 12300.00, orders: 118, growth: 9.2 },
-                { id: '5', name: 'Lalelilo Jaboatão', city: 'Jaboatão', revenue: 11900.00, orders: 112, growth: 8.7 }
-            ]);
+                if (data.success) {
+                    setStats(data.metrics);
+                    setTopShops(data.topShops || []);
+                }
+            } catch (error) {
+                console.error('Error fetching analytics:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-            setLoading(false);
-        }, 1000);
+        fetchAnalytics();
     }, []);
 
     if (loading) {
