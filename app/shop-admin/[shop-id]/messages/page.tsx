@@ -7,6 +7,7 @@ import { MessageSquare, Send, Check, CheckCheck, AlertCircle } from 'lucide-reac
 interface Message {
     id: string;
     sender: 'super-admin' | 'shop';
+    sender_id: string; // Added this
     content: string;
     created_at: string;
     read_at?: string;
@@ -54,13 +55,21 @@ export default function ShopMessagesPage({
     const sendMessage = async () => {
         if (!newMessage.trim()) return;
 
+        // Try to find the UUID from existing messages first to avoid extra API calls
+        // If we have messages, we know our true UUID is in sender_id or recipient_id
+        let realShopId = shopId;
+        const previousMsg = messages.find(m => m.sender_id !== 'super-admin');
+        if (previousMsg) {
+            realShopId = previousMsg.sender_id;
+        }
+
         try {
             const response = await fetch('/api/messages', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     sender_type: 'shop',
-                    sender_id: shopId,
+                    sender_id: realShopId, // Send the best ID we have (slug or uuid)
                     recipient_id: 'super-admin',
                     content: newMessage
                 })
