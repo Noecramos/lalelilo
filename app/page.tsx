@@ -78,17 +78,20 @@ export default function HomePage() {
             alt="Lalelilo Teaser"
             className="w-full h-auto object-contain"
           />
-          <div className="absolute top-4 right-4 z-10 flex gap-2">
+          {/* Register Icon (Top Left) */}
+          <div className="absolute top-4 left-4 z-10">
             <Link href="/register">
-              <Button variant="outline" className="bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white border-white/50 shadow-sm">
-                <User size={18} className="mr-2" />
-                Cadastre-se
+              <Button variant="outline" className="w-12 h-12 rounded-full p-0 bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white border-white/50 shadow-lg flex items-center justify-center">
+                <User size={24} />
               </Button>
             </Link>
+          </div>
+
+          {/* Cart Icon (Top Right) */}
+          <div className="absolute top-4 right-4 z-10">
             <Link href="/cart">
-              <Button variant="outline" className="bg-white/90 backdrop-blur-sm text-lale-orange hover:bg-white border-white/50 shadow-sm">
-                <ShoppingBag size={18} className="mr-2" />
-                Carrinho
+              <Button variant="outline" className="w-12 h-12 rounded-full p-0 bg-white/90 backdrop-blur-sm text-lale-orange hover:bg-white border-white/50 shadow-lg flex items-center justify-center">
+                <ShoppingBag size={24} />
               </Button>
             </Link>
           </div>
