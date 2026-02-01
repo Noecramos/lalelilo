@@ -34,16 +34,16 @@ export async function GET(request: NextRequest) {
             // In the frontend code, `shopId` is the SLUG (e.g. 'lalelilo-centro').
             // The database stores UUIDs. We MUST resolve the slug to UUID first.
 
-            let targetShopId = shopId;
+            let targetShopId = shopId || '';
 
             // Simple check: is it a valid UUID? If not, treat as slug.
-            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(shopId);
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetShopId);
 
-            if (!isUuid) {
+            if (!isUuid && targetShopId) {
                 const { data: shop } = await supabase
                     .from('shops')
                     .select('id')
-                    .eq('slug', shopId)
+                    .eq('slug', targetShopId)
                     .single();
 
                 if (shop) {
