@@ -55,23 +55,19 @@ export default function MessagesPage() {
             const data = await response.json();
 
             if (data.messages) {
-                const msgs = data.messages as (Message & { sender_id: string })[];
+                const msgs = data.messages;
                 const grouped = new Map<string, Conversation>();
-
-                // Get all unique shop IDs from messages
-                const shopIds = new Set<string>();
-                msgs.forEach(m => {
-                    if (m.sender === 'shop') shopIds.add(m.sender_id);
-                    if (m.recipient_id !== 'all' && m.recipient_id !== 'super-admin') shopIds.add(m.recipient_id);
-                });
 
                 // Helper to get shop name (optimistic or fallback)
                 const getShopName = (id: string) => {
-                    return shops.find(s => s.id === id)?.name || 'Carregando...';
+                    const shop = shops.find(s => s.id === id);
+                    return shop ? shop.name : 'Loja Desconhecida';
                 };
 
-                msgs.forEach(msg => {
+                msgs.forEach((msg: any) => {
                     // Determine the other party in the conversation
+                    // If sender is shop, the "other party" is the sender_id
+                    // If sender is super-admin, the "other party" is the recipient_id
                     const otherPartyId = msg.sender === 'shop' ? msg.sender_id : msg.recipient_id;
 
                     if (otherPartyId === 'all' || otherPartyId === 'super-admin') return;
