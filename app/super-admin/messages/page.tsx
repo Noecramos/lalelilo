@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Input, Badge, Modal } from '@/components/ui';
 import { MessageSquare, Send, Users, Search, Plus, Check, CheckCheck } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface Shop {
     id: string;
@@ -45,6 +46,20 @@ export default function MessagesPage() {
     useEffect(() => {
         if (selectedShop) {
             fetchMessages(selectedShop);
+
+            // Realtime subscription for this specific conversation
+            const channel = supabase
+                .channel(`convo_${selectedShop}`)
+                .on(
+                    'postgres_changes',
+                    { event: 'INSERT', schema: 'public', table: 'messages' },
+                    () => fetchMessages(selectedShop)
+                )
+                .subscribe();
+
+            return () => {
+                supabase.removeChannel(channel);
+            };
         }
     }, [selectedShop]);
 
@@ -132,10 +147,23 @@ export default function MessagesPage() {
         }
     }, [shops]);
 
-    // Polling for new messages
+    // Polling and Realtime for conversation list
     useEffect(() => {
         const interval = setInterval(fetchConversations, 10000);
-        return () => clearInterval(interval);
+
+        const channel = supabase
+            .channel('admin_messages_list')
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'messages' },
+                () => fetchConversations()
+            )
+            .subscribe();
+
+        return () => {
+            clearInterval(interval);
+            supabase.removeChannel(channel);
+        };
     }, [shops]);
 
     // Existing fetchShops... (keep it as is, but ensure it runs)

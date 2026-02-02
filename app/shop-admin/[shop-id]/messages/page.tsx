@@ -3,6 +3,7 @@
 import React, { useState, useEffect, use } from 'react';
 import { Card, Button, Input, Badge } from '@/components/ui';
 import { MessageSquare, Send, Check, CheckCheck, AlertCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface Message {
     id: string;
@@ -26,6 +27,41 @@ export default function ShopMessagesPage({
 
     useEffect(() => {
         fetchMessages();
+
+        // Polling fallback
+        const interval = setInterval(fetchMessages, 10000);
+
+        // Realtime subscription
+        const channel = supabase
+            .channel(`shop_messages_${shopId}`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages'
+                },
+                (payload) => {
+                    const newMsg = payload.new as Message;
+                    // Only add if it's relevant to this shop (or broadcast)
+                    // We check if we already have it to avoid duplicates with fetch
+                    setMessages(prev => {
+                        if (prev.find(m => m.id === newMsg.id)) return prev;
+
+                        // Check if it belongs to this conversation
+                        // Note: finalSenderId resolution happens on backend, so we might need fetchMessages 
+                        // to be 100% sure, but let's try to be smart.
+                        fetchMessages(); // simplest way to ensure all logic (slugs etc) is correct
+                        return prev;
+                    });
+                }
+            )
+            .subscribe();
+
+        return () => {
+            clearInterval(interval);
+            supabase.removeChannel(channel);
+        };
     }, [shopId]);
 
     const fetchMessages = async () => {
