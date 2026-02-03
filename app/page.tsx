@@ -263,9 +263,19 @@ export default function HomePage() {
             {/* Product Details */}
             <div className="flex flex-col h-full">
               <div className="flex-1">
-                <p className="text-2xl font-bold text-lale-orange mb-4">
-                  R$ {Number(selectedProduct.price).toFixed(2)}
-                </p>
+                {/* Price and Share Button Row */}
+                <div className="flex items-start justify-between mb-4">
+                  <p className="text-2xl font-bold text-lale-orange">
+                    R$ {Number(selectedProduct.price).toFixed(2)}
+                  </p>
+                  <ShareButton
+                    type="product"
+                    title={selectedProduct.name}
+                    description={`R$ ${Number(selectedProduct.price).toFixed(2)}`}
+                    imageUrl={selectedProduct.image_url}
+                    variant="icon"
+                  />
+                </div>
                 <div className="mb-4">
                   <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Descrição</h4>
                   <p className="text-gray-600 text-sm leading-relaxed">
@@ -286,14 +296,6 @@ export default function HomePage() {
                 )}
               </div>
               <div className="mt-6 space-y-3">
-                {/* Share Button */}
-                <ShareButton
-                  type="product"
-                  title={selectedProduct.name}
-                  description={`R$ ${Number(selectedProduct.price).toFixed(2)}`}
-                  imageUrl={selectedProduct.image_url}
-                />
-
                 <Link href="/cart" className="block" onClick={() => setSelectedProduct(null)}>
                   <Button variant="primary" className="w-full py-3 text-lg">
                     Adicionar ao Carrinho

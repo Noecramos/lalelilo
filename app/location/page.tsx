@@ -186,7 +186,7 @@ export default function LocationPage() {
                                         </p>
                                         <p>📞 {shop.phone}</p>
                                     </div>
-                                    <div className="flex flex-col gap-2">
+                                    <div className="flex gap-2">
                                         <div
                                             onClick={(e) => e.stopPropagation()}
                                             className="z-10 relative"
@@ -195,6 +195,7 @@ export default function LocationPage() {
                                                 type="shop"
                                                 title={shop.name}
                                                 description={`${shop.address}, ${shop.city} - ${shop.state}\n📞 ${shop.phone}`}
+                                                variant="icon"
                                             />
                                         </div>
                                         <Button

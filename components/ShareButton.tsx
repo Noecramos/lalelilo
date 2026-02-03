@@ -9,9 +9,17 @@ interface ShareButtonProps {
     description?: string;
     imageUrl?: string;
     url?: string;
+    variant?: 'button' | 'icon'; // New prop for style variant
 }
 
-export default function ShareButton({ type, title, description, imageUrl, url }: ShareButtonProps) {
+export default function ShareButton({
+    type,
+    title,
+    description,
+    imageUrl,
+    url,
+    variant = 'button'
+}: ShareButtonProps) {
     const handleShare = () => {
         // Get current URL if not provided
         const shareUrl = url || window.location.href;
@@ -39,6 +47,20 @@ export default function ShareButton({ type, title, description, imageUrl, url }:
         window.open(whatsappUrl, '_blank');
     };
 
+    // Icon-only variant
+    if (variant === 'icon') {
+        return (
+            <button
+                onClick={handleShare}
+                className="w-10 h-10 rounded-full bg-green-500 hover:bg-green-600 text-white flex items-center justify-center transition-all hover:scale-110 active:scale-95 shadow-md"
+                title={`Compartilhar ${type === 'product' ? 'produto' : 'loja'} no WhatsApp`}
+            >
+                <Share2 size={18} />
+            </button>
+        );
+    }
+
+    // Full button variant
     return (
         <button
             onClick={handleShare}
