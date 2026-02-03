@@ -60,17 +60,18 @@ export default function ProductsPage() {
 
     return (
         <div className="min-h-screen bg-lale-bg-pink">
+            {/* Floating Back Button */}
+            <Link href="/">
+                <button className="fixed top-4 left-4 z-50 bg-white text-lale-orange rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110">
+                    <ArrowLeft size={24} />
+                </button>
+            </Link>
+
             {/* Header */}
             <header className="bg-gradient-to-r from-lale-pink to-lale-orange text-white">
                 <div className="container mx-auto px-4 py-4 md:py-6">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto text-center sm:text-left">
-                            <Link href="/">
-                                <Button variant="outline" size="sm" className="bg-white text-lale-orange border-white/50">
-                                    <ArrowLeft size={16} className="mr-2" />
-                                    Voltar
-                                </Button>
-                            </Link>
                             <div className="flex items-center gap-3">
                                 <div className="bg-white rounded-lg p-1.5 shadow-sm">
                                     <img src="/lalelilo-logo.jpg" alt="Lalelilo" className="h-8 md:h-10 w-auto object-contain" />

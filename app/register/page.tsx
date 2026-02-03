@@ -70,11 +70,14 @@ export default function RegisterPage() {
 
     return (
         <div className="min-h-screen bg-lale-bg-pink py-12 px-4">
+            {/* Floating Back Button */}
+            <Link href="/">
+                <button className="fixed top-4 left-4 z-50 bg-white text-lale-orange rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110">
+                    <ArrowLeft size={24} />
+                </button>
+            </Link>
+
             <div className="max-w-md mx-auto">
-                <Link href="/" className="inline-flex items-center text-lale-orange hover:gap-2 transition-all mb-8 group">
-                    <ArrowLeft size={18} className="mr-2 group-hover:mr-3 transition-all" />
-                    Voltar para a loja
-                </Link>
 
                 <Card className="p-8 shadow-xl border-t-4 border-lale-pink">
                     <div className="text-center mb-8">
