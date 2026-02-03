@@ -6,6 +6,7 @@ import { MapPin, Search, Navigation, ArrowLeft, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import ShareButton from '@/components/ShareButton';
 
 interface Shop {
     id: string;
@@ -176,7 +177,7 @@ export default function LocationPage() {
                                     </div>
                                 </div>
 
-                                {/* Bottom Row: Address/Phone + Button */}
+                                {/* Bottom Row: Address/Phone + Buttons */}
                                 <div className="flex items-end justify-between gap-4">
                                     <div className="flex-1 space-y-1 text-sm text-gray-600">
                                         <p className="flex items-center gap-2">
@@ -185,19 +186,31 @@ export default function LocationPage() {
                                         </p>
                                         <p>📞 {shop.phone}</p>
                                     </div>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            const address = encodeURIComponent(`${shop.address}, ${shop.city} - ${shop.state}`);
-                                            window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
-                                        }}
-                                        className="whitespace-nowrap z-10 relative"
-                                    >
-                                        <Navigation size={14} className="mr-1" />
-                                        Como chegar
-                                    </Button>
+                                    <div className="flex flex-col gap-2">
+                                        <div
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="z-10 relative"
+                                        >
+                                            <ShareButton
+                                                type="shop"
+                                                title={shop.name}
+                                                description={`${shop.address}, ${shop.city} - ${shop.state}\n📞 ${shop.phone}`}
+                                            />
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                const address = encodeURIComponent(`${shop.address}, ${shop.city} - ${shop.state}`);
+                                                window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+                                            }}
+                                            className="whitespace-nowrap z-10 relative"
+                                        >
+                                            <Navigation size={14} className="mr-1" />
+                                            Como chegar
+                                        </Button>
+                                    </div>
                                 </div>
 
                                 {/* Selected Indicator */}

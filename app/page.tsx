@@ -5,6 +5,8 @@ import { Card, Button, Badge, Loading, Modal } from '@/components/ui';
 import { MapPin, ShoppingBag, Heart, Star, ChevronRight, User, ShoppingCart, Instagram } from 'lucide-react';
 import Link from 'next/link';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import ImageGallery from '@/components/ImageGallery';
+import ShareButton from '@/components/ShareButton';
 
 interface Product {
   id: string;
@@ -230,25 +232,18 @@ export default function HomePage() {
       >
         {selectedProduct && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="aspect-[3/4] rounded-lg overflow-hidden bg-gray-100">
-                <img
-                  src={selectedProduct.image_url}
-                  alt={selectedProduct.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {selectedProduct.images?.slice(0, 3).map((img: string, idx: number) => (
-                  <div key={idx} className="aspect-square rounded-md overflow-hidden bg-gray-100 border border-gray-200">
-                    <img src={img} alt={`${selectedProduct.name} ${idx}`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Image Gallery with Zoom & Carousel */}
+            <ImageGallery
+              images={selectedProduct.images && selectedProduct.images.length > 0
+                ? selectedProduct.images
+                : [selectedProduct.image_url]}
+              productName={selectedProduct.name}
+            />
+
+            {/* Product Details */}
             <div className="flex flex-col h-full">
               <div className="flex-1">
-                <p className="text-2xl font-bold text-lale-orange mb-2">
+                <p className="text-2xl font-bold text-lale-orange mb-4">
                   R$ {Number(selectedProduct.price).toFixed(2)}
                 </p>
                 <div className="mb-4">
@@ -271,6 +266,14 @@ export default function HomePage() {
                 )}
               </div>
               <div className="mt-6 space-y-3">
+                {/* Share Button */}
+                <ShareButton
+                  type="product"
+                  title={selectedProduct.name}
+                  description={`R$ ${Number(selectedProduct.price).toFixed(2)}`}
+                  imageUrl={selectedProduct.image_url}
+                />
+
                 <Link href="/cart" className="block" onClick={() => setSelectedProduct(null)}>
                   <Button variant="primary" className="w-full py-3 text-lg">
                     Adicionar ao Carrinho
