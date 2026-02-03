@@ -182,9 +182,9 @@ export default function LocationPage() {
                                             <p>📞 {shop.phone}</p>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end gap-2">
+                                    <div className="flex flex-col items-end justify-between gap-4 min-h-[100px]">
                                         {selectedShop === shop.id && (
-                                            <div className="bg-lale-orange text-white rounded-full p-2 mb-2">
+                                            <div className="bg-lale-orange text-white rounded-full p-2">
                                                 <Check size={20} />
                                             </div>
                                         )}
@@ -196,7 +196,7 @@ export default function LocationPage() {
                                                 const address = encodeURIComponent(`${shop.address}, ${shop.city} - ${shop.state}`);
                                                 window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
                                             }}
-                                            className="whitespace-nowrap z-10 relative"
+                                            className="whitespace-nowrap z-10 relative mt-auto"
                                         >
                                             <Navigation size={14} className="mr-1" />
                                             Como chegar
