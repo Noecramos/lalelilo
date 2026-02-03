@@ -62,7 +62,7 @@ export default function ProductsPage() {
         <div className="min-h-screen bg-lale-bg-pink">
             {/* Floating Back Button */}
             <Link href="/">
-                <button className="fixed top-4 left-4 z-50 bg-white text-lale-orange rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110">
+                <button className="fixed bottom-4 left-4 z-50 bg-white text-lale-orange rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110">
                     <ArrowLeft size={24} />
                 </button>
             </Link>
