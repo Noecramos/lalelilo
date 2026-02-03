@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Loading, Modal } from '@/components/ui';
-import { MapPin, ShoppingBag, Heart, Star, ChevronRight, User, ShoppingCart, Instagram } from 'lucide-react';
+import { MapPin, ShoppingBag, Heart, Star, ChevronRight, User, ShoppingCart, Instagram, Share2 } from 'lucide-react';
 import Link from 'next/link';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ImageGallery from '@/components/ImageGallery';
@@ -124,6 +124,26 @@ export default function HomePage() {
             <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 group-hover:text-lale-pink transition-colors">Conta</span>
           </div>
         </Link>
+
+        {/* Share Button */}
+        <button
+          onClick={() => {
+            const message = encodeURIComponent(
+              `🛍️ *Lalelilo Moda Infantil*\n\n` +
+              `Roupa de Criança com Amor e Estilo\n\n` +
+              `✨ Confira nossa loja online!\n\n` +
+              `🔗 ${window.location.origin}`
+            );
+            window.open(`https://wa.me/?text=${message}`, '_blank');
+          }}
+          title="Compartilhar"
+          className="group flex flex-col items-center gap-1"
+        >
+          <div className="w-14 h-14 rounded-full bg-white shadow-md flex items-center justify-center text-green-600 border border-gray-100 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:text-green-500 group-hover:border-green-500/30">
+            <Share2 size={28} />
+          </div>
+          <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 group-hover:text-green-600 transition-colors">Compartilhar</span>
+        </button>
 
         <Link href="/cart" title="Carrinho">
           <div className="group flex flex-col items-center gap-1">
