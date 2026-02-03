@@ -161,48 +161,51 @@ export default function LocationPage() {
                                     }`}
                                 onClick={() => selectShop(shop.id)}
                             >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <h3 className="font-semibold text-gray-900 text-lg">{shop.name}</h3>
-                                            {shop.is_open ? (
-                                                <Badge variant="success">Aberto</Badge>
-                                            ) : (
-                                                <Badge variant="danger">Fechado</Badge>
-                                            )}
-                                            {shop.distance && (
-                                                <Badge variant="info">{shop.distance} km</Badge>
-                                            )}
-                                        </div>
-                                        <div className="space-y-1 text-sm text-gray-600">
-                                            <p className="flex items-center gap-2">
-                                                <MapPin size={14} />
-                                                {shop.address}, {shop.city} - {shop.state}
-                                            </p>
-                                            <p>📞 {shop.phone}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col items-end justify-between gap-4 min-h-[100px]">
-                                        {selectedShop === shop.id && (
-                                            <div className="bg-lale-orange text-white rounded-full p-2">
-                                                <Check size={20} />
-                                            </div>
+                                {/* Top Row: Name + Badges */}
+                                <div className="flex items-start justify-between mb-3">
+                                    <h3 className="font-semibold text-gray-900 text-lg">{shop.name}</h3>
+                                    <div className="flex items-center gap-2">
+                                        {shop.is_open ? (
+                                            <Badge variant="success">Aberto</Badge>
+                                        ) : (
+                                            <Badge variant="danger">Fechado</Badge>
                                         )}
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                const address = encodeURIComponent(`${shop.address}, ${shop.city} - ${shop.state}`);
-                                                window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
-                                            }}
-                                            className="whitespace-nowrap z-10 relative mt-auto"
-                                        >
-                                            <Navigation size={14} className="mr-1" />
-                                            Como chegar
-                                        </Button>
+                                        {shop.distance && (
+                                            <Badge variant="info">{shop.distance} km</Badge>
+                                        )}
                                     </div>
                                 </div>
+
+                                {/* Bottom Row: Address/Phone + Button */}
+                                <div className="flex items-end justify-between gap-4">
+                                    <div className="flex-1 space-y-1 text-sm text-gray-600">
+                                        <p className="flex items-center gap-2">
+                                            <MapPin size={14} />
+                                            {shop.address}, {shop.city} - {shop.state}
+                                        </p>
+                                        <p>📞 {shop.phone}</p>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            const address = encodeURIComponent(`${shop.address}, ${shop.city} - ${shop.state}`);
+                                            window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
+                                        }}
+                                        className="whitespace-nowrap z-10 relative"
+                                    >
+                                        <Navigation size={14} className="mr-1" />
+                                        Como chegar
+                                    </Button>
+                                </div>
+
+                                {/* Selected Indicator */}
+                                {selectedShop === shop.id && (
+                                    <div className="absolute top-4 right-4 bg-lale-orange text-white rounded-full p-2">
+                                        <Check size={16} />
+                                    </div>
+                                )}
                             </Card>
                         ))}
                     </div>
