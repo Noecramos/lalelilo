@@ -171,13 +171,38 @@ export default function CRMPage() {
                 </div>
             )}
 
+            {/* Unassigned Leads Alert */}
+            {metrics && metrics.unassigned_leads > 0 && (
+                <Card padding="md" className="mb-6 border-2 border-orange-200 bg-orange-50">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-orange-200">
+                                <Building2 size={20} className="text-orange-700" />
+                            </div>
+                            <div>
+                                <p className="font-semibold text-orange-900">
+                                    {metrics.unassigned_leads} lead{metrics.unassigned_leads > 1 ? 's' : ''} não atribuído{metrics.unassigned_leads > 1 ? 's' : ''}
+                                </p>
+                                <p className="text-sm text-orange-700">Atribua leads às lojas para melhor atendimento</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => window.location.href = '/super-admin/crm/assign'}
+                            className="px-4 py-2 bg-lale-orange text-white rounded-lg font-medium hover:opacity-90 transition-opacity"
+                        >
+                            Atribuir Agora
+                        </button>
+                    </div>
+                </Card>
+            )}
+
             {/* View Tabs */}
             <div className="flex items-center gap-2 mb-4">
                 <button
                     onClick={() => setView('leads')}
                     className={`px-4 py-2 rounded-lg font-medium transition-all ${view === 'leads'
-                            ? 'bg-lale-orange text-white shadow-md'
-                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                        ? 'bg-lale-orange text-white shadow-md'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                 >
                     Leads ({metrics?.total_leads || 0})
@@ -185,8 +210,8 @@ export default function CRMPage() {
                 <button
                     onClick={() => setView('customers')}
                     className={`px-4 py-2 rounded-lg font-medium transition-all ${view === 'customers'
-                            ? 'bg-lale-orange text-white shadow-md'
-                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                        ? 'bg-lale-orange text-white shadow-md'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                 >
                     Clientes ({(metrics?.customers || 0) + (metrics?.vips || 0)})
@@ -194,8 +219,8 @@ export default function CRMPage() {
                 <button
                     onClick={() => setView('all')}
                     className={`px-4 py-2 rounded-lg font-medium transition-all ${view === 'all'
-                            ? 'bg-lale-orange text-white shadow-md'
-                            : 'bg-white text-gray-600 hover:bg-gray-50'
+                        ? 'bg-lale-orange text-white shadow-md'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
                 >
                     Todos ({contacts.length})
@@ -235,7 +260,7 @@ export default function CRMPage() {
                             const SourceIcon = sourceIcons[contact.source as keyof typeof sourceIcons] || UserPlus;
                             const statusCfg = statusConfig[contact.status] || statusConfig.lead;
                             return (
-                                <div key={contact.id} className="px-5 py-4 hover:bg-gray-50 transition-colors">
+                                <div key={contact.id} className="px-5 py-4 hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => window.location.href = `/super-admin/crm/${contact.id}`}>
                                     <div className="flex items-start gap-4">
                                         {/* Avatar/Icon */}
                                         <div className="p-3 rounded-xl bg-gradient-to-br from-lale-pink to-lale-orange text-white">
@@ -300,7 +325,7 @@ export default function CRMPage() {
                                         </div>
 
                                         {/* Actions */}
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                             <select
                                                 value={contact.status}
                                                 onChange={e => updateContactStatus(contact.id, e.target.value)}
@@ -312,9 +337,6 @@ export default function CRMPage() {
                                                 <option value="vip">VIP</option>
                                                 <option value="inactive">Inativo</option>
                                             </select>
-                                            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                                                <MessageSquare size={16} className="text-gray-400" />
-                                            </button>
                                             <ChevronRight size={16} className="text-gray-300" />
                                         </div>
                                     </div>
