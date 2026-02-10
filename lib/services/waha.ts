@@ -71,8 +71,8 @@ async function wahaFetch(endpoint: string, body: Record<string, unknown>): Promi
  */
 export async function sendText({ phone, text, session }: SendTextParams): Promise<WahaResponse> {
     const chatId = `${formatPhone(phone)}@c.us`;
-    return wahaFetch('/api/sendText', {
-        session: session || WAHA_SESSION,
+    const sessionName = session || WAHA_SESSION;
+    return wahaFetch(`/api/${sessionName}/sendText`, {
         chatId,
         text,
     });
@@ -83,8 +83,8 @@ export async function sendText({ phone, text, session }: SendTextParams): Promis
  */
 export async function sendImage({ phone, imageUrl, caption, session }: SendImageParams): Promise<WahaResponse> {
     const chatId = `${formatPhone(phone)}@c.us`;
-    return wahaFetch('/api/sendImage', {
-        session: session || WAHA_SESSION,
+    const sessionName = session || WAHA_SESSION;
+    return wahaFetch(`/api/${sessionName}/sendImage`, {
         chatId,
         file: { url: imageUrl },
         caption: caption || '',
@@ -96,8 +96,8 @@ export async function sendImage({ phone, imageUrl, caption, session }: SendImage
  */
 export async function sendDocument({ phone, documentUrl, fileName, caption, session }: SendDocumentParams): Promise<WahaResponse> {
     const chatId = `${formatPhone(phone)}@c.us`;
-    return wahaFetch('/api/sendFile', {
-        session: session || WAHA_SESSION,
+    const sessionName = session || WAHA_SESSION;
+    return wahaFetch(`/api/${sessionName}/sendFile`, {
         chatId,
         file: { url: documentUrl },
         fileName: fileName || 'document',
