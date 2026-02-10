@@ -81,7 +81,11 @@ export default function SuperAdminLayout({
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-4 space-y-1 pb-32 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 4rem)' }}>
+                <nav className="p-4 space-y-1 pb-32 overflow-y-auto scrollbar-hide" style={{ 
+                    maxHeight: 'calc(100vh - 4rem)',
+                    maskImage: 'linear-gradient(to bottom, black calc(100% - 140px), transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 140px), transparent 100%)'
+                }}>
                     {navigation.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.href);
@@ -126,8 +130,8 @@ export default function SuperAdminLayout({
                 </nav>
 
                 {/* Noviapp Branding */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-20 text-center">
-                    <div className="bg-white/10 rounded-lg p-3 text-xs text-white/80">
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-20 text-center bg-gradient-to-b from-transparent via-lale-orange to-lale-orange pointer-events-none">
+                    <div className="bg-white/10 rounded-lg p-3 text-xs text-white/80 pointer-events-auto">
                         <p>© 2026 Noviapp Sistemas IA.</p>
                         <p>Todos os direitos reservados.</p>
                         <a href="https://www.noviapp.com.br" target="_blank" rel="noopener noreferrer" className="block my-1 text-white hover:underline">
