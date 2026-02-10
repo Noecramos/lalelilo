@@ -37,7 +37,7 @@ export async function analyzeMessage(
 
         return {
             text: parsed.text,
-            intent: parsed.intent,
+            intent: parsed.intent as 'shop_selection' | 'product_inquiry' | 'general' | 'order_status',
             suggestedShopId: parsed.suggestedShopId,
             confidence: parsed.confidence
         };
