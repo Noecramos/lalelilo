@@ -247,7 +247,7 @@ async function getOrCreateConversationState(
     const supabase = getSupabase();
 
     // Check for existing active state
-    const { data: existing } = await supabase
+    const { data: existing, error: fetchError } = await supabase
         .from('conversation_states')
         .select('*')
         .eq('phone', phone)
@@ -256,14 +256,14 @@ async function getOrCreateConversationState(
         .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle(); // Use maybeSingle() instead of single()
 
-    if (existing) {
+    if (existing && !fetchError) {
         return existing as ConversationState;
     }
 
     // Create new state
-    const { data: newState } = await supabase
+    const { data: newState, error: insertError } = await supabase
         .from('conversation_states')
         .insert({
             phone,
@@ -273,6 +273,10 @@ async function getOrCreateConversationState(
         })
         .select()
         .single();
+
+    if (insertError || !newState) {
+        throw new Error(`Failed to create conversation state: ${insertError?.message}`);
+    }
 
     return newState as ConversationState;
 }
