@@ -21,6 +21,13 @@ export async function GET(req: NextRequest) {
         return NextResponse.json(data);
     }
 
+    if (action === 'lead_metrics') {
+        const shopId = searchParams.get('shop_id') || undefined;
+        const { getLeadMetrics } = await import('@/lib/services/crm');
+        const { data } = await getLeadMetrics(clientId, shopId);
+        return NextResponse.json(data);
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
 }
 
@@ -45,6 +52,38 @@ export async function POST(req: NextRequest) {
         const { data, error } = await upsertContact(body);
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });
         return NextResponse.json(data, { status: 201 });
+    }
+
+    if (action === 'find_or_create_contact') {
+        const { findOrCreateContact } = await import('@/lib/services/crm');
+        const { data, error, isNew } = await findOrCreateContact(body);
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ contact: data, isNew }, { status: isNew ? 201 : 200 });
+    }
+
+    if (action === 'qualify_lead') {
+        const { qualifyLead } = await import('@/lib/services/crm');
+        const { contactId } = body;
+        if (!contactId) return NextResponse.json({ error: 'contactId required' }, { status: 400 });
+        const { data, error } = await qualifyLead(contactId);
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json(data);
+    }
+
+    if (action === 'assign_lead') {
+        const { assignLeadToShop } = await import('@/lib/services/crm');
+        const { data, error } = await assignLeadToShop(body);
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json(data);
+    }
+
+    if (action === 'update_status') {
+        const { updateContactStatus } = await import('@/lib/services/crm');
+        const { contactId, status } = body;
+        if (!contactId || !status) return NextResponse.json({ error: 'contactId and status required' }, { status: 400 });
+        const { data, error } = await updateContactStatus(contactId, status);
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json(data);
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
