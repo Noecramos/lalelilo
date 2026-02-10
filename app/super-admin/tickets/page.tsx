@@ -182,11 +182,18 @@ export default function TicketsPage() {
                                 onChange={e => setNewTicket(prev => ({ ...prev, category: e.target.value }))}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                             >
-                                <option value="operational">Operacional</option>
-                                <option value="maintenance">Manutenção</option>
-                                <option value="inventory">Estoque</option>
-                                <option value="customer_complaint">Reclamação</option>
-                                <option value="hr">RH</option>
+                                <option value="eletrica">⚡ Elétrica</option>
+                                <option value="tecnologia">💻 Tecnologia</option>
+                                <option value="estrutura">🏗️ Estrutura</option>
+                                <option value="mobiliario">🪑 Mobiliário</option>
+                                <option value="climatizacao">🌡️ Climatização</option>
+                                <option value="hidraulica">🚰 Hidráulica</option>
+                                <option value="seguranca">🔒 Segurança</option>
+                                <option value="pintura">🎨 Pintura</option>
+                                <option value="limpeza">🧹 Limpeza Especial</option>
+                                <option value="equipamentos">📦 Equipamentos</option>
+                                <option value="portas_janelas">🚪 Portas/Janelas</option>
+                                <option value="outros">🛠️ Outros</option>
                             </select>
                         </div>
                     </div>
@@ -274,20 +281,22 @@ export default function TicketsPage() {
             </Card>
 
             {/* Priority Summary */}
-            {tickets.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {Object.entries(priorityConfig).map(([key, cfg]) => {
-                        const PIcon = cfg.icon;
-                        return (
-                            <div key={key} className={`p-3 rounded-lg ${cfg.color} text-center`}>
-                                <PIcon size={18} className="mx-auto mb-1" />
-                                <p className="text-lg font-bold">{countByPriority(key)}</p>
-                                <p className="text-xs font-medium">{cfg.label}</p>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-        </div>
+            {
+                tickets.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {Object.entries(priorityConfig).map(([key, cfg]) => {
+                            const PIcon = cfg.icon;
+                            return (
+                                <div key={key} className={`p-3 rounded-lg ${cfg.color} text-center`}>
+                                    <PIcon size={18} className="mx-auto mb-1" />
+                                    <p className="text-lg font-bold">{countByPriority(key)}</p>
+                                    <p className="text-xs font-medium">{cfg.label}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )
+            }
+        </div >
     );
 }
