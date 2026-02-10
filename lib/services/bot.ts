@@ -102,7 +102,7 @@ async function startShopSelectionFlow(
         .from('shops')
         .select('id, name, city')
         .eq('client_id', CLIENT_ID)
-        .eq('active', true)
+        .eq('is_active', true)
         .order('name');
 
     if (!shops || shops.length === 0) {
