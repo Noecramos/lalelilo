@@ -267,10 +267,10 @@ export default function ShopsManagementPage() {
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
-                                            R$ {shop.revenue_30d.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                            R$ {(shop.revenue_30d || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-center text-gray-900">
-                                            {shop.orders_30d}
+                                            {shop.orders_30d || 0}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-center">
                                             <Badge variant={shop.is_active ? 'success' : 'default'}>
