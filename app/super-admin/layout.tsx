@@ -12,7 +12,11 @@ import {
     X,
     Crown,
     MessageSquare,
-    Phone
+    Phone,
+    Trophy,
+    ClipboardCheck,
+    TicketCheck,
+    Users
 } from 'lucide-react';
 
 export default function SuperAdminLayout({
@@ -30,6 +34,12 @@ export default function SuperAdminLayout({
         { name: 'Mensagens', href: '/super-admin/messages', icon: MessageSquare },
         { name: 'Analytics', href: '/super-admin/analytics', icon: BarChart3 },
         { name: 'Relatórios', href: '/super-admin/reports', icon: FileText },
+        { name: 'divider', href: '', icon: LayoutDashboard },
+        { name: 'Gamificação', href: '/super-admin/gamification', icon: Trophy },
+        { name: 'Checklists', href: '/super-admin/checklists', icon: ClipboardCheck },
+        { name: 'Tickets', href: '/super-admin/tickets', icon: TicketCheck },
+        { name: 'Equipe', href: '/super-admin/team', icon: Users },
+        { name: 'divider2', href: '', icon: LayoutDashboard },
         { name: 'Suporte', href: 'https://wa.me/558183920320', icon: Phone, external: true },
     ];
 
@@ -74,6 +84,10 @@ export default function SuperAdminLayout({
                     {navigation.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.href);
+
+                        if (item.name.startsWith('divider')) {
+                            return <div key={item.name} className="border-t border-white border-opacity-20 my-3" />;
+                        }
 
                         if (item.external) {
                             return (
