@@ -27,11 +27,13 @@ CREATE INDEX IF NOT EXISTS idx_contacts_assigned_shop ON contacts(assigned_shop_
 CREATE INDEX IF NOT EXISTS idx_contacts_first_contact ON contacts(first_contact_date);
 CREATE INDEX IF NOT EXISTS idx_contacts_last_contact ON contacts(last_contact_date);
 
--- Add lead tracking to orders
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS converted_from_lead BOOLEAN DEFAULT FALSE;
-ALTER TABLE orders ADD COLUMN IF NOT EXISTS lead_source TEXT;
+-- Add lead tracking to orders (will be enabled when orders schema is updated)
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS converted_from_lead BOOLEAN DEFAULT FALSE;
+-- ALTER TABLE orders ADD COLUMN IF NOT EXISTS lead_source TEXT;
 
 -- Create function to auto-update contact stats when order is placed
+-- (Disabled until orders table has contact_id column)
+/*
 CREATE OR REPLACE FUNCTION update_contact_stats_on_order()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -65,8 +67,11 @@ CREATE TRIGGER update_contact_stats_on_order_trigger
   BEFORE INSERT ON orders
   FOR EACH ROW
   EXECUTE FUNCTION update_contact_stats_on_order();
+*/
 
 -- Create function to auto-tag contacts based on product categories
+-- (Disabled until orders table has contact_id column)
+/*
 CREATE OR REPLACE FUNCTION auto_tag_contact_by_category()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -128,6 +133,8 @@ CREATE TRIGGER auto_tag_contact_trigger
   AFTER INSERT ON orders
   FOR EACH ROW
   EXECUTE FUNCTION auto_tag_contact_by_category();
+*/
+
 
 -- Create view for lead conversion metrics by shop
 CREATE OR REPLACE VIEW shop_lead_metrics AS
@@ -136,16 +143,9 @@ SELECT
   s.name as shop_name,
   COUNT(DISTINCT c.id) FILTER (WHERE c.status IN ('lead', 'qualified_lead')) as active_leads,
   COUNT(DISTINCT c.id) FILTER (WHERE c.status IN ('customer', 'vip')) as total_customers,
-  COUNT(DISTINCT o.id) FILTER (WHERE o.converted_from_lead = TRUE) as converted_leads,
-  ROUND(
-    COUNT(DISTINCT o.id) FILTER (WHERE o.converted_from_lead = TRUE)::numeric / 
-    NULLIF(COUNT(DISTINCT c.id) FILTER (WHERE c.status IN ('lead', 'qualified_lead')), 0) * 100, 
-    2
-  ) as conversion_rate,
   ROUND(AVG(c.lifetime_value) FILTER (WHERE c.status IN ('customer', 'vip')), 2) as avg_customer_value
 FROM shops s
 LEFT JOIN contacts c ON c.assigned_shop_id = s.id
-LEFT JOIN orders o ON o.contact_id = c.id
 GROUP BY s.id, s.name;
 
 COMMENT ON VIEW shop_lead_metrics IS 'Lead conversion and customer metrics per shop';
