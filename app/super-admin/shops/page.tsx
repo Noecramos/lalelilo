@@ -23,6 +23,15 @@ export default function ShopsManagementPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
     const [editingShop, setEditingShop] = useState<Shop | null>(null);
+    const [isCreating, setIsCreating] = useState(false);
+    const [newShop, setNewShop] = useState<Partial<Shop>>({
+        name: '',
+        slug: '',
+        city: '',
+        state: '',
+        phone: '',
+        is_active: true
+    });
 
     useEffect(() => {
         fetchShops();
@@ -31,32 +40,46 @@ export default function ShopsManagementPage() {
     const fetchShops = async () => {
         setLoading(true);
         try {
-            // TODO: Replace with actual API call
-            setTimeout(() => {
-                setShops([
-                    { id: '1', name: 'Lalelilo Centro', slug: 'centro', city: 'Recife', state: 'PE', phone: '(81) 3333-4444', is_active: true, revenue_30d: 15200.00, orders_30d: 145 },
-                    { id: '2', name: 'Lalelilo Boa Viagem', slug: 'boa-viagem', city: 'Recife', state: 'PE', phone: '(81) 3333-5555', is_active: true, revenue_30d: 14800.00, orders_30d: 138 },
-                    { id: '3', name: 'Lalelilo Shopping', slug: 'shopping', city: 'Recife', state: 'PE', phone: '(81) 3333-6666', is_active: true, revenue_30d: 13500.00, orders_30d: 125 },
-                    { id: '4', name: 'Lalelilo Olinda', slug: 'olinda', city: 'Olinda', state: 'PE', phone: '(81) 3333-7777', is_active: true, revenue_30d: 12300.00, orders_30d: 118 },
-                    { id: '5', name: 'Lalelilo Jaboatão', slug: 'jaboatao', city: 'Jaboatão', state: 'PE', phone: '(81) 3333-8888', is_active: false, revenue_30d: 0, orders_30d: 0 }
-                ]);
-                setLoading(false);
-            }, 1000);
+            const response = await fetch('/api/shops');
+            if (response.ok) {
+                const data = await response.json();
+                setShops(data.shops || []);
+            }
         } catch (error) {
             console.error('Error fetching shops:', error);
+        } finally {
             setLoading(false);
+        }
+    };
+
+    const createShop = async () => {
+        try {
+            const response = await fetch('/api/shops', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newShop),
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to create shop');
+            }
+
+            await fetchShops();
+            setIsCreating(false);
+            setNewShop({ name: '', slug: '', city: '', state: '', phone: '', is_active: true });
+            alert('Loja criada com sucesso!');
+        } catch (error) {
+            console.error('Error creating shop:', error);
+            alert(error instanceof Error ? error.message : 'Erro ao criar loja');
         }
     };
 
     const saveShop = async (shop: Shop) => {
         try {
-            // TODO: Uncomment when database is connected
-            /*
             const response = await fetch(`/api/shops/${shop.id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: shop.name,
                     slug: shop.slug,
@@ -68,22 +91,12 @@ export default function ShopsManagementPage() {
             });
 
             if (!response.ok) {
-                const contentType = response.headers.get('content-type');
-                if (contentType?.includes('application/json')) {
-                    const data = await response.json();
-                    throw new Error(data.error || 'Failed to update shop');
-                }
-                throw new Error(`Server error: ${response.status}`);
+                const data = await response.json();
+                throw new Error(data.error || 'Failed to update shop');
             }
 
-            const data = await response.json();
-            */
-
-            // Update local state
-            setShops(shops.map(s => s.id === shop.id ? shop : s));
+            await fetchShops();
             setEditingShop(null);
-
-            // Show success message
             alert('Loja atualizada com sucesso!');
         } catch (error) {
             console.error('Error saving shop:', error);
@@ -113,7 +126,7 @@ export default function ShopsManagementPage() {
                         Gerencie todas as {shops.length} lojas Lalelilo
                     </p>
                 </div>
-                <Button variant="primary">
+                <Button variant="primary" onClick={() => setIsCreating(true)}>
                     <Plus size={16} className="mr-2" />
                     Nova Loja
                 </Button>
@@ -357,6 +370,74 @@ export default function ShopsManagementPage() {
                                 className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                             />
                             <label htmlFor="is_active" className="text-sm text-gray-700">
+                                Loja Ativa
+                            </label>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+
+            {/* Create Shop Modal */}
+            {isCreating && (
+                <Modal
+                    isOpen={isCreating}
+                    onClose={() => setIsCreating(false)}
+                    title="Nova Loja"
+                    size="lg"
+                    footer={
+                        <>
+                            <Button variant="outline" onClick={() => setIsCreating(false)}>
+                                Cancelar
+                            </Button>
+                            <Button variant="primary" onClick={createShop}>
+                                Criar Loja
+                            </Button>
+                        </>
+                    }
+                >
+                    <div className="space-y-4">
+                        <Input
+                            label="Nome da Loja"
+                            value={newShop.name || ''}
+                            onChange={(e) => setNewShop({ ...newShop, name: e.target.value })}
+                            required
+                        />
+                        <Input
+                            label="Slug (URL)"
+                            value={newShop.slug || ''}
+                            onChange={(e) => setNewShop({ ...newShop, slug: e.target.value })}
+                            required
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label="Cidade"
+                                value={newShop.city || ''}
+                                onChange={(e) => setNewShop({ ...newShop, city: e.target.value })}
+                                required
+                            />
+                            <Input
+                                label="Estado"
+                                value={newShop.state || ''}
+                                onChange={(e) => setNewShop({ ...newShop, state: e.target.value })}
+                                maxLength={2}
+                                required
+                            />
+                        </div>
+                        <Input
+                            label="Telefone"
+                            value={newShop.phone || ''}
+                            onChange={(e) => setNewShop({ ...newShop, phone: e.target.value })}
+                            required
+                        />
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id="new_is_active"
+                                checked={newShop.is_active}
+                                onChange={(e) => setNewShop({ ...newShop, is_active: e.target.checked })}
+                                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                            />
+                            <label htmlFor="new_is_active" className="text-sm text-gray-700">
                                 Loja Ativa
                             </label>
                         </div>
