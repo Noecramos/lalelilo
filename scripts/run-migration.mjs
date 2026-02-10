@@ -8,8 +8,17 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const SUPABASE_URL = 'https://lecgrltttoomuodptfol.supabase.co';
-const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlY2dybHR0dG9vbXVvZHB0Zm9sIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2OTgwMDQ0MiwiZXhwIjoyMDg1Mzc2NDQyfQ.8cgyJoGJlOUlrM-ptPgz4I7gqRcZXfPEylR1xi7rTIc';
+// Load from environment variables
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    console.error('❌ Missing environment variables!');
+    console.error('   Please set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+    console.error('   You can load them from .env.local:');
+    console.error('   node -r dotenv/config scripts/run-migration.mjs');
+    process.exit(1);
+}
 
 const headers = {
     'Content-Type': 'application/json',
