@@ -81,7 +81,7 @@ export default function SuperAdminLayout({
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-4 space-y-1">
+                <nav className="p-4 space-y-1 pb-32 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 4rem)' }}>
                     {navigation.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.href);
