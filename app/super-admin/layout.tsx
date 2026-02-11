@@ -35,12 +35,10 @@ export default function SuperAdminLayout({
         { name: 'Mensagens', href: '/super-admin/messages', icon: MessageSquare },
         { name: 'Analytics', href: '/super-admin/analytics', icon: BarChart3 },
         { name: 'Relatórios', href: '/super-admin/reports', icon: FileText },
-        { name: 'divider', href: '', icon: LayoutDashboard },
         { name: 'Gamificação', href: '/super-admin/gamification', icon: Trophy },
         { name: 'Checklists', href: '/super-admin/checklists', icon: ClipboardCheck },
         { name: 'Tickets', href: '/super-admin/tickets', icon: TicketCheck },
         { name: 'Equipe', href: '/super-admin/team', icon: Users },
-        { name: 'divider2', href: '', icon: LayoutDashboard },
         { name: 'Suporte', href: 'https://wa.me/558183920320', icon: Phone, external: true },
     ];
 
@@ -81,7 +79,7 @@ export default function SuperAdminLayout({
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-4 space-y-1 pb-32 overflow-y-auto scrollbar-hide" style={{ 
+                <nav className="p-4 space-y-1 pb-32 overflow-y-auto scrollbar-hide" style={{
                     maxHeight: 'calc(100vh - 4rem)',
                     maskImage: 'linear-gradient(to bottom, black calc(100% - 140px), transparent 100%)',
                     WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 140px), transparent 100%)'
@@ -91,7 +89,7 @@ export default function SuperAdminLayout({
                         const active = isActive(item.href);
 
                         if (item.name.startsWith('divider')) {
-                            return <div key={item.name} className="border-t border-white border-opacity-20 my-3" />;
+                            return null; // Remove dividers
                         }
 
                         if (item.external) {

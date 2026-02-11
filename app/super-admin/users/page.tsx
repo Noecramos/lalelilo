@@ -127,8 +127,14 @@ export default function SuperAdminUsersPage() {
                             key: 'actions',
                             header: 'Ações',
                             align: 'right',
-                            render: () => (
-                                <Button variant="outline" size="sm">Ver Perfil</Button>
+                            render: (user) => (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => window.location.href = `/super-admin/users/${user.id}`}
+                                >
+                                    Ver Perfil
+                                </Button>
                             )
                         }
                     ]}

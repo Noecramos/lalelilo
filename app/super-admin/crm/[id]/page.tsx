@@ -41,10 +41,12 @@ interface Order {
 
 interface Message {
     id: string;
-    body: string;
-    direction: 'inbound' | 'outbound';
+    content: string;
+    sender_type: 'contact' | 'agent';
+    channel_type: string;
     created_at: string;
-    channel: string;
+    metadata: any;
+    status: string;
 }
 
 interface Event {
@@ -106,9 +108,10 @@ export default function ContactDetailPage() {
             // const ordersRes = await fetch(`/api/ecommerce?action=orders&contact_id=${contactId}`);
             // setOrders(await ordersRes.json());
 
-            // Fetch messages (mock for now)
-            // const messagesRes = await fetch(`/api/messaging?action=history&contact_id=${contactId}`);
-            // setMessages(await messagesRes.json());
+            // Fetch messages
+            const messagesRes = await fetch(`/api/crm?action=contact_messages&client_id=${CLIENT_ID}&contact_id=${contactId}`);
+            const messagesData = await messagesRes.json();
+            setMessages(Array.isArray(messagesData) ? messagesData : []);
 
             // Fetch events
             // const eventsRes = await fetch(`/api/crm?action=events&contact_id=${contactId}`);
@@ -276,8 +279,8 @@ export default function ContactDetailPage() {
                         key={tab}
                         onClick={() => setActiveTab(tab as any)}
                         className={`px-4 py-2 font-medium transition-colors ${activeTab === tab
-                                ? 'text-lale-orange border-b-2 border-lale-orange'
-                                : 'text-gray-500 hover:text-gray-700'
+                            ? 'text-lale-orange border-b-2 border-lale-orange'
+                            : 'text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         {tab === 'overview' && 'Visão Geral'}
@@ -475,11 +478,51 @@ export default function ContactDetailPage() {
 
             {activeTab === 'messages' && (
                 <Card padding="md">
-                    <h3 className="font-semibold text-gray-900 mb-4">Histórico de Mensagens</h3>
-                    <div className="text-center py-12">
-                        <MessageSquare size={48} className="text-gray-200 mx-auto mb-3" />
-                        <p className="text-gray-500">Histórico de mensagens será exibido aqui</p>
-                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <MessageSquare size={18} />
+                        Histórico de Mensagens
+                        <span className="text-sm font-normal text-gray-400 ml-2">({messages.length})</span>
+                    </h3>
+                    {messages.length === 0 ? (
+                        <div className="text-center py-12">
+                            <MessageSquare size={48} className="text-gray-200 mx-auto mb-3" />
+                            <p className="text-gray-500">Nenhuma mensagem ainda</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                            {messages.map(msg => {
+                                const isAgent = msg.sender_type === 'agent';
+                                const channelColors: Record<string, string> = {
+                                    facebook: 'bg-blue-500',
+                                    instagram: 'bg-pink-500',
+                                    whatsapp: 'bg-green-500',
+                                };
+                                const channelBg = channelColors[msg.channel_type] || 'bg-gray-500';
+                                return (
+                                    <div
+                                        key={msg.id}
+                                        className={`flex ${isAgent ? 'justify-end' : 'justify-start'}`}
+                                    >
+                                        <div
+                                            className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${isAgent
+                                                    ? 'bg-lale-orange text-white rounded-br-md'
+                                                    : 'bg-gray-100 text-gray-900 rounded-bl-md'
+                                                }`}
+                                        >
+                                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                            <div className={`flex items-center gap-2 mt-1 text-xs ${isAgent ? 'text-orange-100' : 'text-gray-400'
+                                                }`}>
+                                                <span className={`inline-block w-2 h-2 rounded-full ${channelBg}`} />
+                                                <span className="capitalize">{msg.channel_type}</span>
+                                                <span>•</span>
+                                                <span>{new Date(msg.created_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </Card>
             )}
 

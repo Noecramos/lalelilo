@@ -1,6 +1,7 @@
-// API: CRM (Events, Contacts, Birthday Processing)
+// API: CRM (Events, Contacts, Birthday Processing, Conversations)
 import { NextRequest, NextResponse } from 'next/server';
 import { getUpcomingEvents, processBirthdayNotifications, createCRMEvent, getContacts, upsertContact } from '@/lib/services/crm';
+import { supabase } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -19,6 +20,35 @@ export async function GET(req: NextRequest) {
         const { data, error } = await getContacts(clientId, search);
         if (error) return NextResponse.json({ error: error.message }, { status: 500 });
         return NextResponse.json(data);
+    }
+
+    if (action === 'contact_messages') {
+        const contactId = searchParams.get('contact_id');
+        if (!contactId) return NextResponse.json({ error: 'contact_id required' }, { status: 400 });
+
+        const { data: messages, error } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('contact_id', contactId)
+            .order('created_at', { ascending: true })
+            .limit(100);
+
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json(messages || []);
+    }
+
+    if (action === 'contact_conversations') {
+        const contactId = searchParams.get('contact_id');
+        if (!contactId) return NextResponse.json({ error: 'contact_id required' }, { status: 400 });
+
+        const { data: conversations, error } = await supabase
+            .from('conversations')
+            .select('*')
+            .eq('contact_id', contactId)
+            .order('last_message_at', { ascending: false });
+
+        if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json(conversations || []);
     }
 
     if (action === 'lead_metrics') {

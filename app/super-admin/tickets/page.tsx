@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui';
 import {
     TicketCheck, Plus, Clock, AlertCircle, CheckCircle2,
-    ChevronRight, Filter, ArrowUpCircle, ArrowDownCircle, MinusCircle
+    ChevronRight, Filter, ArrowUpCircle, ArrowDownCircle, MinusCircle,
+    Camera, X, Upload
 } from 'lucide-react';
 
 const CLIENT_ID = 'acb4b354-728f-479d-915a-c857d27da9ad';
@@ -42,7 +43,9 @@ export default function TicketsPage() {
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [filterStatus, setFilterStatus] = useState<string>('all');
-    const [newTicket, setNewTicket] = useState({ title: '', description: '', priority: 'medium', category: 'operational' });
+    const [newTicket, setNewTicket] = useState({ title: '', description: '', priority: 'medium', category: 'operational', shop_id: '' });
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
         fetchTickets();
@@ -59,16 +62,34 @@ export default function TicketsPage() {
     };
 
     const createTicket = async () => {
+        if (!newTicket.title || !newTicket.description) {
+            alert('Preencha título e descrição');
+            return;
+        }
+
+        setUploading(true);
         try {
             await fetch('/api/tickets', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'create', clientId: CLIENT_ID, ...newTicket }),
+                body: JSON.stringify({
+                    action: 'create',
+                    clientId: CLIENT_ID,
+                    ...newTicket,
+                    attachments: uploadedFiles.map(f => f.name)
+                }),
             });
             setShowForm(false);
-            setNewTicket({ title: '', description: '', priority: 'medium', category: 'operational' });
+            setNewTicket({ title: '', description: '', priority: 'medium', category: 'operational', shop_id: '' });
+            setUploadedFiles([]);
             fetchTickets();
-        } catch (e) { console.error(e); }
+            alert('Ticket criado com sucesso!');
+        } catch (e) {
+            console.error(e);
+            alert('Erro ao criar ticket');
+        } finally {
+            setUploading(false);
+        }
     };
 
     const updateStatus = async (ticketId: string, status: string) => {
@@ -297,6 +318,189 @@ export default function TicketsPage() {
                     </div>
                 )
             }
+
+            {/* Create Ticket Modal */}
+            {showForm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        {/* Header */}
+                        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                                <TicketCheck className="text-lale-orange" size={24} />
+                                Novo Ticket
+                            </h3>
+                            <button
+                                onClick={() => {
+                                    setShowForm(false);
+                                    setUploadedFiles([]);
+                                }}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Form */}
+                        <div className="p-6 space-y-4">
+                            {/* Title */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Título <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newTicket.title}
+                                    onChange={(e) => setNewTicket({ ...newTicket, title: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
+                                    placeholder="Ex: Problema na vitrine"
+                                />
+                            </div>
+
+                            {/* Description */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Descrição <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    value={newTicket.description}
+                                    onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })}
+                                    rows={4}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
+                                    placeholder="Descreva o problema em detalhes..."
+                                />
+                            </div>
+
+                            {/* Priority & Category */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Prioridade</label>
+                                    <select
+                                        value={newTicket.priority}
+                                        onChange={(e) => setNewTicket({ ...newTicket, priority: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
+                                    >
+                                        <option value="low">Baixa</option>
+                                        <option value="medium">Média</option>
+                                        <option value="high">Alta</option>
+                                        <option value="critical">Crítica</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                                    <select
+                                        value={newTicket.category}
+                                        onChange={(e) => setNewTicket({ ...newTicket, category: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
+                                    >
+                                        <option value="operational">Operacional</option>
+                                        <option value="maintenance">Manutenção</option>
+                                        <option value="inventory">Estoque</option>
+                                        <option value="customer_service">Atendimento</option>
+                                        <option value="other">Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* File Upload */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Anexos (Fotos/Documentos)
+                                </label>
+
+                                {/* Upload Buttons */}
+                                <div className="flex gap-2 mb-3">
+                                    <label className="flex-1 cursor-pointer">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            capture="environment"
+                                            multiple
+                                            onChange={(e) => {
+                                                if (e.target.files) {
+                                                    setUploadedFiles([...uploadedFiles, ...Array.from(e.target.files)]);
+                                                }
+                                            }}
+                                            className="hidden"
+                                        />
+                                        <div className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg border-2 border-blue-200 hover:bg-blue-100 transition-colors">
+                                            <Camera size={18} />
+                                            <span className="text-sm font-medium">Tirar Foto</span>
+                                        </div>
+                                    </label>
+
+                                    <label className="flex-1 cursor-pointer">
+                                        <input
+                                            type="file"
+                                            accept="image/*,application/pdf"
+                                            multiple
+                                            onChange={(e) => {
+                                                if (e.target.files) {
+                                                    setUploadedFiles([...uploadedFiles, ...Array.from(e.target.files)]);
+                                                }
+                                            }}
+                                            className="hidden"
+                                        />
+                                        <div className="flex items-center justify-center gap-2 px-4 py-2 bg-purple-50 text-purple-600 rounded-lg border-2 border-purple-200 hover:bg-purple-100 transition-colors">
+                                            <Upload size={18} />
+                                            <span className="text-sm font-medium">Escolher Arquivo</span>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                {/* File Preview */}
+                                {uploadedFiles.length > 0 && (
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {uploadedFiles.map((file, idx) => (
+                                            <div key={idx} className="relative group">
+                                                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                                                    {file.type.startsWith('image/') ? (
+                                                        <img
+                                                            src={URL.createObjectURL(file)}
+                                                            alt={file.name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                            <Upload size={32} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={() => setUploadedFiles(uploadedFiles.filter((_, i) => i !== idx))}
+                                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                                <p className="text-xs text-gray-500 mt-1 truncate">{file.name}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-200">
+                            <button
+                                onClick={() => {
+                                    setShowForm(false);
+                                    setUploadedFiles([]);
+                                }}
+                                className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg font-medium transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={createTicket}
+                                disabled={uploading || !newTicket.title || !newTicket.description}
+                                className="px-6 py-2 bg-gradient-to-r from-lale-orange to-lale-pink text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {uploading ? 'Criando...' : 'Criar Ticket'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 }

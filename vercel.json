@@ -5,6 +5,10 @@
         {
             "path": "/api/notifications",
             "schedule": "*/5 * * * *"
+        },
+        {
+            "path": "/api/sync/facebook?secret=lalelilo_verify",
+            "schedule": "*/5 * * * *"
         }
     ]
 }
