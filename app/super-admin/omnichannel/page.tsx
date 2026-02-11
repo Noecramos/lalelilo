@@ -435,6 +435,7 @@ export default function OmnichannelPage() {
                             })
                         )}
                     </div>
+                </Card>
             </div>
 
             {/* Chat Modal - Opens when conversation is selected */}
