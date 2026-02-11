@@ -32,7 +32,7 @@ export default function SuperAdminLayout({
         { name: 'Lojas', href: '/super-admin/shops', icon: Store },
         { name: 'Clientes', href: '/super-admin/users', icon: Crown },
         { name: 'CRM', href: '/super-admin/crm', icon: Users },
-        { name: 'Omnichannel', href: '/super-admin/omnichannel', icon: MessageSquare },
+        { name: 'Central Msgs', href: '/super-admin/omnichannel', icon: MessageSquare },
         { name: 'Mensagens Internas', href: '/super-admin/messages', icon: Phone },
         { name: 'Analytics', href: '/super-admin/analytics', icon: BarChart3 },
         { name: 'Relatórios', href: '/super-admin/reports', icon: FileText },
@@ -80,11 +80,16 @@ export default function SuperAdminLayout({
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-4 space-y-1 pb-32 overflow-y-auto scrollbar-hide" style={{
-                    maxHeight: 'calc(100vh - 4rem)',
-                    maskImage: 'linear-gradient(to bottom, black calc(100% - 140px), transparent 100%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 140px), transparent 100%)'
+                <nav className="p-4 space-y-1 overflow-y-auto" style={{
+                    maxHeight: 'calc(100vh - 12rem)',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none'
                 }}>
+                    <style jsx>{`
+                        nav::-webkit-scrollbar {
+                            display: none;
+                        }
+                    `}</style>
                     {navigation.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.href);

@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui';
 import {
     MessageSquare, Phone, Instagram, Facebook, Send, Search,
-    Filter, Clock, CheckCheck, User, Building2, RefreshCw
+    Filter, Clock, CheckCheck, User, Building2, RefreshCw,
+    Edit, Trash, Check, X
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -62,6 +63,10 @@ export default function OmnichannelPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'whatsapp' | 'instagram' | 'facebook'>('all');
     const [search, setSearch] = useState('');
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const [editedContent, setEditedContent] = useState('');
+    const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
+
 
     useEffect(() => {
         fetchConversations();
@@ -167,6 +172,59 @@ export default function OmnichannelPage() {
             console.error('Error sending message:', e);
         }
     };
+
+    const startEditMessage = (messageId: string, currentContent: string) => {
+        setEditingMessageId(messageId);
+        setEditedContent(currentContent);
+    };
+
+    const saveEditMessage = async (messageId: string) => {
+        if (!editedContent.trim()) return;
+
+        try {
+            const { error } = await supabase
+                .from('messages')
+                .update({ content: editedContent })
+                .eq('id', messageId);
+
+            if (error) throw error;
+
+            // Update local state
+            setMessages(messages.map(msg =>
+                msg.id === messageId ? { ...msg, content: editedContent } : msg
+            ));
+            setEditingMessageId(null);
+            setEditedContent('');
+        } catch (e) {
+            console.error('Error editing message:', e);
+            alert('Erro ao editar mensagem');
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditingMessageId(null);
+        setEditedContent('');
+    };
+
+    const deleteMessage = async (messageId: string) => {
+        if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('messages')
+                .delete()
+                .eq('id', messageId);
+
+            if (error) throw error;
+
+            // Update local state
+            setMessages(messages.filter(msg => msg.id !== messageId));
+        } catch (e) {
+            console.error('Error deleting message:', e);
+            alert('Erro ao excluir mensagem');
+        }
+    };
+
 
     // Filter conversations
     let filtered = conversations;
@@ -354,25 +412,77 @@ export default function OmnichannelPage() {
                                     <div
                                         key={msg.id}
                                         className={`flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'}`}
+                                        onMouseEnter={() => setHoveredMessageId(msg.id)}
+                                        onMouseLeave={() => setHoveredMessageId(null)}
                                     >
-                                        <div
-                                            className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                ? 'bg-purple-600 text-white'
-                                                : 'bg-white text-gray-900 border border-gray-200'
-                                                }`}
-                                        >
-                                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                                            {msg.media_url && (
-                                                <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
-                                            )}
-                                            <div className="flex items-center justify-end gap-1 mt-1">
-                                                <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-200' : 'text-gray-500'}`}>
-                                                    {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                                {msg.sender_type === 'agent' && msg.status === 'delivered' && (
-                                                    <CheckCheck size={14} />
+                                        <div className="relative group">
+                                            <div
+                                                className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
+                                                        ? 'bg-purple-600 text-white'
+                                                        : 'bg-white text-gray-900 border border-gray-200'
+                                                    }`}
+                                            >
+                                                {editingMessageId === msg.id ? (
+                                                    <div className="space-y-2">
+                                                        <textarea
+                                                            value={editedContent}
+                                                            onChange={(e) => setEditedContent(e.target.value)}
+                                                            className="w-full p-2 text-sm border border-gray-300 rounded text-gray-900 focus:ring-2 focus:ring-lale-orange focus:border-transparent"
+                                                            rows={3}
+                                                            autoFocus
+                                                        />
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => saveEditMessage(msg.id)}
+                                                                className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 flex items-center gap-1"
+                                                            >
+                                                                <Check size={12} /> Salvar
+                                                            </button>
+                                                            <button
+                                                                onClick={cancelEdit}
+                                                                className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 flex items-center gap-1"
+                                                            >
+                                                                <X size={12} /> Cancelar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                        {msg.media_url && (
+                                                            <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
+                                                        )}
+                                                        <div className="flex items-center justify-end gap-1 mt-1">
+                                                            <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-200' : 'text-gray-500'}`}>
+                                                                {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                            </p>
+                                                            {msg.sender_type === 'agent' && msg.status === 'delivered' && (
+                                                                <CheckCheck size={14} />
+                                                            )}
+                                                        </div>
+                                                    </>
                                                 )}
                                             </div>
+
+                                            {/* Edit and Delete buttons */}
+                                            {msg.sender_type === 'agent' && hoveredMessageId === msg.id && editingMessageId !== msg.id && (
+                                                <div className="absolute -top-2 -right-2 flex gap-1">
+                                                    <button
+                                                        onClick={() => startEditMessage(msg.id, msg.content)}
+                                                        className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-md"
+                                                        title="Editar"
+                                                    >
+                                                        <Edit size={12} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteMessage(msg.id)}
+                                                        className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-md"
+                                                        title="Excluir"
+                                                    >
+                                                        <Trash size={12} />
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
