@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
     LayoutDashboard,
     Store,
@@ -16,7 +16,8 @@ import {
     Trophy,
     ClipboardCheck,
     TicketCheck,
-    Users
+    Users,
+    LogOut
 } from 'lucide-react';
 
 export default function SuperAdminLayout({
@@ -25,6 +26,7 @@ export default function SuperAdminLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
+    const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const navigation = [
@@ -42,6 +44,13 @@ export default function SuperAdminLayout({
         { name: 'Equipe', href: '/super-admin/team', icon: Users },
         { name: 'Suporte', href: 'https://wa.me/558183920320', icon: Phone, external: true },
     ];
+
+    const handleLogout = async () => {
+        if (!confirm('Deseja realmente sair?')) return;
+
+        await fetch('/api/auth/logout', { method: 'POST' });
+        router.push('/login');
+    };
 
     const isActive = (href: string) => pathname === href;
 
@@ -171,6 +180,14 @@ export default function SuperAdminLayout({
                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-lale-pink to-lale-orange flex items-center justify-center text-white font-bold">
                             L
                         </div>
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                            title="Sair"
+                        >
+                            <LogOut size={18} />
+                            <span className="hidden sm:inline">Sair</span>
+                        </button>
                     </div>
                 </header>
 

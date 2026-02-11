@@ -2,7 +2,7 @@
 
 import React, { useState, use } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
     LayoutDashboard,
     ShoppingBag,
@@ -13,7 +13,8 @@ import {
     Store,
     MessageSquare,
     Users,
-    Phone
+    Phone,
+    LogOut
 } from 'lucide-react';
 
 export default function ShopAdminLayout({
@@ -24,6 +25,7 @@ export default function ShopAdminLayout({
     params: Promise<{ 'shop-id': string }>;
 }) {
     const pathname = usePathname();
+    const router = useRouter();
     const { 'shop-id': shopId } = use(params);
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -36,6 +38,13 @@ export default function ShopAdminLayout({
         { name: 'Configurações', href: `/shop-admin/${shopId}/settings`, icon: Settings },
         { name: 'Suporte Whats', href: 'https://wa.me/558183920320', icon: Phone, external: true },
     ];
+
+    const handleLogout = async () => {
+        if (!confirm('Deseja realmente sair?')) return;
+
+        await fetch('/api/auth/logout', { method: 'POST' });
+        router.push('/login');
+    };
 
     const isActive = (href: string) => pathname === href;
 
@@ -143,10 +152,17 @@ export default function ShopAdminLayout({
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* User menu would go here */}
                         <div className="h-8 w-8 rounded-full bg-lale-orange flex items-center justify-center text-white font-medium shadow-sm">
                             A
                         </div>
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                            title="Sair"
+                        >
+                            <LogOut size={18} />
+                            <span className="hidden sm:inline">Sair</span>
+                        </button>
                     </div>
                 </header>
 
