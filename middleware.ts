@@ -45,7 +45,7 @@ export function middleware(request: NextRequest) {
         try {
             const sessionData = JSON.parse(session.value);
 
-            // Extract shop ID from URL
+            // Extract shop ID from URL (using shop-id parameter)
             const shopIdMatch = pathname.match(/\/shop-admin\/([^\/]+)/);
             const requestedShopId = shopIdMatch ? shopIdMatch[1] : null;
 
@@ -54,8 +54,8 @@ export function middleware(request: NextRequest) {
                 return NextResponse.next();
             }
 
-            // Shop managers can only access their own shop
-            if (sessionData.role === 'shop' && sessionData.shopId === requestedShopId) {
+            // Shop managers can only access their own shop (compare slug)
+            if (sessionData.role === 'shop' && sessionData.slug === requestedShopId) {
                 return NextResponse.next();
             }
 

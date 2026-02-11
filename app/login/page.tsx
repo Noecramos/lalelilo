@@ -36,7 +36,7 @@ export default function LoginPage() {
                 if (data.role === 'super_admin') {
                     router.push('/super-admin/dashboard');
                 } else if (data.role === 'shop') {
-                    router.push(`/shop-admin/${data.shopId}`);
+                    router.push(`/shop-admin/${data.slug}`);
                 }
             } else {
                 alert(data.error || 'Credenciais inválidas');
