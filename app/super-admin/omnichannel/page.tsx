@@ -122,26 +122,21 @@ export default function OmnichannelPage() {
 
     const fetchMessages = async (conversationId: string) => {
         try {
-            // Fetch non-archived messages
+            // Fetch all messages (archived column may not exist yet)
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
                 .eq('conversation_id', conversationId)
-                .or('archived.is.null,archived.eq.false')
                 .order('created_at', { ascending: true });
 
             if (error) throw error;
-            setMessages(data || []);
 
-            // Load archived messages
-            const { data: archivedData } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('conversation_id', conversationId)
-                .eq('archived', true)
-                .order('created_at', { ascending: true });
+            // Separate archived and active messages
+            const active = (data || []).filter(msg => !msg.archived);
+            const archived = (data || []).filter(msg => msg.archived);
 
-            setArchivedMessages(archivedData || []);
+            setMessages(active);
+            setArchivedMessages(archived);
 
             // Mark as read
             await supabase
@@ -578,8 +573,8 @@ export default function OmnichannelPage() {
                                                         <div className="relative group">
                                                             <div
                                                                 className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                                        ? 'bg-purple-400 text-white'
-                                                                        : 'bg-gray-200 text-gray-700 border border-gray-300'
+                                                                    ? 'bg-purple-400 text-white'
+                                                                    : 'bg-gray-200 text-gray-700 border border-gray-300'
                                                                     }`}
                                                             >
                                                                 <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
