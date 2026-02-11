@@ -277,23 +277,35 @@ export default function MessagesPage() {
     return (
         <div className="h-[calc(100vh-4rem)] flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900">Mensagens</h2>
                     <p className="text-gray-600 mt-1">Comunique-se com as lojas</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" onClick={async () => {
-                        if (confirm('Tem certeza? Isso apagará todas as mensagens.')) {
-                            await fetch('/api/debug/messages', { method: 'DELETE' });
-                            window.location.reload();
-                        }
-                    }}>
-                        Resetar Mensagens
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                            if (confirm('Tem certeza? Isso apagará todas as mensagens.')) {
+                                await fetch('/api/debug/messages', { method: 'DELETE' });
+                                window.location.reload();
+                            }
+                        }}
+                        className="flex-1 sm:flex-none"
+                    >
+                        <span className="hidden sm:inline">Resetar Mensagens</span>
+                        <span className="sm:hidden">Resetar</span>
                     </Button>
-                    <Button variant="primary" onClick={() => setShowNewMessageModal(true)}>
-                        <Plus size={16} className="mr-2" />
-                        Nova Mensagem
+                    <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => setShowNewMessageModal(true)}
+                        className="flex-1 sm:flex-none"
+                    >
+                        <Plus size={16} className="mr-1 sm:mr-2" />
+                        <span className="hidden sm:inline">Nova Mensagem</span>
+                        <span className="sm:hidden">Nova</span>
                     </Button>
                 </div>
             </div>
