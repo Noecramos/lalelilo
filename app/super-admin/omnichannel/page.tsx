@@ -418,8 +418,8 @@ export default function OmnichannelPage() {
                                         <div className="relative group">
                                             <div
                                                 className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                        ? 'bg-purple-600 text-white'
-                                                        : 'bg-white text-gray-900 border border-gray-200'
+                                                    ? 'bg-purple-600 text-white'
+                                                    : 'bg-white text-gray-900 border border-gray-200'
                                                     }`}
                                             >
                                                 {editingMessageId === msg.id ? (
@@ -465,15 +465,19 @@ export default function OmnichannelPage() {
                                             </div>
 
                                             {/* Edit and Delete buttons */}
-                                            {msg.sender_type === 'agent' && hoveredMessageId === msg.id && editingMessageId !== msg.id && (
+                                            {hoveredMessageId === msg.id && editingMessageId !== msg.id && (
                                                 <div className="absolute -top-2 -right-2 flex gap-1">
-                                                    <button
-                                                        onClick={() => startEditMessage(msg.id, msg.content)}
-                                                        className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-md"
-                                                        title="Editar"
-                                                    >
-                                                        <Edit size={12} />
-                                                    </button>
+                                                    {/* Edit button - only for agent messages */}
+                                                    {msg.sender_type === 'agent' && (
+                                                        <button
+                                                            onClick={() => startEditMessage(msg.id, msg.content)}
+                                                            className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-md"
+                                                            title="Editar"
+                                                        >
+                                                            <Edit size={12} />
+                                                        </button>
+                                                    )}
+                                                    {/* Delete button - for all messages */}
                                                     <button
                                                         onClick={() => deleteMessage(msg.id)}
                                                         className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-md"
