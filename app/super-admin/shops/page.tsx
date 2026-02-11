@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Input, Badge, Modal, Loading } from '@/components/ui';
-import { Search, Plus, Edit, MapPin, Phone, Eye } from 'lucide-react';
+import { Search, Plus, Edit, MapPin, Phone, Eye, Key, Mail, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
 
 interface Shop {
@@ -16,6 +16,8 @@ interface Shop {
     email?: string;
     address?: string;
     cnpj?: string;
+    password_hash?: string;
+    last_login?: string;
     is_active: boolean;
     revenue_30d: number;
     orders_30d: number;
@@ -28,6 +30,8 @@ export default function ShopsManagementPage() {
     const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
     const [editingShop, setEditingShop] = useState<Shop | null>(null);
     const [isCreating, setIsCreating] = useState(false);
+    const [passwordModal, setPasswordModal] = useState<{ show: boolean; password: string; shopName: string }>({ show: false, password: '', shopName: '' });
+    const [copied, setCopied] = useState(false);
     const [newShop, setNewShop] = useState<Partial<Shop>>({
         name: '',
         slug: '',
@@ -111,6 +115,72 @@ export default function ShopsManagementPage() {
             alert(error instanceof Error ? error.message : 'Erro ao salvar alterações');
         }
     };
+
+    const generatePassword = async (shop: Shop) => {
+        if (!confirm(`Gerar senha para ${shop.name}?`)) return;
+
+        try {
+            const response = await fetch('/api/shops/generate-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ shopId: shop.id }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to generate password');
+            }
+
+            setPasswordModal({
+                show: true,
+                password: data.password,
+                shopName: shop.name
+            });
+
+            await fetchShops();
+        } catch (error) {
+            console.error('Error generating password:', error);
+            alert(error instanceof Error ? error.message : 'Erro ao gerar senha');
+        }
+    };
+
+    const resetPassword = async (shop: Shop) => {
+        if (!confirm(`Resetar senha para ${shop.name}? Uma nova senha será gerada e enviada para ${shop.email || 'o email cadastrado'}.`)) return;
+
+        try {
+            const response = await fetch('/api/shops/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ shopId: shop.id }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to reset password');
+            }
+
+            setPasswordModal({
+                show: true,
+                password: data.password,
+                shopName: shop.name
+            });
+
+            alert(`Senha resetada! ${shop.email ? `Email enviado para ${shop.email}` : 'Copie a senha abaixo'}`);
+            await fetchShops();
+        } catch (error) {
+            console.error('Error resetting password:', error);
+            alert(error instanceof Error ? error.message : 'Erro ao resetar senha');
+        }
+    };
+
+    const copyPassword = () => {
+        navigator.clipboard.writeText(passwordModal.password);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
 
     const filteredShops = shops.filter(shop => {
         const matchesSearch = shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -241,6 +311,12 @@ export default function ShopsManagementPage() {
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                         Contato
                                     </th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                        Senha
+                                    </th>
+                                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                                        Último Login
+                                    </th>
                                     <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                                         Receita (30d)
                                     </th>
@@ -273,6 +349,41 @@ export default function ShopsManagementPage() {
                                                 <Phone size={14} />
                                                 {shop.phone}
                                             </div>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-center">
+                                            {shop.password_hash ? (
+                                                <div className="flex flex-col items-center gap-1">
+                                                    <Badge variant="success">✓ Configurada</Badge>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => resetPassword(shop)}
+                                                        className="text-xs"
+                                                    >
+                                                        <Key size={12} className="mr-1" />
+                                                        Resetar
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <Button
+                                                    size="sm"
+                                                    variant="primary"
+                                                    onClick={() => generatePassword(shop)}
+                                                >
+                                                    <Key size={14} className="mr-1" />
+                                                    Gerar Senha
+                                                </Button>
+                                            )}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-center text-gray-600">
+                                            {shop.last_login ? (
+                                                <div className="text-xs">
+                                                    <div>{new Date(shop.last_login).toLocaleDateString('pt-BR')}</div>
+                                                    <div className="text-gray-400">{new Date(shop.last_login).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-400 text-xs">Nunca</span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-3 text-sm text-right font-medium text-gray-900">
                                             R$ {(shop.revenue_30d || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -500,6 +611,62 @@ export default function ShopsManagementPage() {
                             <label htmlFor="new_is_active" className="text-sm text-gray-700">
                                 Loja Ativa
                             </label>
+                        </div>
+                    </div>
+                </Modal>
+            )}
+
+            {/* Password Modal */}
+            {passwordModal.show && (
+                <Modal
+                    title="🔑 Senha Gerada"
+                    isOpen={passwordModal.show}
+                    onClose={() => setPasswordModal({ show: false, password: '', shopName: '' })}
+                    size="md"
+                >
+                    <div className="space-y-4">
+                        <p className="text-sm text-gray-600">
+                            Senha gerada para <strong>{passwordModal.shopName}</strong>:
+                        </p>
+
+                        <div className="bg-purple-50 border-2 border-purple-200 rounded-lg p-6">
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="flex-1">
+                                    <p className="text-xs text-gray-500 mb-1">Senha:</p>
+                                    <p className="text-2xl font-mono font-bold text-purple-600 tracking-wider">
+                                        {passwordModal.password}
+                                    </p>
+                                </div>
+                                <Button
+                                    variant={copied ? 'success' : 'primary'}
+                                    onClick={copyPassword}
+                                    className="flex-shrink-0"
+                                >
+                                    {copied ? (
+                                        <>
+                                            <Check size={16} className="mr-2" />
+                                            Copiado!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Copy size={16} className="mr-2" />
+                                            Copiar
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <p className="text-sm text-yellow-800">
+                                <strong>⚠️ Importante:</strong> Copie esta senha agora! Ela não será exibida novamente.
+                            </p>
+                        </div>
+
+                        <div className="text-xs text-gray-500 space-y-1">
+                            <p>• A senha foi salva no sistema</p>
+                            <p>• O usuário pode fazer login com o slug da loja e esta senha</p>
+                            <p>• Se configurado, um email foi enviado automaticamente</p>
                         </div>
                     </div>
                 </Modal>
