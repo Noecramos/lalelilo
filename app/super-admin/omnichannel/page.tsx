@@ -362,7 +362,7 @@ export default function OmnichannelPage() {
             </div>
 
             {/* Chat Interface */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4">
                 {/* Conversations List */}
                 <Card padding="none" className="flex flex-col" style={{ height: '600px' }}>
                     <div className="p-4 border-b border-gray-200">
@@ -435,293 +435,241 @@ export default function OmnichannelPage() {
                             })
                         )}
                     </div>
-                </Card>
+            </div>
 
-                {/* Messages Area */}
-                <Card padding="none" className="md:col-span-2 flex flex-col" style={{ height: '600px' }}>
-                    {selectedConversation ? (
-                        <>
-                            {/* Chat Header */}
-                            <div className="p-4 border-b border-gray-200 bg-gray-50">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg ${channelColors[selectedConversation.channel_type]}`}>
-                                            {React.createElement(channelIcons[selectedConversation.channel_type], { size: 20 })}
-                                        </div>
-                                        <div>
-                                            <h3 className="font-semibold text-gray-900">
-                                                {selectedConversation.contacts.name || selectedConversation.contacts.phone || 'Sem nome'}
-                                            </h3>
-                                            <p className="text-sm text-gray-600 capitalize">
-                                                {selectedConversation.channel_type}
-                                                {selectedConversation.contacts.phone && ` • ${selectedConversation.contacts.phone}`}
-                                            </p>
-                                        </div>
+            {/* Chat Modal - Opens when conversation is selected */}
+            {selectedConversation && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedConv(null)}>
+                    <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                        {/* Modal Header */}
+                        <div className="p-4 border-b border-gray-200 bg-gray-50">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2 rounded-lg ${channelColors[selectedConversation.channel_type]}`}>
+                                        {React.createElement(channelIcons[selectedConversation.channel_type], { size: 20 })}
                                     </div>
-
-                                    <div className="flex items-center gap-2">
-                                        {/* Histórico Button */}
-                                        {archivedMessages.length > 0 && (
-                                            <button
-                                                onClick={() => setShowArchived(!showArchived)}
-                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showArchived
-                                                    ? 'bg-yellow-500 text-white'
-                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                    }`}
-                                            >
-                                                <Archive size={18} />
-                                                <span className="font-medium">Histórico</span>
-                                                <span className="px-2 py-0.5 bg-white bg-opacity-30 rounded-full text-xs font-bold">
-                                                    {archivedMessages.length}
-                                                </span>
-                                            </button>
-                                        )}
-
-                                        {/* Archive Conversation Button */}
-                                        <button
-                                            onClick={async () => {
-                                                if (confirm('Arquivar esta conversa?')) {
-                                                    // Archive all messages in this conversation
-                                                    const { error } = await supabase
-                                                        .from('messages')
-                                                        .update({ archived: true })
-                                                        .eq('conversation_id', selectedConv);
-
-                                                    if (!error) {
-                                                        fetchMessages(selectedConv);
-                                                    }
-                                                }
-                                            }}
-                                            className="p-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
-                                            title="Arquivar conversa"
-                                        >
-                                            <Archive size={20} />
-                                        </button>
-
-                                        {/* Delete Conversation Button */}
-                                        <button
-                                            onClick={async () => {
-                                                if (confirm('Excluir esta conversa e todas as mensagens?')) {
-                                                    const { error } = await supabase
-                                                        .from('messages')
-                                                        .delete()
-                                                        .eq('conversation_id', selectedConv);
-
-                                                    if (!error) {
-                                                        setSelectedConv(null);
-                                                        fetchConversations();
-                                                    }
-                                                }
-                                            }}
-                                            className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                                            title="Excluir conversa"
-                                        >
-                                            <Trash size={20} />
-                                        </button>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900">
+                                            {selectedConversation.contacts.name || selectedConversation.contacts.phone || 'Sem nome'}
+                                        </h3>
+                                        <p className="text-sm text-gray-600 capitalize">
+                                            {selectedConversation.channel_type}
+                                            {selectedConversation.contacts.phone && ` • ${selectedConversation.contacts.phone}`}
+                                        </p>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Messages */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-                                {!showArchived && messages.length === 0 ? (
-                                    <div className="text-center py-12">
-                                        <MessageSquare size={48} className="mx-auto text-gray-400 mb-3" />
-                                        <p className="text-gray-500">Nenhuma mensagem ainda</p>
-                                        <p className="text-sm text-gray-400 mt-1">Envie uma mensagem para começar</p>
-                                    </div>
-                                ) : !showArchived ? (
-                                    // Active messages
-                                    messages.map((msg) => (
-                                        <div
-                                            key={msg.id}
-                                            className={`flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'} mb-4`}
-                                        >
-                                            {/* Message bubble */}
-                                            <div
-                                                className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                    ? 'bg-purple-600 text-white'
-                                                    : 'bg-white text-gray-900 border border-gray-200'
-                                                    }`}
-                                            >
-                                                {editingMessageId === msg.id ? (
-                                                    <div className="space-y-2">
-                                                        <textarea
-                                                            value={editedContent}
-                                                            onChange={(e) => setEditedContent(e.target.value)}
-                                                            className="w-full p-2 text-sm border border-gray-300 rounded text-gray-900 focus:ring-2 focus:ring-lale-orange focus:border-transparent"
-                                                            rows={3}
-                                                            autoFocus
-                                                        />
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => saveEditMessage(msg.id)}
-                                                                className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 flex items-center gap-1"
-                                                            >
-                                                                <Check size={12} /> Salvar
-                                                            </button>
-                                                            <button
-                                                                onClick={cancelEdit}
-                                                                className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 flex items-center gap-1"
-                                                            >
-                                                                <X size={12} /> Cancelar
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        {msg.content && msg.content.trim() !== '' ? (
-                                                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                                                        ) : (
-                                                            <p className="text-sm italic text-gray-400">Mídia enviada</p>
-                                                        )}
-                                                        {msg.media_url && (
-                                                            <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
-                                                        )}
-                                                        <div className="flex items-center justify-end gap-1 mt-1">
-                                                            <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-200' : 'text-gray-500'}`}>
-                                                                {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                                            </p>
-                                                            {msg.sender_type === 'agent' && msg.status === 'delivered' && (
-                                                                <CheckCheck size={14} />
-                                                            )}
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    // Archived messages view
-                                    <>
-                                        <div className="mb-6">
-                                            <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                                                <Archive size={20} className="text-yellow-500" />
-                                                Histórico de Mensagens Arquivadas
-                                            </h3>
-                                            <p className="text-sm text-gray-500">
-                                                {archivedMessages.length} {archivedMessages.length === 1 ? 'mensagem arquivada' : 'mensagens arquivadas'}
-                                            </p>
-                                        </div>
-
-                                        {archivedMessages.map((msg) => (
-                                            <div key={msg.id} className="flex items-start gap-3 mb-4 opacity-75">
-                                                <div className={`flex-1 flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'}`}>
-                                                    <div className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                        ? 'bg-purple-400 text-white'
-                                                        : 'bg-gray-200 text-gray-700 border border-gray-300'
-                                                        }`}>
-                                                        {msg.content && msg.content.trim() !== '' ? (
-                                                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                                                        ) : (
-                                                            <p className="text-sm italic text-gray-400">Mídia enviada</p>
-                                                        )}
-                                                        {msg.media_url && <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />}
-                                                        <div className="flex items-center justify-between gap-2 mt-1">
-                                                            <span className="text-xs italic">Arquivada</span>
-                                                            <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-100' : 'text-gray-500'}`}>
-                                                                {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="flex flex-col gap-1.5 pt-1">
-                                                    <button
-                                                        onClick={() => deleteMessage(msg.id)}
-                                                        className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow-md transition-colors"
-                                                        title="Excluir permanentemente"
-                                                    >
-                                                        <Trash size={16} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </>
-                                )}
-
-                                {/* Histórico de Msgs - Archived Messages */}
-                                {archivedMessages.length > 0 && (
-                                    <div className="mt-6 pt-4 border-t-2 border-gray-300">
+                                <div className="flex items-center gap-2">
+                                    {/* Histórico Button */}
+                                    {archivedMessages.length > 0 && (
                                         <button
                                             onClick={() => setShowArchived(!showArchived)}
-                                            className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-lale-orange mb-3"
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showArchived
+                                                ? 'bg-yellow-500 text-white'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                }`}
                                         >
-                                            <Archive size={16} />
-                                            Histórico de Msgs ({archivedMessages.length})
-                                            <span className="text-xs">
-                                                {showArchived ? '▼' : '▶'}
+                                            <Archive size={18} />
+                                            <span className="font-medium">Histórico</span>
+                                            <span className="px-2 py-0.5 bg-white bg-opacity-30 rounded-full text-xs font-bold">
+                                                {archivedMessages.length}
                                             </span>
                                         </button>
+                                    )}
 
-                                        {showArchived && (
-                                            <div className="space-y-4">
-                                                {archivedMessages.map((msg) => (
-                                                    <div
-                                                        key={msg.id}
-                                                        className={`flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'} opacity-60`}
-                                                    >
-                                                        <div className="relative group">
-                                                            <div
-                                                                className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                                    ? 'bg-purple-400 text-white'
-                                                                    : 'bg-gray-200 text-gray-700 border border-gray-300'
-                                                                    }`}
-                                                            >
-                                                                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                                                                {msg.media_url && (
-                                                                    <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
-                                                                )}
-                                                                <div className="flex items-center justify-between gap-2 mt-1">
-                                                                    <span className="text-xs italic">Arquivada</span>
-                                                                    <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-100' : 'text-gray-500'}`}>
-                                                                        {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Message Input */}
-                            <div className="p-4 border-t border-gray-200 bg-white">
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Digite sua mensagem..."
-                                        value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                                        className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
-                                    />
+                                    {/* Archive Conversation Button */}
                                     <button
-                                        onClick={sendMessage}
-                                        className="px-4 py-2 bg-lale-orange text-white rounded-lg hover:opacity-90 transition-opacity"
+                                        onClick={async () => {
+                                            if (confirm('Arquivar esta conversa?')) {
+                                                const { error } = await supabase
+                                                    .from('messages')
+                                                    .update({ archived: true })
+                                                    .eq('conversation_id', selectedConv);
+
+                                                if (!error && selectedConv) {
+                                                    fetchMessages(selectedConv);
+                                                }
+                                            }
+                                        }}
+                                        className="p-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                                        title="Arquivar conversa"
                                     >
-                                        <Send size={18} />
+                                        <Archive size={20} />
+                                    </button>
+
+                                    {/* Delete Conversation Button */}
+                                    <button
+                                        onClick={async () => {
+                                            if (confirm('Excluir esta conversa e todas as mensagens?')) {
+                                                const { error } = await supabase
+                                                    .from('messages')
+                                                    .delete()
+                                                    .eq('conversation_id', selectedConv);
+
+                                                if (!error) {
+                                                    setSelectedConv(null);
+                                                    fetchConversations();
+                                                }
+                                            }
+                                        }}
+                                        className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                        title="Excluir conversa"
+                                    >
+                                        <Trash size={20} />
+                                    </button>
+
+                                    {/* Close Modal Button */}
+                                    <button
+                                        onClick={() => setSelectedConv(null)}
+                                        className="p-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                                        title="Fechar"
+                                    >
+                                        <X size={20} />
                                     </button>
                                 </div>
                             </div>
-                        </>
-                    ) : (
-                        <div className="flex-1 flex items-center justify-center">
-                            <div className="text-center">
-                                <MessageSquare size={64} className="mx-auto text-gray-400 mb-4" />
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                    Selecione uma conversa
-                                </h3>
-                                <p className="text-gray-600">
-                                    Escolha uma conversa para ver as mensagens
-                                </p>
+                        </div>
+
+                        {/* Messages */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                            {!showArchived && messages.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <MessageSquare size={48} className="mx-auto text-gray-400 mb-3" />
+                                    <p className="text-gray-500">Nenhuma mensagem ainda</p>
+                                    <p className="text-sm text-gray-400 mt-1">Envie uma mensagem para começar</p>
+                                </div>
+                            ) : !showArchived ? (
+                                // Active messages
+                                messages.map((msg) => (
+                                    <div
+                                        key={msg.id}
+                                        className={`flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'} mb-4`}
+                                    >
+                                        {/* Message bubble */}
+                                        <div
+                                            className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-white text-gray-900 border border-gray-200'
+                                                }`}
+                                        >
+                                            {editingMessageId === msg.id ? (
+                                                <div className="space-y-2">
+                                                    <textarea
+                                                        value={editedContent}
+                                                        onChange={(e) => setEditedContent(e.target.value)}
+                                                        className="w-full p-2 text-sm border border-gray-300 rounded text-gray-900 focus:ring-2 focus:ring-lale-orange focus:border-transparent"
+                                                        rows={3}
+                                                        autoFocus
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => saveEditMessage(msg.id)}
+                                                            className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 flex items-center gap-1"
+                                                        >
+                                                            <Check size={12} /> Salvar
+                                                        </button>
+                                                        <button
+                                                            onClick={cancelEdit}
+                                                            className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 flex items-center gap-1"
+                                                        >
+                                                            <X size={12} /> Cancelar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {msg.content && msg.content.trim() !== '' ? (
+                                                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                    ) : (
+                                                        <p className="text-sm italic text-gray-400">Mídia enviada</p>
+                                                    )}
+                                                    {msg.media_url && (
+                                                        <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
+                                                    )}
+                                                    <div className="flex items-center justify-end gap-1 mt-1">
+                                                        <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-200' : 'text-gray-500'}`}>
+                                                            {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                        </p>
+                                                        {msg.sender_type === 'agent' && msg.status === 'delivered' && (
+                                                            <CheckCheck size={14} />
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                // Archived messages view
+                                <>
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
+                                            <Archive size={20} />
+                                            Histórico de Mensagens Arquivadas
+                                        </h3>
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            {archivedMessages.length} {archivedMessages.length === 1 ? 'mensagem arquivada' : 'mensagens arquivadas'}
+                                        </p>
+                                    </div>
+
+                                    {archivedMessages.map((msg) => (
+                                        <div key={msg.id} className="flex items-start gap-3 mb-4 opacity-75">
+                                            <div className={`flex-1 flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'}`}>
+                                                <div className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
+                                                    ? 'bg-purple-400 text-white'
+                                                    : 'bg-gray-200 text-gray-700 border border-gray-300'
+                                                    }`}>
+                                                    {msg.content && msg.content.trim() !== '' ? (
+                                                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                    ) : (
+                                                        <p className="text-sm italic text-gray-400">Mídia enviada</p>
+                                                    )}
+                                                    {msg.media_url && <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />}
+                                                    <div className="flex items-center justify-between gap-2 mt-1">
+                                                        <span className="text-xs italic">Arquivada</span>
+                                                        <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-100' : 'text-gray-500'}`}>
+                                                            {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-col gap-1.5 pt-1">
+                                                <button
+                                                    onClick={() => deleteMessage(msg.id)}
+                                                    className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow-md transition-colors"
+                                                    title="Excluir permanentemente"
+                                                >
+                                                    <Trash size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        </div>
+
+                        {/* Message Input */}
+                        <div className="p-4 border-t border-gray-200 bg-white">
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="Digite sua mensagem..."
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
+                                />
+                                <button
+                                    onClick={sendMessage}
+                                    className="px-4 py-2 bg-lale-orange text-white rounded-lg hover:opacity-90 transition-opacity"
+                                >
+                                    <Send size={18} />
+                                </button>
                             </div>
                         </div>
-                    )}
-                </Card>
-            </div>
-        </div >
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
