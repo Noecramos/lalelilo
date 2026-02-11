@@ -12,8 +12,10 @@ const CLIENT_ID = 'acb4b354-728f-479d-915a-c857d27da9ad';
 
 interface Ticket {
     id: string;
+    ticket_number?: number;
     title: string;
     description: string;
+    job_position?: string;
     priority: string;
     status: string;
     category: string;
@@ -43,7 +45,7 @@ export default function TicketsPage() {
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [filterStatus, setFilterStatus] = useState<string>('all');
-    const [newTicket, setNewTicket] = useState({ title: '', description: '', priority: 'medium', category: 'operational', shop_id: '' });
+    const [newTicket, setNewTicket] = useState({ title: '', description: '', job_position: '', priority: 'medium', category: 'operational', shop_id: '' });
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
     const [uploading, setUploading] = useState(false);
 
@@ -80,7 +82,7 @@ export default function TicketsPage() {
                 }),
             });
             setShowForm(false);
-            setNewTicket({ title: '', description: '', priority: 'medium', category: 'operational', shop_id: '' });
+            setNewTicket({ title: '', description: '', job_position: '', priority: 'medium', category: 'operational', shop_id: '' });
             setUploadedFiles([]);
             fetchTickets();
             alert('Ticket criado com sucesso!');
@@ -265,6 +267,11 @@ export default function TicketsPage() {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 flex-wrap">
+                                                {ticket.ticket_number && (
+                                                    <span className="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                                                        #{String(ticket.ticket_number).padStart(4, '0')}
+                                                    </span>
+                                                )}
                                                 <p className="font-medium text-gray-900">{ticket.title}</p>
                                                 <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${pCfg.color}`}>
                                                     <PIcon size={12} /> {pCfg.label}
@@ -276,6 +283,9 @@ export default function TicketsPage() {
                                             <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
                                                 <span>{new Date(ticket.created_at).toLocaleDateString('pt-BR')}</span>
                                                 <span className="capitalize">{ticket.category?.replace('_', ' ')}</span>
+                                                {ticket.job_position && (
+                                                    <span className="text-gray-500">👤 {ticket.job_position}</span>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1">
@@ -367,6 +377,20 @@ export default function TicketsPage() {
                                     rows={4}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
                                     placeholder="Descreva o problema em detalhes..."
+                                />
+                            </div>
+
+                            {/* Job Position */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Cargo/Função
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newTicket.job_position}
+                                    onChange={(e) => setNewTicket({ ...newTicket, job_position: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
+                                    placeholder="Ex: Gerente, Vendedor, Técnico..."
                                 />
                             </div>
 

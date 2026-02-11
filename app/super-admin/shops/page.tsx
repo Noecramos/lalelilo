@@ -12,6 +12,10 @@ interface Shop {
     city: string;
     state: string;
     phone: string;
+    whatsapp?: string;
+    email?: string;
+    address?: string;
+    cnpj?: string;
     is_active: boolean;
     revenue_30d: number;
     orders_30d: number;
@@ -30,6 +34,10 @@ export default function ShopsManagementPage() {
         city: '',
         state: '',
         phone: '',
+        whatsapp: '',
+        email: '',
+        address: '',
+        cnpj: '',
         is_active: true
     });
 
@@ -67,7 +75,7 @@ export default function ShopsManagementPage() {
 
             await fetchShops();
             setIsCreating(false);
-            setNewShop({ name: '', slug: '', city: '', state: '', phone: '', is_active: true });
+            setNewShop({ name: '', slug: '', city: '', state: '', phone: '', whatsapp: '', email: '', address: '', cnpj: '', is_active: true });
             alert('Loja criada com sucesso!');
         } catch (error) {
             console.error('Error creating shop:', error);
@@ -361,6 +369,32 @@ export default function ShopsManagementPage() {
                             onChange={(e) => setEditingShop({ ...editingShop, phone: e.target.value })}
                             required
                         />
+                        <Input
+                            label="WhatsApp"
+                            value={editingShop.whatsapp || ''}
+                            onChange={(e) => setEditingShop({ ...editingShop, whatsapp: e.target.value })}
+                            placeholder="(00) 00000-0000"
+                        />
+                        <Input
+                            label="Email"
+                            type="email"
+                            value={editingShop.email || ''}
+                            onChange={(e) => setEditingShop({ ...editingShop, email: e.target.value })}
+                            placeholder="loja@exemplo.com"
+                        />
+                        <Input
+                            label="Endereço Completo"
+                            value={editingShop.address || ''}
+                            onChange={(e) => setEditingShop({ ...editingShop, address: e.target.value })}
+                            placeholder="Rua, número, bairro, CEP"
+                        />
+                        <Input
+                            label="CNPJ"
+                            value={editingShop.cnpj || ''}
+                            onChange={(e) => setEditingShop({ ...editingShop, cnpj: e.target.value })}
+                            placeholder="00.000.000/0000-00"
+                            maxLength={18}
+                        />
                         <div className="flex items-center gap-2">
                             <input
                                 type="checkbox"
@@ -428,6 +462,32 @@ export default function ShopsManagementPage() {
                             value={newShop.phone || ''}
                             onChange={(e) => setNewShop({ ...newShop, phone: e.target.value })}
                             required
+                        />
+                        <Input
+                            label="WhatsApp"
+                            value={newShop.whatsapp || ''}
+                            onChange={(e) => setNewShop({ ...newShop, whatsapp: e.target.value })}
+                            placeholder="(00) 00000-0000"
+                        />
+                        <Input
+                            label="Email"
+                            type="email"
+                            value={newShop.email || ''}
+                            onChange={(e) => setNewShop({ ...newShop, email: e.target.value })}
+                            placeholder="loja@exemplo.com"
+                        />
+                        <Input
+                            label="Endereço Completo"
+                            value={newShop.address || ''}
+                            onChange={(e) => setNewShop({ ...newShop, address: e.target.value })}
+                            placeholder="Rua, número, bairro, CEP"
+                        />
+                        <Input
+                            label="CNPJ"
+                            value={newShop.cnpj || ''}
+                            onChange={(e) => setNewShop({ ...newShop, cnpj: e.target.value })}
+                            placeholder="00.000.000/0000-00"
+                            maxLength={18}
                         />
                         <div className="flex items-center gap-2">
                             <input
