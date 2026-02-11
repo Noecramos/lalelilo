@@ -79,6 +79,13 @@ export function middleware(request: NextRequest) {
         }
     }
 
+    // Default: Require authentication for all other routes
+    // If you want to make certain routes public (like homepage, products, etc.),
+    // add them to the publicRoutes array above
+    if (!session) {
+        return NextResponse.redirect(new URL('/login', request.url));
+    }
+
     return NextResponse.next();
 }
 
