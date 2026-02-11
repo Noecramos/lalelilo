@@ -526,7 +526,11 @@ export default function OmnichannelPage() {
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                            {msg.content && msg.content.trim() !== '' ? (
+                                                                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                            ) : (
+                                                                <p className="text-sm italic text-gray-400">Mídia enviada</p>
+                                                            )}
                                                             {msg.media_url && (
                                                                 <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
                                                             )}
@@ -591,10 +595,14 @@ export default function OmnichannelPage() {
                                             <div key={msg.id} className="flex items-start gap-3 mb-4 opacity-75">
                                                 <div className={`flex-1 flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'}`}>
                                                     <div className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                            ? 'bg-purple-400 text-white'
-                                                            : 'bg-gray-200 text-gray-700 border border-gray-300'
+                                                        ? 'bg-purple-400 text-white'
+                                                        : 'bg-gray-200 text-gray-700 border border-gray-300'
                                                         }`}>
-                                                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                        {msg.content && msg.content.trim() !== '' ? (
+                                                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                        ) : (
+                                                            <p className="text-sm italic text-gray-400">Mídia enviada</p>
+                                                        )}
                                                         {msg.media_url && <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />}
                                                         <div className="flex items-center justify-between gap-2 mt-1">
                                                             <span className="text-xs italic">Arquivada</span>
