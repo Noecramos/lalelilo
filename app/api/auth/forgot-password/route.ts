@@ -46,11 +46,13 @@ export async function POST(req: NextRequest) {
                 .eq('id', admin.id);
 
             // Send email via Supabase
-            await sendPasswordEmail(email, newPassword, entityName);
+            if (email) {
+                await sendPasswordEmail(email, newPassword, entityName);
+            }
 
             return NextResponse.json({
                 success: true,
-                email: maskEmail(email),
+                email: email ? maskEmail(email) : 'N/A',
                 message: 'Nova senha enviada para o email cadastrado'
             });
         }
@@ -90,11 +92,13 @@ export async function POST(req: NextRequest) {
             .eq('id', shop.id);
 
         // Send email via Supabase
-        await sendPasswordEmail(email, newPassword, entityName);
+        if (email) {
+            await sendPasswordEmail(email, newPassword, entityName);
+        }
 
         return NextResponse.json({
             success: true,
-            email: maskEmail(email),
+            email: email ? maskEmail(email) : 'N/A',
             message: 'Nova senha enviada para o email cadastrado'
         });
 
