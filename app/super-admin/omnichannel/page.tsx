@@ -192,7 +192,7 @@ export default function OmnichannelPage() {
     }
 
     return (
-        <div className="h-[calc(100vh-4rem)] flex flex-col">
+        <div className="min-h-screen pb-6">
             {/* Header */}
             <div className="mb-6">
                 <div className="flex items-center justify-between">
@@ -251,9 +251,9 @@ export default function OmnichannelPage() {
             </div>
 
             {/* Chat Interface */}
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Conversations List */}
-                <Card padding="none" className="flex flex-col h-full">
+                <Card padding="none" className="flex flex-col" style={{ height: '600px' }}>
                     <div className="p-4 border-b border-gray-200">
                         <div className="relative">
                             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -327,7 +327,7 @@ export default function OmnichannelPage() {
                 </Card>
 
                 {/* Messages Area */}
-                <Card padding="none" className="md:col-span-2 flex flex-col h-full">
+                <Card padding="none" className="md:col-span-2 flex flex-col" style={{ height: '600px' }}>
                     {selectedConversation ? (
                         <>
                             {/* Chat Header */}
@@ -357,8 +357,8 @@ export default function OmnichannelPage() {
                                     >
                                         <div
                                             className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                    ? 'bg-purple-600 text-white'
-                                                    : 'bg-white text-gray-900 border border-gray-200'
+                                                ? 'bg-purple-600 text-white'
+                                                : 'bg-white text-gray-900 border border-gray-200'
                                                 }`}
                                         >
                                             <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
