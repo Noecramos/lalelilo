@@ -5,7 +5,7 @@ import { Card } from '@/components/ui';
 import {
     MessageSquare, Phone, Instagram, Facebook, Send, Search,
     Filter, Clock, CheckCheck, User, Building2, RefreshCw,
-    Edit, Trash, Check, X
+    Edit, Trash, Check, X, Archive
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -41,6 +41,7 @@ interface Message {
     media_url: string | null;
     status: string;
     created_at: string;
+    archived?: boolean;
 }
 
 const channelIcons = {
@@ -66,6 +67,9 @@ export default function OmnichannelPage() {
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const [editedContent, setEditedContent] = useState('');
     const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
+    const [showArchived, setShowArchived] = useState(false);
+    const [archivedMessages, setArchivedMessages] = useState<Message[]>([]);
+
 
 
     useEffect(() => {
@@ -118,14 +122,26 @@ export default function OmnichannelPage() {
 
     const fetchMessages = async (conversationId: string) => {
         try {
+            // Fetch non-archived messages
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
                 .eq('conversation_id', conversationId)
+                .or('archived.is.null,archived.eq.false')
                 .order('created_at', { ascending: true });
 
             if (error) throw error;
             setMessages(data || []);
+
+            // Load archived messages
+            const { data: archivedData } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('conversation_id', conversationId)
+                .eq('archived', true)
+                .order('created_at', { ascending: true });
+
+            setArchivedMessages(archivedData || []);
 
             // Mark as read
             await supabase
@@ -224,6 +240,47 @@ export default function OmnichannelPage() {
             alert('Erro ao excluir mensagem');
         }
     };
+
+    const archiveMessage = async (messageId: string) => {
+        try {
+            const messageToArchive = messages.find(msg => msg.id === messageId);
+            if (!messageToArchive) return;
+
+            // Mark as archived in database
+            const { error } = await supabase
+                .from('messages')
+                .update({ archived: true })
+                .eq('id', messageId);
+
+            if (error) throw error;
+
+            // Move to archived list
+            setArchivedMessages([...archivedMessages, { ...messageToArchive, archived: true }]);
+            setMessages(messages.filter(msg => msg.id !== messageId));
+        } catch (e) {
+            console.error('Error archiving message:', e);
+            alert('Erro ao arquivar mensagem');
+        }
+    };
+
+    const loadArchivedMessages = async () => {
+        if (!selectedConv) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('conversation_id', selectedConv)
+                .eq('archived', true)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            setArchivedMessages(data || []);
+        } catch (e) {
+            console.error('Error loading archived messages:', e);
+        }
+    };
+
 
 
     // Filter conversations
@@ -464,19 +521,25 @@ export default function OmnichannelPage() {
                                                 )}
                                             </div>
 
-                                            {/* Edit and Delete buttons */}
+                                            {/* Edit, Archive and Delete buttons */}
                                             {hoveredMessageId === msg.id && editingMessageId !== msg.id && (
                                                 <div className="absolute -top-2 -right-2 flex gap-1">
-                                                    {/* Edit button - only for agent messages */}
-                                                    {msg.sender_type === 'agent' && (
-                                                        <button
-                                                            onClick={() => startEditMessage(msg.id, msg.content)}
-                                                            className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-md"
-                                                            title="Editar"
-                                                        >
-                                                            <Edit size={12} />
-                                                        </button>
-                                                    )}
+                                                    {/* Edit button - for all messages */}
+                                                    <button
+                                                        onClick={() => startEditMessage(msg.id, msg.content)}
+                                                        className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-md"
+                                                        title="Editar"
+                                                    >
+                                                        <Edit size={12} />
+                                                    </button>
+                                                    {/* Archive button - for all messages */}
+                                                    <button
+                                                        onClick={() => archiveMessage(msg.id)}
+                                                        className="p-1.5 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 shadow-md"
+                                                        title="Arquivar"
+                                                    >
+                                                        <Archive size={12} />
+                                                    </button>
                                                     {/* Delete button - for all messages */}
                                                     <button
                                                         onClick={() => deleteMessage(msg.id)}
@@ -490,6 +553,53 @@ export default function OmnichannelPage() {
                                         </div>
                                     </div>
                                 ))}
+
+                                {/* Histórico de Msgs - Archived Messages */}
+                                {archivedMessages.length > 0 && (
+                                    <div className="mt-6 pt-4 border-t-2 border-gray-300">
+                                        <button
+                                            onClick={() => setShowArchived(!showArchived)}
+                                            className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-lale-orange mb-3"
+                                        >
+                                            <Archive size={16} />
+                                            Histórico de Msgs ({archivedMessages.length})
+                                            <span className="text-xs">
+                                                {showArchived ? '▼' : '▶'}
+                                            </span>
+                                        </button>
+
+                                        {showArchived && (
+                                            <div className="space-y-4">
+                                                {archivedMessages.map((msg) => (
+                                                    <div
+                                                        key={msg.id}
+                                                        className={`flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'} opacity-60`}
+                                                    >
+                                                        <div className="relative group">
+                                                            <div
+                                                                className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
+                                                                        ? 'bg-purple-400 text-white'
+                                                                        : 'bg-gray-200 text-gray-700 border border-gray-300'
+                                                                    }`}
+                                                            >
+                                                                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                                {msg.media_url && (
+                                                                    <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
+                                                                )}
+                                                                <div className="flex items-center justify-between gap-2 mt-1">
+                                                                    <span className="text-xs italic">Arquivada</span>
+                                                                    <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-100' : 'text-gray-500'}`}>
+                                                                        {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Message Input */}
