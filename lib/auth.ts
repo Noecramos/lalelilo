@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase';
 
 const SALT_ROUNDS = 10;
 
@@ -58,7 +58,7 @@ export function generateResetToken(): string {
  * Authenticate a shop by slug and password
  */
 export async function authenticateShop(slug: string, password: string): Promise<{ success: boolean; shop?: any; error?: string }> {
-    const supabase = await createClient();
+    const supabase = supabaseAdmin;
 
     // Find shop by slug
     const { data: shop, error } = await supabase
@@ -96,7 +96,7 @@ export async function authenticateShop(slug: string, password: string): Promise<
  * Authenticate super admin
  */
 export async function authenticateSuperAdmin(username: string, password: string): Promise<{ success: boolean; admin?: any; error?: string }> {
-    const supabase = await createClient();
+    const supabase = supabaseAdmin;
 
     // Find super admin by username
     const { data: admin, error } = await supabase

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase';
 import { generateRandomPassword, hashPassword } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const supabase = await createClient();
+        const supabase = supabaseAdmin;
         let email: string | null = null;
         let entityName: string = '';
 
@@ -111,7 +111,6 @@ export async function POST(req: NextRequest) {
  * Send password reset email via Supabase
  */
 async function sendPasswordEmail(email: string, password: string, entityName: string) {
-    const supabase = await createClient();
 
     const emailHtml = `
         <!DOCTYPE html>
