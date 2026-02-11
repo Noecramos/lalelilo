@@ -459,22 +459,66 @@ export default function OmnichannelPage() {
                                         </div>
                                     </div>
 
-                                    {/* Histórico Button */}
-                                    {archivedMessages.length > 0 && (
+                                    <div className="flex items-center gap-2">
+                                        {/* Histórico Button */}
+                                        {archivedMessages.length > 0 && (
+                                            <button
+                                                onClick={() => setShowArchived(!showArchived)}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showArchived
+                                                    ? 'bg-yellow-500 text-white'
+                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                    }`}
+                                            >
+                                                <Archive size={18} />
+                                                <span className="font-medium">Histórico</span>
+                                                <span className="px-2 py-0.5 bg-white bg-opacity-30 rounded-full text-xs font-bold">
+                                                    {archivedMessages.length}
+                                                </span>
+                                            </button>
+                                        )}
+
+                                        {/* Archive Conversation Button */}
                                         <button
-                                            onClick={() => setShowArchived(!showArchived)}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showArchived
-                                                ? 'bg-yellow-500 text-white'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                }`}
+                                            onClick={async () => {
+                                                if (confirm('Arquivar esta conversa?')) {
+                                                    // Archive all messages in this conversation
+                                                    const { error } = await supabase
+                                                        .from('messages')
+                                                        .update({ archived: true })
+                                                        .eq('conversation_id', selectedConv);
+
+                                                    if (!error) {
+                                                        fetchMessages(selectedConv);
+                                                    }
+                                                }
+                                            }}
+                                            className="p-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                                            title="Arquivar conversa"
                                         >
-                                            <Archive size={18} />
-                                            <span className="font-medium">Histórico</span>
-                                            <span className="px-2 py-0.5 bg-white bg-opacity-30 rounded-full text-xs font-bold">
-                                                {archivedMessages.length}
-                                            </span>
+                                            <Archive size={20} />
                                         </button>
-                                    )}
+
+                                        {/* Delete Conversation Button */}
+                                        <button
+                                            onClick={async () => {
+                                                if (confirm('Excluir esta conversa e todas as mensagens?')) {
+                                                    const { error } = await supabase
+                                                        .from('messages')
+                                                        .delete()
+                                                        .eq('conversation_id', selectedConv);
+
+                                                    if (!error) {
+                                                        setSelectedConv(null);
+                                                        fetchConversations();
+                                                    }
+                                                }
+                                            }}
+                                            className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                                            title="Excluir conversa"
+                                        >
+                                            <Trash size={20} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -491,92 +535,60 @@ export default function OmnichannelPage() {
                                     messages.map((msg) => (
                                         <div
                                             key={msg.id}
-                                            className="flex items-start gap-3 mb-4 w-full"
+                                            className={`flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'} mb-4`}
                                         >
                                             {/* Message bubble */}
-                                            <div className={`flex-1 flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'}`}>
-                                                <div
-                                                    className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                        ? 'bg-purple-600 text-white'
-                                                        : 'bg-white text-gray-900 border border-gray-200'
-                                                        }`}
-                                                >
-                                                    {editingMessageId === msg.id ? (
-                                                        <div className="space-y-2">
-                                                            <textarea
-                                                                value={editedContent}
-                                                                onChange={(e) => setEditedContent(e.target.value)}
-                                                                className="w-full p-2 text-sm border border-gray-300 rounded text-gray-900 focus:ring-2 focus:ring-lale-orange focus:border-transparent"
-                                                                rows={3}
-                                                                autoFocus
-                                                            />
-                                                            <div className="flex gap-2">
-                                                                <button
-                                                                    onClick={() => saveEditMessage(msg.id)}
-                                                                    className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 flex items-center gap-1"
-                                                                >
-                                                                    <Check size={12} /> Salvar
-                                                                </button>
-                                                                <button
-                                                                    onClick={cancelEdit}
-                                                                    className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 flex items-center gap-1"
-                                                                >
-                                                                    <X size={12} /> Cancelar
-                                                                </button>
-                                                            </div>
+                                            <div
+                                                className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
+                                                    ? 'bg-purple-600 text-white'
+                                                    : 'bg-white text-gray-900 border border-gray-200'
+                                                    }`}
+                                            >
+                                                {editingMessageId === msg.id ? (
+                                                    <div className="space-y-2">
+                                                        <textarea
+                                                            value={editedContent}
+                                                            onChange={(e) => setEditedContent(e.target.value)}
+                                                            className="w-full p-2 text-sm border border-gray-300 rounded text-gray-900 focus:ring-2 focus:ring-lale-orange focus:border-transparent"
+                                                            rows={3}
+                                                            autoFocus
+                                                        />
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => saveEditMessage(msg.id)}
+                                                                className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 flex items-center gap-1"
+                                                            >
+                                                                <Check size={12} /> Salvar
+                                                            </button>
+                                                            <button
+                                                                onClick={cancelEdit}
+                                                                className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 flex items-center gap-1"
+                                                            >
+                                                                <X size={12} /> Cancelar
+                                                            </button>
                                                         </div>
-                                                    ) : (
-                                                        <>
-                                                            {msg.content && msg.content.trim() !== '' ? (
-                                                                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                                                            ) : (
-                                                                <p className="text-sm italic text-gray-400">Mídia enviada</p>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        {msg.content && msg.content.trim() !== '' ? (
+                                                            <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                        ) : (
+                                                            <p className="text-sm italic text-gray-400">Mídia enviada</p>
+                                                        )}
+                                                        {msg.media_url && (
+                                                            <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
+                                                        )}
+                                                        <div className="flex items-center justify-end gap-1 mt-1">
+                                                            <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-200' : 'text-gray-500'}`}>
+                                                                {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                            </p>
+                                                            {msg.sender_type === 'agent' && msg.status === 'delivered' && (
+                                                                <CheckCheck size={14} />
                                                             )}
-                                                            {msg.media_url && (
-                                                                <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
-                                                            )}
-                                                            <div className="flex items-center justify-end gap-1 mt-1">
-                                                                <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-200' : 'text-gray-500'}`}>
-                                                                    {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                                                </p>
-                                                                {msg.sender_type === 'agent' && msg.status === 'delivered' && (
-                                                                    <CheckCheck size={14} />
-                                                                )}
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
-
-                                            {/* Action buttons - always visible on the right */}
-                                            {editingMessageId !== msg.id && (
-                                                <div className="flex flex-col gap-1.5 pt-1">
-                                                    {/* Edit button */}
-                                                    <button
-                                                        onClick={() => startEditMessage(msg.id, msg.content)}
-                                                        className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-md transition-colors"
-                                                        title="Editar"
-                                                    >
-                                                        <Edit size={16} />
-                                                    </button>
-                                                    {/* Archive button */}
-                                                    <button
-                                                        onClick={() => archiveMessage(msg.id)}
-                                                        className="p-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 shadow-md transition-colors"
-                                                        title="Arquivar"
-                                                    >
-                                                        <Archive size={16} />
-                                                    </button>
-                                                    {/* Delete button */}
-                                                    <button
-                                                        onClick={() => deleteMessage(msg.id)}
-                                                        className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow-md transition-colors"
-                                                        title="Excluir"
-                                                    >
-                                                        <Trash size={16} />
-                                                    </button>
-                                                </div>
-                                            )}
                                         </div>
                                     ))
                                 ) : (
@@ -710,6 +722,6 @@ export default function OmnichannelPage() {
                     )}
                 </Card>
             </div>
-        </div>
+        </div >
     );
 }
