@@ -463,15 +463,14 @@ export default function OmnichannelPage() {
                                 {messages.map((msg) => (
                                     <div
                                         key={msg.id}
-                                        className={`flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'}`}
-                                        onMouseEnter={() => setHoveredMessageId(msg.id)}
-                                        onMouseLeave={() => setHoveredMessageId(null)}
+                                        className="flex items-start gap-3 mb-4"
                                     >
-                                        <div className="relative group">
+                                        {/* Message bubble */}
+                                        <div className={`flex-1 flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'}`}>
                                             <div
                                                 className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                    ? 'bg-purple-600 text-white'
-                                                    : 'bg-white text-gray-900 border border-gray-200'
+                                                        ? 'bg-purple-600 text-white'
+                                                        : 'bg-white text-gray-900 border border-gray-200'
                                                     }`}
                                             >
                                                 {editingMessageId === msg.id ? (
@@ -515,37 +514,37 @@ export default function OmnichannelPage() {
                                                     </>
                                                 )}
                                             </div>
-
-                                            {/* Edit, Archive and Delete buttons */}
-                                            {hoveredMessageId === msg.id && editingMessageId !== msg.id && (
-                                                <div className="absolute -top-2 -right-2 flex gap-1">
-                                                    {/* Edit button - for all messages */}
-                                                    <button
-                                                        onClick={() => startEditMessage(msg.id, msg.content)}
-                                                        className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow-md"
-                                                        title="Editar"
-                                                    >
-                                                        <Edit size={12} />
-                                                    </button>
-                                                    {/* Archive button - for all messages */}
-                                                    <button
-                                                        onClick={() => archiveMessage(msg.id)}
-                                                        className="p-1.5 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 shadow-md"
-                                                        title="Arquivar"
-                                                    >
-                                                        <Archive size={12} />
-                                                    </button>
-                                                    {/* Delete button - for all messages */}
-                                                    <button
-                                                        onClick={() => deleteMessage(msg.id)}
-                                                        className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-md"
-                                                        title="Excluir"
-                                                    >
-                                                        <Trash size={12} />
-                                                    </button>
-                                                </div>
-                                            )}
                                         </div>
+
+                                        {/* Action buttons - always visible on the right */}
+                                        {editingMessageId !== msg.id && (
+                                            <div className="flex flex-col gap-1.5 pt-1">
+                                                {/* Edit button */}
+                                                <button
+                                                    onClick={() => startEditMessage(msg.id, msg.content)}
+                                                    className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-md transition-colors"
+                                                    title="Editar"
+                                                >
+                                                    <Edit size={16} />
+                                                </button>
+                                                {/* Archive button */}
+                                                <button
+                                                    onClick={() => archiveMessage(msg.id)}
+                                                    className="p-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 shadow-md transition-colors"
+                                                    title="Arquivar"
+                                                >
+                                                    <Archive size={16} />
+                                                </button>
+                                                {/* Delete button */}
+                                                <button
+                                                    onClick={() => deleteMessage(msg.id)}
+                                                    className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 shadow-md transition-colors"
+                                                    title="Excluir"
+                                                >
+                                                    <Trash size={16} />
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
 
