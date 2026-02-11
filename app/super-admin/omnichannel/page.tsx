@@ -442,19 +442,38 @@ export default function OmnichannelPage() {
                         <>
                             {/* Chat Header */}
                             <div className="p-4 border-b border-gray-200 bg-gray-50">
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-2 rounded-lg ${channelColors[selectedConversation.channel_type]}`}>
-                                        {React.createElement(channelIcons[selectedConversation.channel_type], { size: 20 })}
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg ${channelColors[selectedConversation.channel_type]}`}>
+                                            {React.createElement(channelIcons[selectedConversation.channel_type], { size: 20 })}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900">
+                                                {selectedConversation.contacts.name || selectedConversation.contacts.phone || 'Sem nome'}
+                                            </h3>
+                                            <p className="text-sm text-gray-600 capitalize">
+                                                {selectedConversation.channel_type}
+                                                {selectedConversation.contacts.phone && ` • ${selectedConversation.contacts.phone}`}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900">
-                                            {selectedConversation.contacts.name || selectedConversation.contacts.phone || 'Sem nome'}
-                                        </h3>
-                                        <p className="text-sm text-gray-600 capitalize">
-                                            {selectedConversation.channel_type}
-                                            {selectedConversation.contacts.phone && ` • ${selectedConversation.contacts.phone}`}
-                                        </p>
-                                    </div>
+
+                                    {/* Histórico Button */}
+                                    {archivedMessages.length > 0 && (
+                                        <button
+                                            onClick={() => setShowArchived(!showArchived)}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${showArchived
+                                                    ? 'bg-yellow-500 text-white'
+                                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                }`}
+                                        >
+                                            <Archive size={18} />
+                                            <span className="font-medium">Histórico</span>
+                                            <span className="px-2 py-0.5 bg-white bg-opacity-30 rounded-full text-xs font-bold">
+                                                {archivedMessages.length}
+                                            </span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -469,8 +488,8 @@ export default function OmnichannelPage() {
                                         <div className={`flex-1 flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'}`}>
                                             <div
                                                 className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                        ? 'bg-purple-600 text-white'
-                                                        : 'bg-white text-gray-900 border border-gray-200'
+                                                    ? 'bg-purple-600 text-white'
+                                                    : 'bg-white text-gray-900 border border-gray-200'
                                                     }`}
                                             >
                                                 {editingMessageId === msg.id ? (
