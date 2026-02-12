@@ -67,7 +67,7 @@ export default function SuperAdminLayout({
             {/* Sidebar */}
             <aside
                 className={`
-          fixed top-0 left-0 z-50 h-full w-64 bg-gradient-to-b from-lale-pink to-lale-orange
+          fixed top-0 left-0 z-50 h-full w-64 bg-gradient-to-b from-purple-700 via-purple-800 to-pink-700
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
@@ -143,7 +143,7 @@ export default function SuperAdminLayout({
                 </nav>
 
                 {/* Noviapp Branding */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-20 text-center bg-lale-orange pointer-events-none">
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-20 text-center bg-pink-800 pointer-events-none">
                     <div className="bg-white/20 rounded-lg p-3 text-xs text-white pointer-events-auto">
                         <p>© 2026 Novix Online • Powered by Noviapp</p>
                         <p>Todos os direitos reservados.</p>
