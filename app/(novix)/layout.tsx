@@ -14,7 +14,7 @@ export default function NovixLayout({
 
     const handleLogout = async () => {
         if (!confirm('Deseja realmente sair?')) return;
-        
+
         await fetch('/api/novix/auth/logout', { method: 'POST' });
         router.push('/novix-login');
     };
@@ -27,10 +27,10 @@ export default function NovixLayout({
                     <div className="flex justify-between items-center h-16">
                         {/* Logo */}
                         <div className="flex items-center gap-3">
-                            <Image 
-                                src="/noviapp-logo.png" 
-                                alt="Noviapp" 
-                                width={40} 
+                            <Image
+                                src="/noviapp-logo.png"
+                                alt="Noviapp"
+                                width={40}
                                 height={40}
                                 className="rounded-lg"
                             />
@@ -65,8 +65,9 @@ export default function NovixLayout({
             </main>
 
             {/* Footer */}
-            <footer className="mt-auto py-6 text-center text-sm text-gray-500">
-                <p>© 2026 Novix Online • Powered by Noviapp</p>
+            <footer className="mt-auto py-6 text-center">
+                <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 opacity-40" />
+                <p className="text-sm text-gray-500">© 2026 Novix Online • Powered by Noviapp AI Systems ®</p>
             </footer>
         </div>
     );

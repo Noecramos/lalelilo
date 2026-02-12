@@ -17,6 +17,7 @@ import {
     ClipboardCheck,
     TicketCheck,
     Users,
+    Package,
     LogOut
 } from 'lucide-react';
 
@@ -40,6 +41,7 @@ export default function SuperAdminLayout({
         { name: 'Relatórios', href: '/super-admin/reports', icon: FileText },
         { name: 'Gamificação', href: '/super-admin/gamification', icon: Trophy },
         { name: 'Checklists', href: '/super-admin/checklists', icon: ClipboardCheck },
+        { name: 'Reabastecimento', href: '/super-admin/replenishment', icon: Package },
         { name: 'Tickets', href: '/super-admin/tickets', icon: TicketCheck },
         { name: 'Equipe', href: '/super-admin/team', icon: Users },
         { name: 'Suporte', href: 'https://wa.me/558183920320', icon: Phone, external: true },
@@ -145,12 +147,11 @@ export default function SuperAdminLayout({
                 {/* Noviapp Branding */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-20 text-center bg-pink-800 pointer-events-none">
                     <div className="bg-white/20 rounded-lg p-3 text-xs text-white pointer-events-auto">
-                        <p>© 2026 Novix Online • Powered by Noviapp</p>
-                        <p>Todos os direitos reservados.</p>
-                        <a href="https://www.noviapp.com.br" target="_blank" rel="noopener noreferrer" className="block my-1 text-white hover:underline">
+                        <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 opacity-90" style={{ filter: 'brightness(0) invert(1)' }} />
+                        <p>© 2026 Novix Online • Powered by Noviapp AI Systems ®</p>
+                        <a href="https://www.noviapp.com.br" target="_blank" rel="noopener noreferrer" className="block mt-1 text-white hover:underline">
                             www.noviapp.com.br
                         </a>
-                        <img src="/noviapp-logo.png" alt="Noviapp" className="h-4 mx-auto mt-2 opacity-90" style={{ filter: 'brightness(0) invert(1)' }} />
                     </div>
                 </div>
             </aside>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { generateRandomPassword, hashPassword } from '@/lib/auth';
+import { resend, EMAIL_CONFIG } from '@/lib/resend';
 
 export async function POST(req: NextRequest) {
     try {
@@ -112,7 +113,7 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * Send password reset email via Supabase
+ * Send password reset email via Resend
  */
 async function sendPasswordEmail(email: string, password: string, entityName: string) {
 
@@ -163,21 +164,28 @@ async function sendPasswordEmail(email: string, password: string, entityName: st
         </html>
     `;
 
-    // Note: Supabase Auth doesn't support custom emails directly
-    // You'll need to use a service like Resend, SendGrid, or configure SMTP
-    // For now, this is a placeholder - you'll need to implement actual email sending
+    try {
+        // Send email via Resend
+        const { data, error } = await resend.emails.send({
+            from: EMAIL_CONFIG.from,
+            to: email,
+            replyTo: EMAIL_CONFIG.replyTo,
+            subject: '🔐 Nova Senha - Lalelilo',
+            html: emailHtml,
+        });
 
-    console.log('Email would be sent to:', email);
-    console.log('Password:', password);
+        if (error) {
+            console.error('Resend error:', error);
+            throw new Error(`Failed to send email: ${error.message}`);
+        }
 
-    // TODO: Implement actual email sending
-    // Example with Resend:
-    // await resend.emails.send({
-    //     from: 'Lalelilo <noreply@lalelilo.com>',
-    //     to: email,
-    //     subject: '🔐 Nova Senha - Lalelilo',
-    //     html: emailHtml
-    // });
+        console.log('✅ Email sent successfully:', data);
+        return data;
+
+    } catch (error) {
+        console.error('Error sending email:', error);
+        throw error;
+    }
 }
 
 /**
