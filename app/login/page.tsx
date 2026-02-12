@@ -181,7 +181,7 @@ export default function LoginPage() {
                 {/* Footer */}
                 <div className="mt-6 text-center">
                     <p className="text-xs text-gray-500">
-                        © 2026 Lalelilo • Todos os direitos reservados
+                        © 2026 Novix Online • Powered by Noviapp
                     </p>
                 </div>
             </div>

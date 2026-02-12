@@ -14,7 +14,7 @@ export default function Footer() {
         <footer className="py-6 mt-12">
             <div className="container mx-auto px-4">
                 <div className="text-center text-xs text-gray-400">
-                    <p>© 2026 Noviapp Sistemas IA. Todos os direitos reservados.</p>
+                    <p>© 2026 Novix Online • Powered by Noviapp</p>
                 </div>
             </div>
         </footer>

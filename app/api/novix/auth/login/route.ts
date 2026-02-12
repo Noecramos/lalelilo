@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Find Novix manager
+        console.log('[Novix Login] Looking for username:', username);
         const { data: manager, error } = await supabaseAdmin
             .from('novix_managers')
             .select('*')
@@ -21,17 +22,31 @@ export async function POST(request: NextRequest) {
             .eq('is_active', true)
             .single();
 
-        if (error || !manager) {
+        if (error) {
+            console.error('[Novix Login] Database error:', error);
             return NextResponse.json(
                 { success: false, error: 'Invalid credentials' },
                 { status: 401 }
             );
         }
 
+        if (!manager) {
+            console.log('[Novix Login] No manager found for username:', username);
+            return NextResponse.json(
+                { success: false, error: 'Invalid credentials' },
+                { status: 401 }
+            );
+        }
+
+        console.log('[Novix Login] Manager found:', manager.username);
+        console.log('[Novix Login] Has password hash:', !!manager.password_hash);
+
         // Verify password
         const isValid = await bcrypt.compare(password, manager.password_hash);
+        console.log('[Novix Login] Password valid:', isValid);
 
         if (!isValid) {
+            console.log('[Novix Login] Password verification failed');
             return NextResponse.json(
                 { success: false, error: 'Invalid credentials' },
                 { status: 401 }

@@ -8,7 +8,13 @@ export function middleware(request: NextRequest) {
     // ============================================
     // NOVIX ONLINE - Platform Manager Dashboard
     // ============================================
-    if (hostname.includes('novix.noviapp.com.br') || (hostname.includes('localhost') && pathname.startsWith('/novix'))) {
+    // Detect Novix requests:
+    // - Production: novix.noviapp.com.br domain
+    // - Localhost: /novix-login or /novix/* paths
+    const isNovixDomain = hostname.includes('novix.noviapp.com.br');
+    const isNovixPath = pathname.startsWith('/novix-login') || pathname.startsWith('/novix/') || pathname === '/novix';
+
+    if (isNovixDomain || (hostname.includes('localhost') && isNovixPath)) {
         const novixSession = request.cookies.get('novix_session');
 
         // Allow Novix auth API routes
@@ -16,17 +22,17 @@ export function middleware(request: NextRequest) {
             return NextResponse.next();
         }
 
-        // Allow login page
-        if (pathname === '/login') {
+        // Allow Novix login page
+        if (pathname === '/novix-login' || pathname.startsWith('/novix-login')) {
             if (novixSession) {
-                return NextResponse.redirect(new URL('/', request.url));
+                return NextResponse.redirect(new URL('/novix', request.url));
             }
             return NextResponse.next();
         }
 
         // Protect all other Novix routes
         if (!novixSession) {
-            return NextResponse.redirect(new URL('/login', request.url));
+            return NextResponse.redirect(new URL('/novix-login', request.url));
         }
 
         return NextResponse.next();

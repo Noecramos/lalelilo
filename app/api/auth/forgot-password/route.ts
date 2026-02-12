@@ -154,7 +154,7 @@ async function sendPasswordEmail(email: string, password: string, entityName: st
                     <p>Se você não solicitou esta alteração, entre em contato com o administrador imediatamente.</p>
                     
                     <div class="footer">
-                        <p>© 2026 Lalelilo • Todos os direitos reservados</p>
+                        <p>© 2026 Novix Online • Powered by Noviapp</p>
                         <p>Este é um email automático, por favor não responda.</p>
                     </div>
                 </div>

@@ -26,7 +26,7 @@ export default function NovixLogin() {
             const data = await response.json();
 
             if (data.success) {
-                router.push('/');
+                router.push('/novix');
             } else {
                 setError(data.error || 'Login failed');
             }
