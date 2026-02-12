@@ -3,8 +3,40 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
+    const hostname = request.headers.get('host') || '';
 
-    // Get session cookie
+    // ============================================
+    // NOVIX ONLINE - Platform Manager Dashboard
+    // ============================================
+    if (hostname.includes('novix.noviapp.com.br') || (hostname.includes('localhost') && pathname.startsWith('/novix'))) {
+        const novixSession = request.cookies.get('novix_session');
+
+        // Allow Novix auth API routes
+        if (pathname.startsWith('/api/novix')) {
+            return NextResponse.next();
+        }
+
+        // Allow login page
+        if (pathname === '/login') {
+            if (novixSession) {
+                return NextResponse.redirect(new URL('/', request.url));
+            }
+            return NextResponse.next();
+        }
+
+        // Protect all other Novix routes
+        if (!novixSession) {
+            return NextResponse.redirect(new URL('/login', request.url));
+        }
+
+        return NextResponse.next();
+    }
+
+    // ============================================
+    // LALELILO - Client App & Shop Admin
+    // ============================================
+
+    // Get shop session cookie
     const session = request.cookies.get('auth_session');
 
     // Admin routes that require authentication
