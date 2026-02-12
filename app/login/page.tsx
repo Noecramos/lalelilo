@@ -123,26 +123,13 @@ export default function LoginPage() {
                                 autoComplete="username"
                             />
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                            Use "super-admin" para acesso administrativo
-                        </p>
                     </div>
 
                     {/* Password Input */}
                     <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
-                                Senha
-                            </label>
-                            <button
-                                type="button"
-                                onClick={handleForgotPassword}
-                                disabled={forgotPasswordLoading}
-                                className="text-xs text-purple-600 font-semibold hover:text-purple-700 hover:underline disabled:opacity-50"
-                            >
-                                {forgotPasswordLoading ? 'Enviando...' : 'Esqueceu sua senha?'}
-                            </button>
-                        </div>
+                        <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+                            Senha
+                        </label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <Lock size={20} className="text-gray-400" />
@@ -164,6 +151,16 @@ export default function LoginPage() {
                                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                             >
                                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
+                        <div className="flex justify-end mt-2">
+                            <button
+                                type="button"
+                                onClick={handleForgotPassword}
+                                disabled={forgotPasswordLoading}
+                                className="text-xs text-purple-600 font-semibold hover:text-purple-700 hover:underline disabled:opacity-50"
+                            >
+                                {forgotPasswordLoading ? 'Enviando...' : 'Esqueceu sua senha?'}
                             </button>
                         </div>
                     </div>
