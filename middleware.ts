@@ -7,26 +7,32 @@ export function middleware(request: NextRequest) {
     // Get session cookie
     const session = request.cookies.get('auth_session');
 
-    // Public routes that don't require authentication
-    const publicRoutes = ['/login', '/api/auth/login', '/api/auth/forgot-password', '/api/auth/logout'];
+    // Admin routes that require authentication
+    const adminRoutes = ['/super-admin', '/shop-admin'];
 
-    // Check if current path is public
-    const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+    // Check if current path is an admin route
+    const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
 
-    if (isPublicRoute) {
-        // If accessing login page with active session, redirect to dashboard
-        if (pathname === '/login' && session) {
-            try {
-                const sessionData = JSON.parse(session.value);
-                if (sessionData.role === 'super_admin') {
-                    return NextResponse.redirect(new URL('/super-admin', request.url));
-                } else if (sessionData.role === 'shop') {
-                    return NextResponse.redirect(new URL(`/shop-admin/${sessionData.slug}`, request.url));
-                }
-            } catch (error) {
-                // Invalid session, continue to login
+    // Auth API routes
+    const authRoutes = ['/login', '/api/auth/login', '/api/auth/forgot-password', '/api/auth/logout'];
+    const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
+
+    // If accessing login page with active session, redirect to dashboard
+    if (pathname === '/login' && session) {
+        try {
+            const sessionData = JSON.parse(session.value);
+            if (sessionData.role === 'super_admin') {
+                return NextResponse.redirect(new URL('/super-admin', request.url));
+            } else if (sessionData.role === 'shop') {
+                return NextResponse.redirect(new URL(`/shop-admin/${sessionData.slug}`, request.url));
             }
+        } catch (error) {
+            // Invalid session, continue to login
         }
+    }
+
+    // Allow access to auth routes and all non-admin routes (end-user pages)
+    if (isAuthRoute || !isAdminRoute) {
         return NextResponse.next();
     }
 
@@ -79,13 +85,8 @@ export function middleware(request: NextRequest) {
         }
     }
 
-    // Default: Require authentication for all other routes
-    // If you want to make certain routes public (like homepage, products, etc.),
-    // add them to the publicRoutes array above
-    if (!session) {
-        return NextResponse.redirect(new URL('/login', request.url));
-    }
-
+    // This should never be reached since we handle admin routes above
+    // and non-admin routes are allowed through earlier
     return NextResponse.next();
 }
 
