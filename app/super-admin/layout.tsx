@@ -129,7 +129,7 @@ export default function SuperAdminLayout({
                                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
                   ${active
-                                        ? 'bg-white text-lale-orange shadow-md'
+                                        ? 'bg-white text-gray-800 shadow-md font-semibold'
                                         : 'text-white hover:bg-white hover:bg-opacity-20'
                                     }
                 `}
