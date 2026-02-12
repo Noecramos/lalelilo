@@ -158,15 +158,15 @@ export default function SuperAdminLayout({
             {/* Main content */}
             <div className="lg:pl-64">
                 {/* Top bar */}
-                <header className="h-16 bg-white border-b border-gray-200 flex items-center gap-3 px-4 lg:px-6">
-                    <button
-                        onClick={() => setSidebarOpen(true)}
-                        className="lg:hidden text-gray-500 hover:text-gray-700 flex-shrink-0"
-                    >
-                        <Menu size={24} />
-                    </button>
+                <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between gap-3 px-4 lg:px-6">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className="lg:hidden text-gray-500 hover:text-gray-700 flex-shrink-0"
+                        >
+                            <Menu size={24} />
+                        </button>
 
-                    <div className="flex-1 lg:flex-none">
                         <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
                             Painel Super Admin
                         </h1>
