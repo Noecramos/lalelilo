@@ -1,15 +1,22 @@
 // Test Getnet Payment Gateway Connection
-// Usage: node test-getnet-simple.mjs
+// Usage: GETNET_CLIENT_ID=xxx GETNET_CLIENT_SECRET=xxx node test-getnet-simple.mjs
 
 async function testGetnetAuth() {
     console.log('🧪 Testing Getnet Payment Gateway Authentication...\n');
 
-    const clientId = process.env.GETNET_CLIENT_ID || 'REDACTED_GETNET_CLIENT_ID';
-    const clientSecret = process.env.GETNET_CLIENT_SECRET || 'REDACTED_GETNET_SECRET';
+    const clientId = process.env.GETNET_CLIENT_ID;
+    const clientSecret = process.env.GETNET_CLIENT_SECRET;
     const apiUrl = process.env.GETNET_API_URL || 'https://api-sbx.globalgetnet.com';
 
+    if (!clientId || !clientSecret) {
+        console.error('❌ Missing credentials!');
+        console.error('   Set GETNET_CLIENT_ID and GETNET_CLIENT_SECRET environment variables.');
+        console.error('   Example: GETNET_CLIENT_ID=xxx GETNET_CLIENT_SECRET=xxx node test-getnet-simple.mjs');
+        process.exit(1);
+    }
+
     console.log('📋 Configuration:');
-    console.log('   Client ID:', clientId);
+    console.log('   Client ID:', clientId.substring(0, 8) + '...');
     console.log('   API URL:', apiUrl);
     console.log('   Environment: sandbox\n');
 

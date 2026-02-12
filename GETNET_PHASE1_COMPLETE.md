@@ -11,10 +11,10 @@
 
 ### 1. **Credentials Configured** ✅
 All Getnet sandbox credentials added to `.env.local`:
-- ✅ Client ID: `REDACTED_GETNET_CLIENT_ID`
-- ✅ Client Secret: `REDACTED_GETNET_SECRET`
-- ✅ Merchant ID: `REDACTED_GETNET_MERCHANT_ID`
-- ✅ Seller ID: `REDACTED_GETNET_SELLER_ID`
+- ✅ Client ID: [REDACTED — see .env.local]
+- ✅ Client Secret: [REDACTED — see .env.local]
+- ✅ Merchant ID: [REDACTED — see .env.local]
+- ✅ Seller ID: [REDACTED — see .env.local]
 - ✅ API URL: `https://api-sbx.globalgetnet.com`
 - ✅ Environment: `sandbox`
 

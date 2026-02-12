@@ -1,10 +1,16 @@
 // SIMPLE Getnet Payment Test
-// Using the EXACT sandbox credentials and simplest possible payload
+// Usage: GETNET_CLIENT_ID=xxx GETNET_CLIENT_SECRET=xxx GETNET_SELLER_ID=xxx node test-getnet-payment-simple.mjs
 
-const API_URL = 'https://api-sbx.globalgetnet.com';
-const CLIENT_ID = 'REDACTED_GETNET_CLIENT_ID';
-const CLIENT_SECRET = 'REDACTED_GETNET_SECRET';
-const SELLER_ID = 'REDACTED_GETNET_SELLER_ID';
+const API_URL = process.env.GETNET_API_URL || 'https://api-sbx.globalgetnet.com';
+const CLIENT_ID = process.env.GETNET_CLIENT_ID;
+const CLIENT_SECRET = process.env.GETNET_CLIENT_SECRET;
+const SELLER_ID = process.env.GETNET_SELLER_ID;
+
+if (!CLIENT_ID || !CLIENT_SECRET || !SELLER_ID) {
+    console.error('❌ Missing credentials!');
+    console.error('   Set GETNET_CLIENT_ID, GETNET_CLIENT_SECRET, and GETNET_SELLER_ID environment variables.');
+    process.exit(1);
+}
 
 console.log('🧪 SIMPLE Getnet Payment Test\n');
 
@@ -60,7 +66,7 @@ async function test() {
             transaction_type: 'FULL',
             number_installments: 1,
             card: {
-                number_token: '4012001037141112',
+                number_token: '4012001037141112', // Getnet sandbox test card
                 cardholder_name: 'TESTE APROVADO',
                 security_code: '123',
                 expiration_month: '12',

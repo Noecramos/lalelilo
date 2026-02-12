@@ -3,34 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui';
 import {
-    Package, Plus, Clock, CheckCircle2, Truck, XCircle,
-    ChevronRight, Filter, Eye, X, AlertTriangle,
-    ArrowRight, ChevronDown, Search, RefreshCw, Send
+    Package, Clock, CheckCircle2, Truck, XCircle,
+    Filter, Eye, X,
+    ArrowRight, Search, RefreshCw
 } from 'lucide-react';
 
 const CLIENT_ID = 'acb4b354-728f-479d-915a-c857d27da9ad';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
-interface Shop {
-    id: string;
-    name: string;
-}
-
-interface DC {
-    id: string;
-    name: string;
-}
-
-interface Product {
-    id: string;
-    name: string;
-    image_url?: string;
-    sku?: string;
-    product_type?: string;
-    product_tier?: string;
-    gender?: string;
-    sizes?: string[];
-}
 
 interface ReplenishmentItem {
     id: string;
@@ -38,7 +18,7 @@ interface ReplenishmentItem {
     size: string;
     quantity_requested: number;
     quantity_fulfilled: number;
-    product?: Product;
+    product?: { id: string; name: string; image_url?: string; sku?: string };
 }
 
 interface ReplenishmentRequest {
@@ -86,26 +66,12 @@ const nextStatusLabel: Record<string, string> = {
 export default function ReplenishmentPage() {
     const [requests, setRequests] = useState<ReplenishmentRequest[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showForm, setShowForm] = useState(false);
     const [showDetail, setShowDetail] = useState<ReplenishmentRequest | null>(null);
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Form state
-    const [shops, setShops] = useState<Shop[]>([]);
-    const [dcs, setDcs] = useState<DC[]>([]);
-    const [products, setProducts] = useState<Product[]>([]);
-    const [selectedShop, setSelectedShop] = useState('');
-    const [selectedDC, setSelectedDC] = useState('');
-    const [formNotes, setFormNotes] = useState('');
-    const [expectedDelivery, setExpectedDelivery] = useState('');
-    const [formItems, setFormItems] = useState<{ product_id: string; size: string; quantity_requested: number }[]>([]);
-    const [submitting, setSubmitting] = useState(false);
-
     useEffect(() => {
         fetchRequests();
-        fetchShopsAndDCs();
-        fetchProducts();
     }, []);
 
     // ─── Data Fetching ────────────────────────────────────────────────────
@@ -122,39 +88,6 @@ export default function ReplenishmentPage() {
         }
     };
 
-    const fetchShopsAndDCs = async () => {
-        try {
-            const shopsRes = await fetch(`/api/shops?client_id=${CLIENT_ID}`);
-            const shopsData = await shopsRes.json();
-            setShops(Array.isArray(shopsData?.shops) ? shopsData.shops : []);
-
-            // For DCs, we'll try to fetch them; if the endpoint doesn't exist, use a default
-            try {
-                const dcRes = await fetch(`/api/replenishment?dc_list=true`);
-                const dcData = await dcRes.json();
-                if (Array.isArray(dcData) && dcData.length > 0) {
-                    setDcs(dcData);
-                } else {
-                    setDcs([{ id: 'dc-default', name: 'CD Principal' }]);
-                }
-            } catch {
-                setDcs([{ id: 'dc-default', name: 'CD Principal' }]);
-            }
-        } catch (e) {
-            console.error('Error fetching shops/DCs:', e);
-        }
-    };
-
-    const fetchProducts = async () => {
-        try {
-            const res = await fetch(`/api/products?client_id=${CLIENT_ID}`);
-            const data = await res.json();
-            setProducts(Array.isArray(data?.products) ? data.products : []);
-        } catch (e) {
-            console.error('Error fetching products:', e);
-        }
-    };
-
     const fetchRequestDetail = async (id: string) => {
         try {
             const res = await fetch(`/api/replenishment/${id}`);
@@ -166,47 +99,6 @@ export default function ReplenishmentPage() {
     };
 
     // ─── Actions ──────────────────────────────────────────────────────────
-    const createRequest = async () => {
-        if (!selectedShop || formItems.length === 0) {
-            alert('Selecione uma loja e adicione pelo menos um item');
-            return;
-        }
-        const validItems = formItems.filter(i => i.product_id && i.quantity_requested > 0);
-        if (validItems.length === 0) {
-            alert('Adicione pelo menos um item com quantidade válida');
-            return;
-        }
-
-        setSubmitting(true);
-        try {
-            const res = await fetch('/api/replenishment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    clientId: CLIENT_ID,
-                    shopId: selectedShop,
-                    dcId: selectedDC || dcs[0]?.id || 'dc-default',
-                    requestedBy: 'admin',
-                    items: validItems,
-                    notes: formNotes,
-                    expectedDelivery: expectedDelivery || undefined,
-                }),
-            });
-
-            if (!res.ok) throw new Error('Failed to create');
-
-            setShowForm(false);
-            resetForm();
-            fetchRequests();
-            alert('✅ Pedido de reabastecimento criado com sucesso!');
-        } catch (e) {
-            console.error(e);
-            alert('❌ Erro ao criar pedido');
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
     const updateStatus = async (requestId: string, newStatus: string) => {
         const confirmMessages: Record<string, string> = {
             processing: 'Iniciar separação deste pedido?',
@@ -244,26 +136,6 @@ export default function ReplenishmentPage() {
         }
     };
 
-    const resetForm = () => {
-        setSelectedShop('');
-        setSelectedDC('');
-        setFormNotes('');
-        setExpectedDelivery('');
-        setFormItems([]);
-    };
-
-    const addItem = () => {
-        setFormItems([...formItems, { product_id: '', size: 'P', quantity_requested: 1 }]);
-    };
-
-    const removeItem = (index: number) => {
-        setFormItems(formItems.filter((_, i) => i !== index));
-    };
-
-    const updateItem = (index: number, field: string, value: string | number) => {
-        setFormItems(formItems.map((item, i) => i === index ? { ...item, [field]: value } : item));
-    };
-
     // ─── Filtering ────────────────────────────────────────────────────────
     const filtered = requests.filter(r => {
         const matchesStatus = filterStatus === 'all' || r.status === filterStatus;
@@ -291,24 +163,16 @@ export default function ReplenishmentPage() {
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                         <Package className="text-lale-orange" size={28} />
-                        Reabastecimento
+                        Pedidos de Reabastecimento
                     </h2>
-                    <p className="text-gray-500 mt-1">Gerencie pedidos de estoque das lojas para o CD</p>
+                    <p className="text-gray-500 mt-1">Gerencie solicitações de estoque enviadas pelas lojas</p>
                 </div>
-                <div className="flex gap-2">
-                    <button
-                        onClick={fetchRequests}
-                        className="flex items-center gap-2 px-3 py-2.5 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                        <RefreshCw size={16} />
-                    </button>
-                    <button
-                        onClick={() => { resetForm(); setShowForm(true); }}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-lale-orange to-lale-pink text-white rounded-lg font-medium hover:opacity-90 transition-opacity shadow-md"
-                    >
-                        <Plus size={18} /> Novo Pedido
-                    </button>
-                </div>
+                <button
+                    onClick={fetchRequests}
+                    className="flex items-center gap-2 px-3 py-2.5 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                    <RefreshCw size={16} /> Atualizar
+                </button>
             </div>
 
             {/* Stats */}
@@ -358,7 +222,7 @@ export default function ReplenishmentPage() {
                     <div className="px-5 py-16 text-center">
                         <Package size={48} className="text-gray-200 mx-auto mb-3" />
                         <p className="text-gray-500 font-medium">Nenhum pedido encontrado</p>
-                        <p className="text-gray-400 text-sm mt-1">Crie um novo pedido clicando em &quot;Novo Pedido&quot;</p>
+                        <p className="text-gray-400 text-sm mt-1">As lojas enviarão solicitações que aparecerão aqui</p>
                     </div>
                 ) : (
                     <div className="divide-y divide-gray-50">
@@ -434,195 +298,6 @@ export default function ReplenishmentPage() {
                 )}
             </Card>
 
-            {/* ═══════════════════════════════════════════════════════════════════
-                CREATE REQUEST MODAL
-            ═══════════════════════════════════════════════════════════════════ */}
-            {showForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-                        {/* Header */}
-                        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-                            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                                <Package className="text-lale-orange" size={24} />
-                                Novo Pedido de Reabastecimento
-                            </h3>
-                            <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        {/* Form Body */}
-                        <div className="p-6 space-y-5">
-                            {/* Shop & DC Selection */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Loja <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        value={selectedShop}
-                                        onChange={e => setSelectedShop(e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
-                                    >
-                                        <option value="">Selecione a loja...</option>
-                                        {shops.map(s => (
-                                            <option key={s.id} value={s.id}>{s.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Centro de Distribuição
-                                    </label>
-                                    <select
-                                        value={selectedDC}
-                                        onChange={e => setSelectedDC(e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
-                                    >
-                                        <option value="">CD Principal</option>
-                                        {dcs.map(d => (
-                                            <option key={d.id} value={d.id}>{d.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            {/* Expected Delivery */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Data Prevista de Entrega
-                                </label>
-                                <input
-                                    type="date"
-                                    value={expectedDelivery}
-                                    onChange={e => setExpectedDelivery(e.target.value)}
-                                    className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
-                                />
-                            </div>
-
-                            {/* Items */}
-                            <div>
-                                <div className="flex items-center justify-between mb-3">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Itens do Pedido <span className="text-red-500">*</span>
-                                    </label>
-                                    <button
-                                        onClick={addItem}
-                                        className="flex items-center gap-1 text-sm text-lale-orange hover:text-lale-pink font-medium"
-                                    >
-                                        <Plus size={16} /> Adicionar Item
-                                    </button>
-                                </div>
-
-                                {formItems.length === 0 ? (
-                                    <div className="bg-gray-50 rounded-lg p-8 text-center border-2 border-dashed border-gray-200">
-                                        <Package size={32} className="text-gray-300 mx-auto mb-2" />
-                                        <p className="text-gray-400 text-sm">Nenhum item adicionado</p>
-                                        <button
-                                            onClick={addItem}
-                                            className="mt-3 text-sm text-lale-orange hover:text-lale-pink font-medium"
-                                        >
-                                            + Adicionar primeiro item
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {formItems.map((item, index) => {
-                                            const selectedProduct = products.find(p => p.id === item.product_id);
-                                            const sizes = selectedProduct?.sizes || ['PP', 'P', 'M', 'G', 'GG', 'XG'];
-
-                                            return (
-                                                <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                                    <div className="flex-1 min-w-0">
-                                                        <select
-                                                            value={item.product_id}
-                                                            onChange={e => updateItem(index, 'product_id', e.target.value)}
-                                                            className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-lale-orange focus:border-transparent"
-                                                        >
-                                                            <option value="">Selecione o produto...</option>
-                                                            {products.map(p => (
-                                                                <option key={p.id} value={p.id}>
-                                                                    {p.name} {p.sku ? `(${p.sku})` : ''}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                    <select
-                                                        value={item.size}
-                                                        onChange={e => updateItem(index, 'size', e.target.value)}
-                                                        className="w-20 px-2 py-1.5 text-sm border border-gray-200 rounded-md"
-                                                    >
-                                                        {(Array.isArray(sizes) ? sizes : ['PP', 'P', 'M', 'G', 'GG', 'XG']).map((s: string) => (
-                                                            <option key={s} value={s}>{s}</option>
-                                                        ))}
-                                                    </select>
-                                                    <input
-                                                        type="number"
-                                                        min="1"
-                                                        value={item.quantity_requested}
-                                                        onChange={e => updateItem(index, 'quantity_requested', parseInt(e.target.value) || 0)}
-                                                        className="w-20 px-2 py-1.5 text-sm border border-gray-200 rounded-md text-center"
-                                                        placeholder="Qtd"
-                                                    />
-                                                    <button
-                                                        onClick={() => removeItem(index)}
-                                                        className="text-red-400 hover:text-red-600 p-1 flex-shrink-0"
-                                                    >
-                                                        <X size={16} />
-                                                    </button>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Notes */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Observações
-                                </label>
-                                <textarea
-                                    value={formNotes}
-                                    onChange={e => setFormNotes(e.target.value)}
-                                    rows={3}
-                                    placeholder="Notas adicionais sobre o pedido..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
-                                />
-                            </div>
-
-                            {/* Summary */}
-                            {formItems.length > 0 && (
-                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                                    <h4 className="text-sm font-semibold text-amber-800 mb-1">Resumo do Pedido</h4>
-                                    <p className="text-sm text-amber-700">
-                                        {formItems.filter(i => i.product_id).length} produto(s) • {' '}
-                                        {formItems.reduce((sum, i) => sum + (i.quantity_requested || 0), 0)} unidades no total
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Footer */}
-                        <div className="sticky bottom-0 bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-200">
-                            <button
-                                onClick={() => setShowForm(false)}
-                                className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg font-medium transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={createRequest}
-                                disabled={submitting || !selectedShop || formItems.length === 0}
-                                className="px-6 py-2 bg-gradient-to-r from-lale-orange to-lale-pink text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                            >
-                                <Send size={16} />
-                                {submitting ? 'Enviando...' : 'Enviar Pedido'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* ═══════════════════════════════════════════════════════════════════
                 DETAIL MODAL

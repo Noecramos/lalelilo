@@ -1,14 +1,20 @@
 // Test Getnet Sandbox Endpoints
-// This will help us find the correct payment endpoint
+// Usage: GETNET_CLIENT_ID=xxx GETNET_CLIENT_SECRET=xxx GETNET_SELLER_ID=xxx node test-getnet-endpoints.mjs
 
-const API_URL = 'https://api-sbx.globalgetnet.com';
-const CLIENT_ID = 'REDACTED_GETNET_CLIENT_ID';
-const CLIENT_SECRET = 'REDACTED_GETNET_SECRET';
-const SELLER_ID = 'REDACTED_GETNET_SELLER_ID';
+const API_URL = process.env.GETNET_API_URL || 'https://api-sbx.globalgetnet.com';
+const CLIENT_ID = process.env.GETNET_CLIENT_ID;
+const CLIENT_SECRET = process.env.GETNET_CLIENT_SECRET;
+const SELLER_ID = process.env.GETNET_SELLER_ID;
+
+if (!CLIENT_ID || !CLIENT_SECRET || !SELLER_ID) {
+    console.error('❌ Missing credentials!');
+    console.error('   Set GETNET_CLIENT_ID, GETNET_CLIENT_SECRET, and GETNET_SELLER_ID environment variables.');
+    process.exit(1);
+}
 
 console.log('🧪 Testing Getnet Sandbox Endpoints\n');
 console.log('API URL:', API_URL);
-console.log('Seller ID:', SELLER_ID);
+console.log('Seller ID:', SELLER_ID.substring(0, 8) + '...');
 console.log('');
 
 async function getToken() {

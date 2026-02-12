@@ -4,10 +4,10 @@
 
 ### 1. **Credentials Configured** ✅
 Added to `.env.local`:
-- `GETNET_CLIENT_ID`: REDACTED_GETNET_CLIENT_ID
-- `GETNET_CLIENT_SECRET`: REDACTED_GETNET_SECRET
-- `GETNET_MERCHANT_ID`: REDACTED_GETNET_MERCHANT_ID
-- `GETNET_SELLER_ID`: REDACTED_GETNET_SELLER_ID
+- `GETNET_CLIENT_ID`: [REDACTED — see .env.local]
+- `GETNET_CLIENT_SECRET`: [REDACTED — see .env.local]
+- `GETNET_MERCHANT_ID`: [REDACTED — see .env.local]
+- `GETNET_SELLER_ID`: [REDACTED — see .env.local]
 - `GETNET_API_URL`: https://api.pre.globalgetnet.com
 - `GETNET_ENVIRONMENT`: sandbox
 
@@ -60,7 +60,7 @@ File: `supabase/migrations/add_payment_support.sql`
 ### **Option 3: Contact Getnet Support**
 - Email: developers@getnet.com or support@globalgetnet.com
 - Ask for: "Sandbox authentication example for Regional API"
-- Provide your Merchant ID: `REDACTED_GETNET_MERCHANT_ID`
+- Provide your Merchant ID (check .env.local)
 
 ---
 

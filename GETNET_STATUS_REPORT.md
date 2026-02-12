@@ -52,8 +52,8 @@ We tested multiple endpoints:
 **Steps**:
 1. Contact Getnet support: suporte@getnet.com.br
 2. Provide your current credentials:
-   - Client ID: `REDACTED_GETNET_CLIENT_ID`
-   - Seller ID: `REDACTED_GETNET_SELLER_ID`
+   - Client ID: [REDACTED — see .env.local]
+   - Seller ID: [REDACTED — see .env.local]
 3. Request access to:
    - **E-commerce API** (also called Direct API)
    - Endpoint: `/v1/payments/credit`
@@ -94,8 +94,8 @@ Olá equipe Getnet,
 Estou integrando o Getnet na minha aplicação e-commerce e preciso de ajuda com as credenciais sandbox.
 
 **Credenciais Atuais:**
-- Client ID: REDACTED_GETNET_CLIENT_ID
-- Seller ID: REDACTED_GETNET_SELLER_ID
+- Client ID: [REDACTED — see .env.local]
+- Seller ID: [REDACTED — see .env.local]
 - Ambiente: Sandbox (api-sbx.globalgetnet.com)
 
 **Problema:**
