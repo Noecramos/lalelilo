@@ -40,5 +40,46 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
-.env*.local
+# ========================================
+# SECURITY: Sensitive Files
+# ========================================
+
+# Environment files with credentials
+.env
+.env.local
+.env.*.local
+!.env.template
+!.env.example
+
+# SQL files with passwords/credentials
+supabase/novix_complete_setup.sql
+supabase/complete_auth_setup.sql
+**/migrations/*password*.sql
+**/migrations/*credentials*.sql
+
+# PowerShell scripts with credentials
+waha-cloudrun/deploy.ps1
+**/*password*.ps1
+**/*credentials*.ps1
+**/*secret*.ps1
+
+# Migration scripts with API keys (if they contain hardcoded keys)
+# scripts/run-migration.mjs
+
+# N8N workflows (may contain API keys)
+**/n8n*.json
+**/*workflow*.json
+
+# Any file with "credentials" or "password" in name
+*credentials*
+*password*
+*secret*
+*apikey*
+
+# Backup files that might contain sensitive data
+*.backup
+*.bak
+*.sql.backup
+
+# Deployment packages
+deploy.zip
