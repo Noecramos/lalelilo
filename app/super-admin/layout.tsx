@@ -89,8 +89,8 @@ export default function SuperAdminLayout({
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-4 space-y-1 overflow-y-auto" style={{
-                    maxHeight: 'calc(100vh - 12rem)',
+                <nav className="p-4 pb-8 space-y-1 overflow-y-auto" style={{
+                    maxHeight: 'calc(100vh - 16rem)',
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none'
                 }}>
