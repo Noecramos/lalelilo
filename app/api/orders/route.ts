@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+
+const DEFAULT_CLIENT_ID = (process.env.DEFAULT_CLIENT_ID || 'acb4b354-728f-479d-915a-c857d27da9ad').trim();
 
 // Generate unique order number
 function generateOrderNumber(): string {
@@ -19,7 +21,7 @@ export async function GET(request: NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '50');
         const offset = parseInt(searchParams.get('offset') || '0');
 
-        let query = supabase
+        let query = supabaseAdmin
             .from('orders')
             .select('*, shops(name, slug)', { count: 'exact' })
             .order('created_at', { ascending: false })
@@ -75,30 +77,34 @@ export async function POST(request: NextRequest) {
 
         const {
             shop_id,
-            client_id,
             customer_name,
             customer_email,
             customer_phone,
+            customer_cpf,
             customer_cep,
             customer_address,
             customer_city,
             customer_state,
             customer_neighborhood,
             customer_complement,
-            order_type,
+            order_type = 'delivery',
             items,
             subtotal,
             delivery_fee,
+            delivery_address,
             discount,
             total_amount,
+            total,
             payment_method,
             customer_notes
         } = body;
 
+        const clientId = body.client_id || DEFAULT_CLIENT_ID;
+
         // Validation
-        if (!client_id || !customer_name || !customer_phone || !order_type || !items || items.length === 0) {
+        if (!customer_name || !customer_phone || !items || items.length === 0) {
             return NextResponse.json(
-                { error: 'Missing required fields' },
+                { error: 'Missing required fields: customer_name, customer_phone, items' },
                 { status: 400 }
             );
         }
@@ -106,32 +112,40 @@ export async function POST(request: NextRequest) {
         // Generate order number
         const orderNumber = generateOrderNumber();
 
+        // Calculate total if not provided
+        const computedSubtotal = subtotal || items.reduce((sum: number, i: any) => sum + (i.price * i.quantity), 0);
+        const computedDelivery = delivery_fee ?? 0;
+        const computedTotal = total_amount || total || (computedSubtotal + computedDelivery - (discount || 0));
+
+        // Extract address fields from delivery_address if provided
+        const addr = delivery_address || {};
+
         // Create order
-        const { data: order, error } = await supabase
+        const { data: order, error } = await supabaseAdmin
             .from('orders')
             .insert({
                 order_number: orderNumber,
-                shop_id,
-                client_id,
+                shop_id: shop_id || null,
+                client_id: clientId,
                 customer_name,
-                customer_email,
+                customer_email: customer_email || null,
                 customer_phone,
-                customer_cep,
-                customer_address,
-                customer_city,
-                customer_state,
-                customer_neighborhood,
-                customer_complement,
+                customer_cep: customer_cep || addr.cep || null,
+                customer_address: customer_address || addr.address || null,
+                customer_city: customer_city || addr.city || null,
+                customer_state: customer_state || addr.state || null,
+                customer_neighborhood: customer_neighborhood || addr.neighborhood || null,
+                customer_complement: customer_complement || addr.complement || null,
                 order_type,
                 status: 'pending',
-                subtotal: parseFloat(subtotal),
-                delivery_fee: parseFloat(delivery_fee || 0),
+                subtotal: parseFloat(computedSubtotal) || 0,
+                delivery_fee: parseFloat(computedDelivery) || 0,
                 discount: parseFloat(discount || 0),
-                total_amount: parseFloat(total_amount),
-                payment_method,
+                total_amount: parseFloat(computedTotal) || 0,
+                payment_method: payment_method || 'pix',
                 payment_status: 'pending',
                 items,
-                customer_notes
+                customer_notes: customer_notes || null,
             })
             .select()
             .single();
@@ -143,9 +157,6 @@ export async function POST(request: NextRequest) {
                 { status: 500 }
             );
         }
-
-        // TODO: Send WhatsApp notification to shop
-        // TODO: Update inventory
 
         return NextResponse.json({
             success: true,

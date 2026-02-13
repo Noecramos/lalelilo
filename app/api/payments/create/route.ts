@@ -3,12 +3,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getnetService } from '@/lib/services/getnet';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 export async function POST(request: NextRequest) {
     try {
@@ -42,7 +38,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Get order details
-        const { data: order, error: orderError } = await supabase
+        const { data: order, error: orderError } = await supabaseAdmin
             .from('orders')
             .select('*, shop:shops(*)')
             .eq('id', orderId)
@@ -77,7 +73,7 @@ export async function POST(request: NextRequest) {
         const paymentResult = await getnetService.createPayment(paymentRequest);
 
         // Save payment to database
-        const { data: payment, error: paymentDbError } = await supabase
+        const { data: payment, error: paymentDbError } = await supabaseAdmin
             .from('payments')
             .insert({
                 order_id: orderId,
@@ -108,7 +104,7 @@ export async function POST(request: NextRequest) {
 
         // Update order with payment info
         if (paymentResult.status === 'approved') {
-            await supabase
+            await supabaseAdmin
                 .from('orders')
                 .update({
                     payment_method: 'credit_card',
@@ -120,7 +116,7 @@ export async function POST(request: NextRequest) {
                 })
                 .eq('id', orderId);
         } else {
-            await supabase
+            await supabaseAdmin
                 .from('orders')
                 .update({
                     payment_method: 'credit_card',

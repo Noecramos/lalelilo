@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 // GET /api/orders/[id] - Get order by ID
 // GET /api/orders/[id] - Get order by ID
@@ -10,7 +10,7 @@ export async function GET(
     try {
         const { id } = await params;
 
-        const { data: order, error } = await supabase
+        const { data: order, error } = await supabaseAdmin
             .from('orders')
             .select('*, shops(id, name, slug, phone, whatsapp, address)')
             .eq('id', id)
@@ -85,7 +85,7 @@ export async function PUT(
             updateData.internal_notes = internal_notes;
         }
 
-        const { data: order, error } = await supabase
+        const { data: order, error } = await supabaseAdmin
             .from('orders')
             .update(updateData)
             .eq('id', id)
@@ -130,7 +130,7 @@ export async function DELETE(
     try {
         const { id } = await params;
 
-        const { data: order, error } = await supabase
+        const { data: order, error } = await supabaseAdmin
             .from('orders')
             .update({
                 status: 'cancelled',

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 // GET /api/products - List all products
 export async function GET(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '50');
         const offset = parseInt(searchParams.get('offset') || '0');
 
-        let query = supabase
+        let query = supabaseAdmin
             .from('products')
             .select('*, categories(name)', { count: 'exact' })
             .order('name', { ascending: true })
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if slug already exists for this client
-        const { data: existingProduct } = await supabase
+        const { data: existingProduct } = await supabaseAdmin
             .from('products')
             .select('id')
             .eq('client_id', client_id)
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create product
-        const { data: product, error } = await supabase
+        const { data: product, error } = await supabaseAdmin
             .from('products')
             .insert({
                 client_id,

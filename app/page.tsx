@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Loading, Modal } from '@/components/ui';
-import { MapPin, ShoppingBag, Heart, Star, ChevronRight, User, ShoppingCart, Instagram, Share2 } from 'lucide-react';
+import { MapPin, ShoppingBag, Heart, Star, ChevronRight, User, ShoppingCart, Instagram, Share2, Check } from 'lucide-react';
 import Link from 'next/link';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import ImageGallery from '@/components/ImageGallery';
 import ShareButton from '@/components/ShareButton';
+import { useCart } from '@/lib/cart-context';
 
 interface Product {
   id: string;
@@ -33,6 +34,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const { addItem, itemCount } = useCart();
 
   useEffect(() => {
     fetchData();
@@ -147,8 +150,13 @@ export default function HomePage() {
 
         <Link href="/cart" title="Carrinho">
           <div className="group flex flex-col items-center gap-1">
-            <div className="w-14 h-14 rounded-full bg-white shadow-md flex items-center justify-center text-lale-orange border border-gray-100 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:text-lale-orange group-hover:border-lale-orange/30">
+            <div className="relative w-14 h-14 rounded-full bg-white shadow-md flex items-center justify-center text-lale-orange border border-gray-100 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:text-lale-orange group-hover:border-lale-orange/30">
               <ShoppingCart size={28} />
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {itemCount > 9 ? '9+' : itemCount}
+                </span>
+              )}
             </div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 group-hover:text-lale-orange transition-colors">Carrinho</span>
           </div>
@@ -296,12 +304,27 @@ export default function HomePage() {
                 )}
               </div>
               <div className="mt-6 space-y-3">
-                <Link href="/cart" className="block" onClick={() => setSelectedProduct(null)}>
-                  <Button variant="primary" className="w-full py-3 text-lg">
-                    Adicionar ao Carrinho
-                  </Button>
-                </Link>
-                <Button variant="outline" className="w-full" onClick={() => setSelectedProduct(null)}>
+                <Button
+                  variant="primary"
+                  className={`w-full py-3 text-lg transition-all ${addedToCart ? 'bg-green-500 hover:bg-green-600' : ''}`}
+                  onClick={() => {
+                    addItem({
+                      id: selectedProduct.id,
+                      name: selectedProduct.name,
+                      price: Number(selectedProduct.price),
+                      image_url: selectedProduct.image_url,
+                    });
+                    setAddedToCart(true);
+                    setTimeout(() => setAddedToCart(false), 2000);
+                  }}
+                >
+                  {addedToCart ? (
+                    <><Check size={18} className="mr-2" /> Adicionado!</>
+                  ) : (
+                    <><ShoppingCart size={18} className="mr-2" /> Adicionar ao Carrinho</>
+                  )}
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => { setSelectedProduct(null); setAddedToCart(false); }}>
                   Continuar Comprando
                 </Button>
               </div>

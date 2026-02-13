@@ -1,31 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, Button, Input, Select, Badge } from '@/components/ui';
+import { Card, Button, Input } from '@/components/ui';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, CreditCard, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import WhatsAppButton from '@/components/WhatsAppButton';
-
-interface CartItem {
-    id: string;
-    name: string;
-    price: number;
-    quantity: number;
-    image_url: string;
-}
+import { useCart } from '@/lib/cart-context';
 
 export default function CheckoutPage() {
     const router = useRouter();
-    const [cartItems, setCartItems] = useState<CartItem[]>([
-        { id: '1', name: 'Vestido Infantil Rosa', price: 75.00, quantity: 2, image_url: '/demo/Image 1.jpg' },
-        { id: '2', name: 'Conjunto Infantil Azul', price: 89.90, quantity: 1, image_url: '/demo/Image 2.jpg' }
-    ]);
+    const { items, removeItem, updateQuantity, subtotal, itemCount, clearCart } = useCart();
 
     const [customerInfo, setCustomerInfo] = useState({
         name: '',
         phone: '',
         email: '',
+        cpf: '',
         address: '',
         city: '',
         state: 'PE',
@@ -36,52 +27,114 @@ export default function CheckoutPage() {
     const [paymentMethod, setPaymentMethod] = useState('pix');
     const [submitting, setSubmitting] = useState(false);
 
-    // Mock shop data - TODO: Fetch from API
+    // Shop data
     const shopData = {
         name: 'Lalelilo - Loja Centro',
         pix_key: '12.345.678/0001-90',
         pix_name: 'Lalelilo Moda Infantil LTDA'
     };
 
-    const updateQuantity = (id: string, delta: number) => {
-        setCartItems(items =>
-            items.map(item =>
-                item.id === id
-                    ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-                    : item
-            )
-        );
-    };
-
-    const removeItem = (id: string) => {
-        setCartItems(items => items.filter(item => item.id !== id));
-    };
-
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const deliveryFee = orderType === 'delivery' ? 10.00 : 0;
     const total = subtotal + deliveryFee;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (items.length === 0) {
+            alert('Seu carrinho está vazio!');
+            return;
+        }
+
+        if (!customerInfo.name || !customerInfo.phone) {
+            alert('Preencha nome e telefone');
+            return;
+        }
+
         setSubmitting(true);
 
         try {
-            // TODO: Replace with actual API call
-            setTimeout(() => {
-                alert('Pedido realizado com sucesso!');
-                router.push('/order-success');
-            }, 2000);
+            // Create order via API
+            const orderPayload = {
+                customer_name: customerInfo.name,
+                customer_phone: customerInfo.phone,
+                customer_email: customerInfo.email,
+                customer_cpf: customerInfo.cpf,
+                order_type: orderType,
+                payment_method: paymentMethod,
+                delivery_address: orderType === 'delivery' ? {
+                    address: customerInfo.address,
+                    city: customerInfo.city,
+                    state: customerInfo.state,
+                    cep: customerInfo.cep,
+                } : null,
+                items: items.map(item => ({
+                    product_id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    image_url: item.image_url,
+                    size: item.size,
+                })),
+                subtotal,
+                delivery_fee: deliveryFee,
+                total,
+            };
+
+            const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderPayload),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Erro ao criar pedido');
+            }
+
+            const orderId = data.order?.id || data.id;
+
+            // If credit/debit card, go to payment page
+            if (paymentMethod === 'credit' || paymentMethod === 'debit') {
+                router.push(`/checkout/payment?orderId=${orderId}&amount=${total}&name=${encodeURIComponent(customerInfo.name)}&email=${encodeURIComponent(customerInfo.email)}&cpf=${encodeURIComponent(customerInfo.cpf)}`);
+            } else {
+                // For PIX/cash, go directly to success
+                clearCart();
+                router.push(`/checkout/success?orderId=${orderId}`);
+            }
         } catch (error) {
             console.error('Error submitting order:', error);
-            alert('Erro ao realizar pedido');
+            alert('Erro ao realizar pedido: ' + (error instanceof Error ? error.message : String(error)));
             setSubmitting(false);
         }
     };
 
+    if (items.length === 0) {
+        return (
+            <div className="min-h-screen bg-lale-bg-pink">
+                <header className="bg-gradient-to-r from-lale-pink to-lale-orange text-white">
+                    <div className="container mx-auto px-4 py-6">
+                        <h1 className="text-xl md:text-2xl font-bold">Checkout</h1>
+                    </div>
+                </header>
+                <div className="container mx-auto px-4 py-8">
+                    <Card padding="lg">
+                        <div className="text-center py-12">
+                            <ShoppingBag size={64} className="mx-auto text-gray-400 mb-4" />
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Carrinho vazio</h2>
+                            <p className="text-gray-600 mb-6">Adicione produtos antes de fazer checkout</p>
+                            <Link href="/"><Button variant="primary" size="lg">Ver Produtos</Button></Link>
+                        </div>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-lale-bg-pink">
             {/* Floating Back Button */}
-            <Link href="/products">
+            <Link href="/cart">
                 <button className="fixed bottom-4 left-4 z-50 bg-white text-lale-orange rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110">
                     <ArrowLeft size={24} />
                 </button>
@@ -97,7 +150,7 @@ export default function CheckoutPage() {
                             </div>
                             <div>
                                 <h1 className="text-xl md:text-2xl font-bold">Checkout</h1>
-                                <p className="text-xs md:text-sm opacity-90">{cartItems.length} itens no carrinho</p>
+                                <p className="text-xs md:text-sm opacity-90">{itemCount} itens no carrinho</p>
                             </div>
                         </div>
                     </div>
@@ -111,57 +164,52 @@ export default function CheckoutPage() {
                         <div className="lg:col-span-2 space-y-6">
                             {/* Cart items */}
                             <Card title="Itens do Pedido" padding="md">
-                                {cartItems.length === 0 ? (
-                                    <div className="text-center py-8">
-                                        <ShoppingBag size={48} className="mx-auto text-gray-400 mb-3" />
-                                        <p className="text-gray-500">Seu carrinho está vazio</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {cartItems.map((item) => (
-                                            <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 pb-4 border-b border-gray-200 last:border-0">
-                                                <img
-                                                    src={item.image_url}
-                                                    alt={item.name}
-                                                    className="w-20 h-20 object-cover rounded-lg"
-                                                />
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="font-semibold text-gray-900">{item.name}</h4>
-                                                    <p className="text-sm text-gray-600">R$ {item.price.toFixed(2)}</p>
-                                                </div>
-                                                <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => updateQuantity(item.id, -1)}
-                                                            className="p-2 rounded hover:bg-gray-100"
-                                                        >
-                                                            <Minus size={16} />
-                                                        </button>
-                                                        <span className="w-8 text-center font-medium">{item.quantity}</span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => updateQuantity(item.id, 1)}
-                                                            className="p-2 rounded hover:bg-gray-100"
-                                                        >
-                                                            <Plus size={16} />
-                                                        </button>
-                                                    </div>
-                                                    <p className="font-bold text-gray-900">
-                                                        R$ {(item.price * item.quantity).toFixed(2)}
-                                                    </p>
+                                <div className="space-y-4">
+                                    {items.map((item) => (
+                                        <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 pb-4 border-b border-gray-200 last:border-0">
+                                            <img
+                                                src={item.image_url}
+                                                alt={item.name}
+                                                className="w-20 h-20 object-cover rounded-lg"
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                                                {item.size && <p className="text-xs text-gray-500">Tam: {item.size}</p>}
+                                                <p className="text-sm text-gray-600">R$ {Number(item.price).toFixed(2)}</p>
+                                            </div>
+                                            <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-4">
+                                                <div className="flex items-center gap-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => removeItem(item.id)}
-                                                        className="text-red-500 hover:text-red-700 p-2"
+                                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                                        disabled={item.quantity <= 1}
+                                                        className="p-2 rounded hover:bg-gray-100 disabled:opacity-30"
                                                     >
-                                                        <Trash2 size={18} />
+                                                        <Minus size={16} />
+                                                    </button>
+                                                    <span className="w-8 text-center font-medium">{item.quantity}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                                        className="p-2 rounded hover:bg-gray-100"
+                                                    >
+                                                        <Plus size={16} />
                                                     </button>
                                                 </div>
+                                                <p className="font-bold text-gray-900">
+                                                    R$ {(Number(item.price) * item.quantity).toFixed(2)}
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeItem(item.id)}
+                                                    className="text-red-500 hover:text-red-700 p-2"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                        </div>
+                                    ))}
+                                </div>
                             </Card>
 
                             {/* Order type */}
@@ -209,14 +257,18 @@ export default function CheckoutPage() {
                                         onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
                                         required
                                     />
-                                    <div className="md:col-span-2">
-                                        <Input
-                                            label="Email"
-                                            type="email"
-                                            value={customerInfo.email}
-                                            onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
-                                        />
-                                    </div>
+                                    <Input
+                                        label="Email"
+                                        type="email"
+                                        value={customerInfo.email}
+                                        onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+                                    />
+                                    <Input
+                                        label="CPF"
+                                        value={customerInfo.cpf}
+                                        onChange={(e) => setCustomerInfo({ ...customerInfo, cpf: e.target.value })}
+                                        placeholder="000.000.000-00"
+                                    />
                                     {orderType === 'delivery' && (
                                         <>
                                             <div className="md:col-span-2">
@@ -247,50 +299,28 @@ export default function CheckoutPage() {
                             {/* Payment method */}
                             <Card title="Forma de Pagamento" padding="md">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentMethod('pix')}
-                                        className={`p-4 rounded-full border-2 transition-all text-center ${paymentMethod === 'pix'
-                                            ? 'border-lale-orange bg-orange-50 text-lale-orange font-semibold'
-                                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                                            }`}
-                                    >
-                                        <p className="font-semibold">PIX</p>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentMethod('debit')}
-                                        className={`p-4 rounded-full border-2 transition-all text-center ${paymentMethod === 'debit'
-                                            ? 'border-[#ffa944] bg-orange-50 text-[#ffa944] font-semibold'
-                                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                                            }`}
-                                    >
-                                        <p className="font-semibold">Débito</p>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentMethod('credit')}
-                                        className={`p-4 rounded-full border-2 transition-all text-center ${paymentMethod === 'credit'
-                                            ? 'border-[#ffa944] bg-orange-50 text-[#ffa944] font-semibold'
-                                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                                            }`}
-                                    >
-                                        <p className="font-semibold">Crédito</p>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPaymentMethod('cash')}
-                                        className={`p-4 rounded-full border-2 transition-all text-center ${paymentMethod === 'cash'
-                                            ? 'border-[#ffa944] bg-orange-50 text-[#ffa944] font-semibold'
-                                            : 'border-gray-200 hover:border-gray-300 text-gray-700'
-                                            }`}
-                                    >
-                                        <p className="font-semibold">Dinheiro</p>
-                                    </button>
+                                    {[
+                                        { key: 'pix', label: 'PIX' },
+                                        { key: 'debit', label: 'Débito' },
+                                        { key: 'credit', label: 'Crédito' },
+                                        { key: 'cash', label: 'Dinheiro' },
+                                    ].map(pm => (
+                                        <button
+                                            key={pm.key}
+                                            type="button"
+                                            onClick={() => setPaymentMethod(pm.key)}
+                                            className={`p-4 rounded-full border-2 transition-all text-center ${paymentMethod === pm.key
+                                                ? 'border-lale-orange bg-orange-50 text-lale-orange font-semibold'
+                                                : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                                                }`}
+                                        >
+                                            <p className="font-semibold">{pm.label}</p>
+                                        </button>
+                                    ))}
                                 </div>
                             </Card>
 
-                            {/* PIX Information - Show when PIX is selected */}
+                            {/* PIX Information */}
                             {paymentMethod === 'pix' && shopData.pix_key && (
                                 <Card title="Informações para Pagamento PIX" padding="md">
                                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border-2 border-green-200">
@@ -315,33 +345,24 @@ export default function CheckoutPage() {
                                                             navigator.clipboard.writeText(shopData.pix_key);
                                                             alert('Chave PIX copiada!');
                                                         }}
-
                                                         className="text-lale-orange hover:text-[#ff9a30] font-semibold text-sm"
                                                     >
                                                         Copiar
                                                     </button>
                                                 </div>
                                             </div>
-
                                             <div>
                                                 <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Favorecido</p>
                                                 <p className="font-semibold text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
                                                     {shopData.pix_name}
                                                 </p>
                                             </div>
-
                                             <div>
                                                 <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Valor a Pagar</p>
                                                 <p className="text-2xl font-bold text-green-600 bg-gray-50 p-3 rounded-lg border border-gray-200">
                                                     R$ {total.toFixed(2)}
                                                 </p>
                                             </div>
-                                        </div>
-
-                                        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                            <p className="text-xs text-yellow-800">
-                                                <strong>⚠️ Importante:</strong> Após realizar o pagamento, clique em "Finalizar Pedido" para confirmar.
-                                            </p>
                                         </div>
                                     </div>
                                 </Card>
@@ -376,10 +397,12 @@ export default function CheckoutPage() {
                                         size="lg"
                                         className="w-full mt-4"
                                         isLoading={submitting}
-                                        disabled={cartItems.length === 0}
+                                        disabled={items.length === 0}
                                     >
                                         <CreditCard size={18} className="mr-2" />
-                                        Finalizar Pedido
+                                        {paymentMethod === 'credit' || paymentMethod === 'debit'
+                                            ? 'Continuar para Pagamento'
+                                            : 'Finalizar Pedido'}
                                     </Button>
                                     <p className="text-xs text-gray-500 text-center mt-2">
                                         Ao finalizar, você concorda com nossos termos de uso
@@ -389,10 +412,10 @@ export default function CheckoutPage() {
                         </div>
                     </div>
                 </form>
-            </div >
+            </div>
 
             {/* Floating WhatsApp Button */}
             <WhatsAppButton phoneNumber="5581999999999" />
-        </div >
+        </div>
     );
 }

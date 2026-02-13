@@ -6,6 +6,7 @@ import PaymentForm from '@/components/PaymentForm';
 import { ShoppingBag, ArrowLeft, CheckCircle, XCircle, Shield, Lock } from 'lucide-react';
 import Link from 'next/link';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import { useCart } from '@/lib/cart-context';
 
 export default function CheckoutPaymentPage() {
     return (
@@ -26,6 +27,11 @@ function CheckoutPaymentContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const orderId = searchParams.get('orderId');
+    const paramAmount = searchParams.get('amount');
+    const paramName = searchParams.get('name');
+    const paramEmail = searchParams.get('email');
+    const paramCpf = searchParams.get('cpf');
+    const { clearCart } = useCart();
 
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -63,6 +69,7 @@ function CheckoutPaymentContent() {
 
     const handlePaymentSuccess = (paymentId: string) => {
         setPaymentStatus('success');
+        clearCart();
         // Redirect to success page after 2 seconds
         setTimeout(() => {
             router.push(`/checkout/success?orderId=${orderId}&paymentId=${paymentId}`);
@@ -182,11 +189,11 @@ function CheckoutPaymentContent() {
 
                                     {paymentStatus === 'idle' && (
                                         <PaymentForm
-                                            amount={order.total_amount || 0}
-                                            orderId={order.id}
-                                            customerName={order.customer_name || 'Cliente'}
-                                            customerEmail={order.customer_email || 'cliente@example.com'}
-                                            customerDocument={order.customer_document}
+                                            amount={order?.total_amount || parseFloat(paramAmount || '0')}
+                                            orderId={order?.id || orderId || ''}
+                                            customerName={order?.customer_name || paramName || 'Cliente'}
+                                            customerEmail={order?.customer_email || paramEmail || ''}
+                                            customerDocument={order?.customer_document || paramCpf}
                                             onSuccess={handlePaymentSuccess}
                                             onError={handlePaymentError}
                                         />
