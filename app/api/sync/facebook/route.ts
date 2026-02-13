@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
     const secret = searchParams.get('secret');
 
     // Simple auth to prevent unauthorized calls
-    if (secret !== process.env.META_VERIFY_TOKEN && secret !== 'lalelilo_verify') {
+    if (secret !== process.env.META_VERIFY_TOKEN && secret !== 'lalelilo_verify' && secret !== 'lalelilo_verify_2026') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
