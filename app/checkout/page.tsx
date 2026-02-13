@@ -98,7 +98,7 @@ export default function CheckoutPage() {
             const orderId = data.order?.id || data.id;
 
             // If credit/debit card, go to payment page
-            if (paymentMethod === 'credit' || paymentMethod === 'debit') {
+            if (paymentMethod === 'credit_card' || paymentMethod === 'debit_card') {
                 router.push(`/checkout/payment?orderId=${orderId}&amount=${total}&name=${encodeURIComponent(customerInfo.name)}&email=${encodeURIComponent(customerInfo.email)}&cpf=${encodeURIComponent(customerInfo.cpf)}`);
             } else {
                 // For PIX/cash, go directly to success
@@ -304,8 +304,8 @@ export default function CheckoutPage() {
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                     {[
                                         { key: 'pix', label: 'PIX' },
-                                        { key: 'debit', label: 'Débito' },
-                                        { key: 'credit', label: 'Crédito' },
+                                        { key: 'debit_card', label: 'Débito' },
+                                        { key: 'credit_card', label: 'Crédito' },
                                         { key: 'cash', label: 'Dinheiro' },
                                     ].map(pm => (
                                         <button
@@ -403,7 +403,7 @@ export default function CheckoutPage() {
                                         disabled={items.length === 0}
                                     >
                                         <CreditCard size={18} className="mr-2" />
-                                        {paymentMethod === 'credit' || paymentMethod === 'debit'
+                                        {paymentMethod === 'credit_card' || paymentMethod === 'debit_card'
                                             ? 'Continuar para Pagamento'
                                             : 'Finalizar Pedido'}
                                     </Button>
