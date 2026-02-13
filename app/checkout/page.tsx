@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Card, Button, Input } from '@/components/ui';
-import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, CreditCard, MapPin } from 'lucide-react';
+import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, CreditCard, MapPin, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import WhatsAppButton from '@/components/WhatsAppButton';
@@ -24,14 +24,12 @@ export default function CheckoutPage() {
     });
 
     const [orderType, setOrderType] = useState<'delivery' | 'pickup'>('delivery');
-    const [paymentMethod, setPaymentMethod] = useState('pix');
+    const [paymentMethod, setPaymentMethod] = useState('credit_card');
     const [submitting, setSubmitting] = useState(false);
 
     // Shop data
     const shopData = {
         name: 'Lalelilo - Loja Centro',
-        pix_key: '12.345.678/0001-90',
-        pix_name: 'Lalelilo Moda Infantil LTDA'
     };
 
     const deliveryFee = orderType === 'delivery' ? 10.00 : 0;
@@ -97,11 +95,11 @@ export default function CheckoutPage() {
 
             const orderId = data.order?.id || data.id;
 
-            // If credit/debit card, go to payment page
-            if (paymentMethod === 'credit_card' || paymentMethod === 'debit_card') {
-                router.push(`/checkout/payment?orderId=${orderId}&amount=${total}&name=${encodeURIComponent(customerInfo.name)}&email=${encodeURIComponent(customerInfo.email)}&cpf=${encodeURIComponent(customerInfo.cpf)}`);
+            // For card and PIX payments, go to Getnet payment page
+            if (paymentMethod === 'credit_card' || paymentMethod === 'debit_card' || paymentMethod === 'pix') {
+                router.push(`/checkout/payment?orderId=${orderId}&amount=${total}&method=${paymentMethod}&name=${encodeURIComponent(customerInfo.name)}&email=${encodeURIComponent(customerInfo.email)}&cpf=${encodeURIComponent(customerInfo.cpf)}`);
             } else {
-                // For PIX/cash, go directly to success
+                // For cash, go directly to success
                 clearCart();
                 router.push(`/checkout/success?orderId=${orderId}`);
             }
@@ -303,9 +301,9 @@ export default function CheckoutPage() {
                             <Card title="Forma de Pagamento" padding="md">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                     {[
-                                        { key: 'pix', label: 'PIX' },
-                                        { key: 'debit_card', label: 'Débito' },
                                         { key: 'credit_card', label: 'Crédito' },
+                                        { key: 'debit_card', label: 'Débito' },
+                                        { key: 'pix', label: 'PIX' },
                                         { key: 'cash', label: 'Dinheiro' },
                                     ].map(pm => (
                                         <button
@@ -323,52 +321,22 @@ export default function CheckoutPage() {
                                 </div>
                             </Card>
 
-                            {/* PIX Information */}
-                            {paymentMethod === 'pix' && shopData.pix_key && (
-                                <Card title="Informações para Pagamento PIX" padding="md">
-                                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg border-2 border-green-200">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="bg-green-500 text-white p-3 rounded-full">
-                                                <CreditCard size={24} />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-green-900">Pague com PIX</h4>
-                                                <p className="text-sm text-green-700">Pagamento instantâneo e seguro</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-3 bg-white p-4 rounded-lg">
-                                            <div>
-                                                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Chave PIX</p>
-                                                <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                                    <p className="font-mono font-bold text-gray-900">{shopData.pix_key}</p>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            navigator.clipboard.writeText(shopData.pix_key);
-                                                            alert('Chave PIX copiada!');
-                                                        }}
-                                                        className="text-lale-orange hover:text-[#ff9a30] font-semibold text-sm"
-                                                    >
-                                                        Copiar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Favorecido</p>
-                                                <p className="font-semibold text-gray-900 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                                    {shopData.pix_name}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Valor a Pagar</p>
-                                                <p className="text-2xl font-bold text-green-600 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                                                    R$ {total.toFixed(2)}
-                                                </p>
-                                            </div>
-                                        </div>
+                            {/* Payment info note */}
+                            {(paymentMethod === 'pix' || paymentMethod === 'credit_card' || paymentMethod === 'debit_card') && (
+                                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                                    <Shield size={20} className="text-blue-500 flex-shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-medium text-blue-900">
+                                            Pagamento seguro via Getnet
+                                        </p>
+                                        <p className="text-xs text-blue-600 mt-1">
+                                            {paymentMethod === 'pix'
+                                                ? 'Você será redirecionado para gerar o QR Code PIX após confirmar o pedido.'
+                                                : 'Você será redirecionado para a página de pagamento seguro após confirmar o pedido.'
+                                            }
+                                        </p>
                                     </div>
-                                </Card>
+                                </div>
                             )}
                         </div>
 
