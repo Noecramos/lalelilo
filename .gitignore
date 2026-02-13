@@ -48,8 +48,20 @@ next-env.d.ts
 .env
 .env.local
 .env.*.local
+.env.production
+.env.staging
 !.env.template
 !.env.example
+
+# Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
 
 # SQL files with passwords/credentials
 supabase/novix_complete_setup.sql
@@ -62,9 +74,6 @@ waha-cloudrun/deploy.ps1
 **/*password*.ps1
 **/*credentials*.ps1
 **/*secret*.ps1
-
-# Migration scripts with API keys (if they contain hardcoded keys)
-# scripts/run-migration.mjs
 
 # N8N workflows (may contain API keys)
 **/n8n*.json
@@ -83,3 +92,13 @@ waha-cloudrun/deploy.ps1
 
 # Deployment packages
 deploy.zip
+
+# Secret scanning temp files
+expressions.txt
+
+# Editor and OS
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+Thumbs.db

@@ -1,0 +1,43 @@
+#!/bin/sh
+# Pre-commit hook: Scan for potential secrets before committing
+# Install: copy this file to .git/hooks/pre-commit and chmod +x
+
+echo "🔍 Scanning for potential secrets..."
+
+# Patterns that indicate leaked secrets
+PATTERNS=(
+    "AKIA[0-9A-Z]{16}"                    # AWS Access Key
+    "AIza[0-9A-Za-z_-]{35}"               # Google API Key
+    "sk-[0-9a-zA-Z]{48}"                  # OpenAI API Key
+    "re_[0-9a-zA-Z_]{25,}"                # Resend API Key
+    "ghp_[0-9a-zA-Z]{36}"                 # GitHub PAT
+    "eyJ[0-9a-zA-Z_-]{20,}\.eyJ"          # JWT Token
+    "sb_secret_[0-9a-zA-Z_]{20,}"         # Supabase Service Role
+    "-----BEGIN (RSA |EC )?PRIVATE KEY"    # Private Keys
+    "password\s*[:=]\s*['\"][^'\"]{8,}"    # Hardcoded passwords
+)
+
+FOUND=0
+
+for pattern in "${PATTERNS[@]}"; do
+    # Only scan staged files, exclude .env.example and binary files
+    MATCHES=$(git diff --cached --diff-filter=ACMR -U0 -- '*.ts' '*.tsx' '*.js' '*.mjs' '*.json' '*.md' '*.sql' '*.env*' | grep -iP "$pattern" | grep -v ".env.example" | grep -v ".env.template" || true)
+    
+    if [ -n "$MATCHES" ]; then
+        echo ""
+        echo "🚨 POTENTIAL SECRET DETECTED!"
+        echo "Pattern: $pattern"
+        echo "$MATCHES"
+        FOUND=1
+    fi
+done
+
+if [ $FOUND -eq 1 ]; then
+    echo ""
+    echo "❌ Commit blocked! Remove secrets before committing."
+    echo "   If this is a false positive, use: git commit --no-verify"
+    exit 1
+fi
+
+echo "✅ No secrets detected. Proceeding with commit."
+exit 0
