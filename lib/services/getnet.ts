@@ -79,22 +79,53 @@ class GetnetService {
             `${this.config.clientId}:${this.config.clientSecret}`
         ).toString('base64');
 
+        console.log('🔑 Getnet auth attempt:', {
+            apiUrl: this.config.apiUrl,
+            clientIdPrefix: this.config.clientId.substring(0, 8) + '...',
+            sellerIdPrefix: this.config.sellerId.substring(0, 8) + '...',
+        });
+
         try {
             const response = await fetch(
-                `${this.config.apiUrl}/authentication/oauth2/access_token`,
+                `${this.config.apiUrl}/auth/oauth/v2/token`,
                 {
                     method: 'POST',
                     headers: {
                         'Authorization': `Basic ${credentials}`,
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: 'grant_type=client_credentials',
+                    body: 'grant_type=client_credentials&scope=oob',
                 }
             );
 
             if (!response.ok) {
-                const error = await response.text();
-                throw new Error(`Getnet auth failed: ${error}`);
+                const errorText = await response.text();
+                console.error('❌ Getnet auth failed:', response.status, errorText);
+                // Try alternative auth endpoint
+                console.log('🔄 Trying alternative auth endpoint...');
+                const altResponse = await fetch(
+                    `${this.config.apiUrl}/authentication/oauth2/access_token`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Basic ${credentials}`,
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'grant_type=client_credentials&scope=oob',
+                    }
+                );
+
+                if (!altResponse.ok) {
+                    const altError = await altResponse.text();
+                    console.error('❌ Getnet alt auth also failed:', altResponse.status, altError);
+                    throw new Error(`Getnet auth failed: ${errorText}`);
+                }
+
+                const altData: GetnetAuthResponse = await altResponse.json();
+                this.accessToken = altData.access_token;
+                this.tokenExpiry = Date.now() + (altData.expires_in - 300) * 1000;
+                console.log('✅ Getnet access token obtained (alt endpoint)');
+                return this.accessToken;
             }
 
             const data: GetnetAuthResponse = await response.json();
