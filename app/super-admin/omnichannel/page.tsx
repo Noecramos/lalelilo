@@ -69,6 +69,8 @@ export default function OmnichannelPage() {
     const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null);
     const [showArchived, setShowArchived] = useState(false);
     const [archivedMessages, setArchivedMessages] = useState<Message[]>([]);
+    const [syncing, setSyncing] = useState(false);
+    const [syncResult, setSyncResult] = useState<string | null>(null);
 
 
 
@@ -319,13 +321,51 @@ export default function OmnichannelPage() {
                             WhatsApp, Instagram e Facebook em um só lugar
                         </p>
                     </div>
-                    <button
-                        onClick={fetchConversations}
-                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                        title="Atualizar"
-                    >
-                        <RefreshCw size={20} className="text-gray-600" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {syncResult && (
+                            <span className={`text-xs px-3 py-1 rounded-full ${syncResult.startsWith('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                {syncResult}
+                            </span>
+                        )}
+                        <button
+                            onClick={async () => {
+                                setSyncing(true);
+                                setSyncResult(null);
+                                try {
+                                    // Sync Facebook/Instagram messages
+                                    const fbRes = await fetch('/api/sync/facebook?secret=lalelilo_verify_2026');
+                                    const fbData = await fbRes.json();
+
+                                    if (fbData.success) {
+                                        setSyncResult(`✅ ${fbData.new_messages || 0} novas msgs (${fbData.conversations || 0} conversas)`);
+                                    } else {
+                                        setSyncResult(`❌ ${fbData.error || 'Erro na sincronização'}`);
+                                    }
+
+                                    // Refresh conversations list
+                                    await fetchConversations();
+                                    if (selectedConv) await fetchMessages(selectedConv);
+                                } catch (e: any) {
+                                    setSyncResult(`❌ ${e.message}`);
+                                }
+                                setSyncing(false);
+                                // Clear result after 5 seconds
+                                setTimeout(() => setSyncResult(null), 5000);
+                            }}
+                            disabled={syncing}
+                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-lale-pink to-lale-orange text-white rounded-lg text-sm font-medium hover:opacity-90 transition-all disabled:opacity-50 shadow-sm"
+                        >
+                            <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+                            {syncing ? 'Sincronizando...' : 'Sincronizar Mensagens'}
+                        </button>
+                        <button
+                            onClick={fetchConversations}
+                            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            title="Atualizar lista"
+                        >
+                            <RefreshCw size={20} className="text-gray-600" />
+                        </button>
+                    </div>
                 </div>
             </div>
 

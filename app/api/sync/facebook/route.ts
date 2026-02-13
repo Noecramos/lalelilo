@@ -1,7 +1,7 @@
 // API Route: Facebook Messages Sync
 // This can be called via cron job or manually to sync Facebook messages into the CRM
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase-admin';
 
 const PAGE_ID = process.env.META_PAGE_ID || '1503236119762968';
 const PAGE_TOKEN = process.env.META_PAGE_TOKEN || '';
