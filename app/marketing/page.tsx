@@ -6,7 +6,7 @@ import {
     Megaphone, Plus, Edit3, Trash2, X, Send, Clock,
     CheckCircle2, XCircle, Calendar, Target, Image as ImageIcon,
     FileText, Download, Store, AlertTriangle, Sparkles,
-    Upload, Loader2, GripVertical, Eye
+    Upload, Loader2, Eye
 } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -79,7 +79,7 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
 };
 
 // ─── Component ──────────────────────────────────────────────────────────────
-export default function MarketingPage() {
+export default function MarketingHubPage() {
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('all');
@@ -90,7 +90,6 @@ export default function MarketingPage() {
     const [shops, setShops] = useState<{ id: string; name: string }[]>([]);
     const [saving, setSaving] = useState(false);
 
-    // Form state
     const [form, setForm] = useState({
         title: '',
         description: '',
@@ -103,11 +102,10 @@ export default function MarketingPage() {
         priority: 'normal',
         status: 'draft',
     });
-    const [allShops, setAllShops] = useState(true); // true = all shops
+    const [allShops, setAllShops] = useState(true);
     const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
     const [coverFile, setCoverFile] = useState<File | null>(null);
     const [coverPreview, setCoverPreview] = useState<string>('');
-    const [uploadingCover, setUploadingCover] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const coverInputRef = useRef<HTMLInputElement>(null);
@@ -149,19 +147,11 @@ export default function MarketingPage() {
         const formData = new FormData();
         formData.append('file', file);
         if (campaignId) formData.append('campaign_id', campaignId);
-
         try {
             const res = await fetch('/api/marketing/upload', { method: 'POST', body: formData });
-            if (!res.ok) {
-                const err = await res.json();
-                console.error('Upload failed:', err);
-                return null;
-            }
+            if (!res.ok) return null;
             return await res.json();
-        } catch (e) {
-            console.error('Upload error:', e);
-            return null;
-        }
+        } catch (e) { return null; }
     };
 
     const handleFilesSelected = (files: FileList | null) => {
@@ -190,12 +180,10 @@ export default function MarketingPage() {
 
     const handleCoverSelected = (files: FileList | null) => {
         if (!files || !files[0]) return;
-        const file = files[0];
-        setCoverFile(file);
-        setCoverPreview(URL.createObjectURL(file));
+        setCoverFile(files[0]);
+        setCoverPreview(URL.createObjectURL(files[0]));
     };
 
-    // ─── Drop Zone ──────────────────────────────────────────────────────────
     const [dragging, setDragging] = useState(false);
     const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); setDragging(true); }, []);
     const handleDragLeave = useCallback(() => setDragging(false), []);
@@ -211,19 +199,14 @@ export default function MarketingPage() {
         setSaving(true);
 
         try {
-            // 1. Upload cover if file selected
             let coverUrl = form.cover_image_url;
             if (coverFile) {
-                setUploadingCover(true);
                 const result = await uploadFile(coverFile);
                 if (result) coverUrl = result.file_url;
-                setUploadingCover(false);
             }
 
-            // 2. Upload all pending files
             const uploadedFiles: { file_url: string; file_name: string; file_type: string; file_size: number }[] = [];
-            for (let i = 0; i < pendingFiles.length; i++) {
-                const pf = pendingFiles[i];
+            for (const pf of pendingFiles) {
                 if (pf.file && !pf.uploaded) {
                     setPendingFiles(prev => prev.map(f => f.id === pf.id ? { ...f, uploading: true } : f));
                     const result = await uploadFile(pf.file);
@@ -238,7 +221,6 @@ export default function MarketingPage() {
                 }
             }
 
-            // 3. Save campaign
             const method = editId ? 'PUT' : 'POST';
             const payload = {
                 ...(editId ? { id: editId } : {}),
@@ -265,10 +247,7 @@ export default function MarketingPage() {
             setShowCreate(false);
             resetForm();
             loadCampaigns();
-        } catch (e) {
-            alert('❌ Erro ao salvar');
-        }
-
+        } catch (e) { alert('❌ Erro ao salvar'); }
         setSaving(false);
     };
 
@@ -312,7 +291,6 @@ export default function MarketingPage() {
         setEditId(c.id);
         setCoverPreview(c.cover_image_url || '');
         setCoverFile(null);
-        // Load existing files as pending (already uploaded)
         setPendingFiles((c.campaign_files || []).map(f => ({
             id: f.id,
             file: null,
@@ -326,7 +304,6 @@ export default function MarketingPage() {
         setShowCreate(true);
     };
 
-    // ─── Filtering ────────────────────────────────────────────────────────
     const filtered = campaigns.filter(c => {
         if (filterStatus !== 'all' && c.status !== filterStatus) return false;
         if (filterType !== 'all' && c.campaign_type !== filterType) return false;
@@ -334,25 +311,18 @@ export default function MarketingPage() {
     });
 
     const countByStatus = (s: string) => campaigns.filter(c => c.status === s).length;
-
     const isExpiring = (c: Campaign) => {
         if (!c.end_date || c.status !== 'active') return false;
         const diff = new Date(c.end_date).getTime() - Date.now();
         return diff > 0 && diff < 3 * 24 * 60 * 60 * 1000;
     };
-
     const formatFileSize = (bytes: number) => {
         if (bytes < 1024) return `${bytes}B`;
         if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)}KB`;
         return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
     };
+    const getShopName = (shopId: string) => shops.find(s => s.id === shopId)?.name || shopId.slice(0, 8);
 
-    const getShopName = (shopId: string) => {
-        const shop = shops.find(s => s.id === shopId);
-        return shop?.name || shopId.slice(0, 8);
-    };
-
-    // ─── Render ─────────────────────────────────────────────────────────────
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -367,10 +337,10 @@ export default function MarketingPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                        <Megaphone className="text-lale-pink" size={28} />
-                        Marketing & Campanhas
+                        <Sparkles className="text-lale-pink" size={28} />
+                        Gerenciar Campanhas
                     </h2>
-                    <p className="text-gray-500 mt-1">Crie e gerencie campanhas de marketing para suas lojas</p>
+                    <p className="text-gray-500 mt-1">Painel exclusivo de marketing — crie, edite e acompanhe campanhas</p>
                 </div>
                 <button
                     onClick={() => { resetForm(); setShowCreate(true); }}
@@ -380,13 +350,14 @@ export default function MarketingPage() {
                 </button>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* Summary Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 {[
                     { label: 'Total', value: campaigns.length, color: 'from-gray-500 to-gray-600', icon: Megaphone },
                     { label: 'Ativas', value: countByStatus('active'), color: 'from-green-500 to-emerald-600', icon: CheckCircle2 },
                     { label: 'Rascunhos', value: countByStatus('draft'), color: 'from-gray-400 to-gray-500', icon: Edit3 },
                     { label: 'Finalizadas', value: countByStatus('completed'), color: 'from-blue-500 to-blue-600', icon: CheckCircle2 },
+                    { label: 'Canceladas', value: countByStatus('cancelled'), color: 'from-red-400 to-red-500', icon: XCircle },
                 ].map((s, i) => {
                     const Icon = s.icon;
                     return (
@@ -417,9 +388,9 @@ export default function MarketingPage() {
             {/* Filter Bar */}
             <div className="flex flex-wrap gap-2">
                 <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-                    {['all', 'active', 'draft', 'completed'].map(s => (
+                    {['all', 'active', 'draft', 'completed', 'cancelled'].map(s => (
                         <button key={s} onClick={() => setFilterStatus(s)} className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${filterStatus === s ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>
-                            {s === 'all' ? 'Todas' : statusConfig[s]?.label}
+                            {s === 'all' ? 'Todas' : statusConfig[s]?.label || s}
                         </button>
                     ))}
                 </div>
@@ -432,7 +403,7 @@ export default function MarketingPage() {
                 </div>
             </div>
 
-            {/* Campaign Grid */}
+            {/* Campaign Table / Grid */}
             {filtered.length === 0 ? (
                 <Card padding="lg">
                     <div className="text-center py-12">
@@ -442,78 +413,106 @@ export default function MarketingPage() {
                     </div>
                 </Card>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filtered.map(campaign => {
-                        const tc = typeConfig[campaign.campaign_type] || typeConfig.general;
-                        const sc = statusConfig[campaign.status] || statusConfig.draft;
-                        const StatusIcon = sc.icon;
-                        const expiring = isExpiring(campaign);
-                        return (
-                            <div
-                                key={campaign.id}
-                                className={`bg-white rounded-2xl border overflow-hidden shadow-sm hover:shadow-lg transition-all cursor-pointer group ${expiring ? 'border-amber-300 ring-2 ring-amber-100' : 'border-gray-100'}`}
-                                onClick={() => setShowDetail(campaign)}
-                            >
-                                <div className="h-36 bg-gradient-to-br from-lale-pink/20 to-lale-orange/20 relative overflow-hidden">
-                                    {campaign.cover_image_url ? (
-                                        <img src={campaign.cover_image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center"><span className="text-5xl">{tc.emoji}</span></div>
-                                    )}
-                                    <div className={`absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-lg border ${campaign.campaign_type === 'black_friday' ? 'bg-gray-900 text-white border-gray-700' : tc.bg} ${tc.color}`}>
-                                        {tc.emoji} {tc.label}
-                                    </div>
-                                    <div className={`absolute top-3 right-3 flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg border ${sc.bg} ${sc.color}`}>
-                                        <StatusIcon size={12} /> {sc.label}
-                                    </div>
-                                    {expiring && (
-                                        <div className="absolute bottom-3 left-3 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-lg animate-pulse">⏰ Termina em breve!</div>
-                                    )}
-                                </div>
-                                <div className="p-4">
-                                    <h3 className="font-bold text-gray-900 text-lg line-clamp-1">{campaign.title}</h3>
-                                    {campaign.description && <p className="text-sm text-gray-500 mt-1 line-clamp-2">{campaign.description}</p>}
-                                    <div className="flex items-center gap-3 mt-3 text-xs text-gray-400 flex-wrap">
-                                        {campaign.start_date && <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(campaign.start_date).toLocaleDateString('pt-BR')}</span>}
-                                        {campaign.end_date && <span>→ {new Date(campaign.end_date).toLocaleDateString('pt-BR')}</span>}
-                                        {campaign.campaign_files?.length > 0 && <span className="flex items-center gap-1"><FileText size={12} /> {campaign.campaign_files.length} arquivo{campaign.campaign_files.length > 1 ? 's' : ''}</span>}
-                                    </div>
-                                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
-                                        <div className="flex items-center gap-1">
-                                            <Target size={12} className="text-gray-400" />
-                                            <span className="text-xs text-gray-400">
-                                                {campaign.target_shops?.length > 0 ? `${campaign.target_shops.length} loja${campaign.target_shops.length > 1 ? 's' : ''}` : 'Todas as lojas'}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <table className="w-full">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Campanha</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Tipo</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Status</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Lojas</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Período</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Confirmações</th>
+                                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {filtered.map(campaign => {
+                                const tc = typeConfig[campaign.campaign_type] || typeConfig.general;
+                                const sc = statusConfig[campaign.status] || statusConfig.draft;
+                                const StatusIcon = sc.icon;
+                                const expiring = isExpiring(campaign);
+
+                                return (
+                                    <tr key={campaign.id} className={`hover:bg-gray-50 transition-colors ${expiring ? 'bg-amber-50/50' : ''}`}>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-lale-pink/10 to-lale-orange/10 flex items-center justify-center">
+                                                    {campaign.cover_image_url ? (
+                                                        <img src={campaign.cover_image_url} alt="" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <span className="text-lg">{tc.emoji}</span>
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="font-medium text-gray-900 truncate">{campaign.title}</p>
+                                                    {campaign.campaign_files?.length > 0 && (
+                                                        <p className="text-xs text-gray-400">{campaign.campaign_files.length} arquivo{campaign.campaign_files.length > 1 ? 's' : ''}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 hidden md:table-cell">
+                                            <span className={`text-xs font-medium px-2 py-1 rounded-lg border ${campaign.campaign_type === 'black_friday' ? 'bg-gray-900 text-white border-gray-700' : tc.bg + ' ' + tc.color}`}>
+                                                {tc.emoji} {tc.label}
                                             </span>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <Store size={12} className="text-green-500" />
-                                            <span className="text-xs text-green-600 font-medium">{campaign.totalAcknowledgements || 0} ✓</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                                        </td>
+                                        <td className="px-4 py-3 hidden md:table-cell">
+                                            <span className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg border w-fit ${sc.bg} ${sc.color}`}>
+                                                <StatusIcon size={10} /> {sc.label}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 hidden lg:table-cell">
+                                            <span className="text-sm text-gray-600">
+                                                {campaign.target_shops?.length > 0 ? `${campaign.target_shops.length} loja${campaign.target_shops.length > 1 ? 's' : ''}` : 'Todas'}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 hidden lg:table-cell text-sm text-gray-500">
+                                            {campaign.start_date ? new Date(campaign.start_date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '—'}
+                                            {campaign.end_date && ` → ${new Date(campaign.end_date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}`}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-1">
+                                                <Store size={14} className="text-green-500" />
+                                                <span className="text-sm font-medium text-green-600">{campaign.totalAcknowledgements || 0}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            <div className="flex items-center gap-1 justify-end">
+                                                <button onClick={() => setShowDetail(campaign)} className="p-1.5 text-gray-400 hover:text-lale-pink rounded-lg hover:bg-gray-100" title="Ver detalhes">
+                                                    <Eye size={16} />
+                                                </button>
+                                                <button onClick={() => startEdit(campaign)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-gray-100" title="Editar">
+                                                    <Edit3 size={16} />
+                                                </button>
+                                                {campaign.status === 'draft' && (
+                                                    <button onClick={() => handlePublish(campaign.id)} className="p-1.5 text-gray-400 hover:text-green-600 rounded-lg hover:bg-gray-100" title="Publicar">
+                                                        <Send size={16} />
+                                                    </button>
+                                                )}
+                                                <button onClick={() => handleDelete(campaign.id)} className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100" title="Excluir">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </div>
             )}
 
-            {/* ═══════════════════════════════════════════════════════════════════
-                CREATE / EDIT MODAL
-            ═══════════════════════════════════════════════════════════════════ */}
+            {/* ─── CREATE / EDIT MODAL ─── */}
             {showCreate && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-                        {/* Header */}
                         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10 rounded-t-2xl">
                             <div className="flex items-center gap-2">
                                 <Sparkles className="text-lale-pink" size={22} />
-                                <h3 className="text-lg font-bold text-gray-900">
-                                    {editId ? 'Editar Campanha' : 'Nova Campanha'}
-                                </h3>
+                                <h3 className="text-lg font-bold text-gray-900">{editId ? 'Editar Campanha' : 'Nova Campanha'}</h3>
                             </div>
-                            <button onClick={() => { setShowCreate(false); resetForm(); }} className="text-gray-400 hover:text-gray-600">
-                                <X size={20} />
-                            </button>
+                            <button onClick={() => { setShowCreate(false); resetForm(); }} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
                         </div>
 
                         <div className="p-6 space-y-5">
@@ -527,13 +526,13 @@ export default function MarketingPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                                    <select value={form.campaign_type} onChange={e => setForm(f => ({ ...f, campaign_type: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-lale-pink/30 outline-none">
+                                    <select value={form.campaign_type} onChange={e => setForm(f => ({ ...f, campaign_type: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none">
                                         {Object.entries(typeConfig).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Prioridade</label>
-                                    <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-lale-pink/30 outline-none">
+                                    <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none">
                                         {Object.entries(priorityConfig).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                                     </select>
                                 </div>
@@ -543,63 +542,55 @@ export default function MarketingPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
-                                    <input type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-lale-pink/30 outline-none" />
+                                    <input type="date" value={form.start_date} onChange={e => setForm(f => ({ ...f, start_date: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
-                                    <input type="date" value={form.end_date} onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-lale-pink/30 outline-none" />
+                                    <input type="date" value={form.end_date} onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none" />
                                 </div>
                             </div>
 
                             {/* Description */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-lale-pink/30 resize-none outline-none" placeholder="Resumo da campanha..." />
+                                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl resize-none outline-none" placeholder="Resumo da campanha..." />
                             </div>
 
                             {/* Instructions */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Instruções para as Lojas</label>
-                                <textarea value={form.instructions} onChange={e => setForm(f => ({ ...f, instructions: e.target.value }))} rows={5} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-lale-pink/30 resize-none font-mono text-sm outline-none" placeholder={"Instruções detalhadas...\n\n- Regras de vitrine\n- Material de divulgação\n- Preços especiais"} />
+                                <textarea value={form.instructions} onChange={e => setForm(f => ({ ...f, instructions: e.target.value }))} rows={5} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl resize-none font-mono text-sm outline-none" placeholder={"Instruções detalhadas...\n\n- Regras de vitrine\n- Material de divulgação"} />
                             </div>
 
-                            {/* ═══ COVER IMAGE UPLOAD ═══ */}
+                            {/* Cover Image */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Imagem de Capa</label>
                                 <div className="flex gap-3 items-start">
-                                    <div
-                                        onClick={() => coverInputRef.current?.click()}
-                                        className="flex-shrink-0 w-36 h-24 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center cursor-pointer hover:border-lale-pink/50 hover:bg-lale-pink/5 transition-all overflow-hidden group"
-                                    >
+                                    <div onClick={() => coverInputRef.current?.click()} className="flex-shrink-0 w-36 h-24 border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center cursor-pointer hover:border-lale-pink/50 hover:bg-lale-pink/5 transition-all overflow-hidden group">
                                         {(coverPreview || form.cover_image_url) ? (
                                             <img src={coverPreview || form.cover_image_url} alt="Capa" className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="text-center">
                                                 <ImageIcon size={24} className="mx-auto text-gray-300 group-hover:text-lale-pink transition-colors" />
-                                                <p className="text-xs text-gray-400 mt-1">Clique para enviar</p>
+                                                <p className="text-xs text-gray-400 mt-1">Enviar</p>
                                             </div>
                                         )}
                                     </div>
                                     <div className="flex-1 space-y-2">
-                                        <input type="url" value={form.cover_image_url} onChange={e => { setForm(f => ({ ...f, cover_image_url: e.target.value })); setCoverPreview(e.target.value); setCoverFile(null); }} className="w-full px-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-lale-pink/30 outline-none" placeholder="...ou cole a URL da imagem" />
+                                        <input type="url" value={form.cover_image_url} onChange={e => { setForm(f => ({ ...f, cover_image_url: e.target.value })); setCoverPreview(e.target.value); setCoverFile(null); }} className="w-full px-4 py-2 border border-gray-200 rounded-xl text-sm outline-none" placeholder="...ou cole URL da imagem" />
                                         {(coverPreview || form.cover_image_url) && (
-                                            <button onClick={() => { setCoverFile(null); setCoverPreview(''); setForm(f => ({ ...f, cover_image_url: '' })); }} className="text-xs text-red-500 hover:underline">
-                                                Remover capa
-                                            </button>
+                                            <button onClick={() => { setCoverFile(null); setCoverPreview(''); setForm(f => ({ ...f, cover_image_url: '' })); }} className="text-xs text-red-500 hover:underline">Remover capa</button>
                                         )}
                                     </div>
                                 </div>
                                 <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={e => handleCoverSelected(e.target.files)} />
                             </div>
 
-                            {/* ═══ FILE UPLOAD SECTION ═══ */}
+                            {/* File Upload */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Arquivos & Materiais
-                                    <span className="text-xs text-gray-400 ml-1">({pendingFiles.length} arquivo{pendingFiles.length !== 1 ? 's' : ''})</span>
+                                    Arquivos & Materiais <span className="text-xs text-gray-400">({pendingFiles.length})</span>
                                 </label>
-
-                                {/* Drop Zone */}
                                 <div
                                     onDragOver={handleDragOver}
                                     onDragLeave={handleDragLeave}
@@ -608,71 +599,39 @@ export default function MarketingPage() {
                                     className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${dragging ? 'border-lale-pink bg-lale-pink/5 scale-[1.02]' : 'border-gray-200 hover:border-lale-pink/50 hover:bg-gray-50'}`}
                                 >
                                     <Upload size={28} className={`mx-auto mb-2 ${dragging ? 'text-lale-pink' : 'text-gray-300'}`} />
-                                    <p className="text-sm text-gray-600 font-medium">
-                                        {dragging ? 'Solte os arquivos aqui!' : 'Arraste e solte arquivos aqui'}
-                                    </p>
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        ou clique para selecionar • Imagens, PDFs, Docs, Vídeos (até 20MB)
-                                    </p>
+                                    <p className="text-sm text-gray-600 font-medium">{dragging ? 'Solte os arquivos aqui!' : 'Arraste e solte arquivos'}</p>
+                                    <p className="text-xs text-gray-400 mt-1">Imagens, PDFs, Docs, Vídeos (até 20MB)</p>
                                 </div>
                                 <input ref={fileInputRef} type="file" multiple className="hidden" accept="image/*,.pdf,.doc,.docx,.xlsx,.pptx,.mp4,.webm" onChange={e => handleFilesSelected(e.target.files)} />
-
-                                {/* File List */}
                                 {pendingFiles.length > 0 && (
                                     <div className="mt-3 space-y-2">
                                         {pendingFiles.map(pf => (
                                             <div key={pf.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl group">
-                                                {/* Preview */}
                                                 <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-white border border-gray-200 flex items-center justify-center">
-                                                    {pf.preview ? (
-                                                        <img src={pf.preview} alt="" className="w-full h-full object-cover" />
-                                                    ) : pf.file_type?.startsWith('image') ? (
-                                                        <ImageIcon size={16} className="text-purple-500" />
-                                                    ) : pf.file_type === 'application/pdf' ? (
-                                                        <FileText size={16} className="text-red-500" />
-                                                    ) : (
-                                                        <FileText size={16} className="text-blue-500" />
-                                                    )}
+                                                    {pf.preview ? <img src={pf.preview} alt="" className="w-full h-full object-cover" />
+                                                        : pf.file_type?.startsWith('image') ? <ImageIcon size={16} className="text-purple-500" />
+                                                            : <FileText size={16} className="text-blue-500" />}
                                                 </div>
-                                                {/* Info */}
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-gray-900 truncate">{pf.file_name}</p>
                                                     <p className="text-xs text-gray-400">{formatFileSize(pf.file_size)}</p>
                                                 </div>
-                                                {/* Status */}
-                                                {pf.uploading ? (
-                                                    <Loader2 size={16} className="animate-spin text-lale-pink" />
-                                                ) : pf.uploaded ? (
-                                                    <CheckCircle2 size={16} className="text-green-500" />
-                                                ) : (
-                                                    <span className="text-xs text-gray-400">Pendente</span>
-                                                )}
-                                                {/* Remove */}
-                                                <button onClick={() => removePendingFile(pf.id)} className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
-                                                    <X size={16} />
-                                                </button>
+                                                {pf.uploading ? <Loader2 size={16} className="animate-spin text-lale-pink" />
+                                                    : pf.uploaded ? <CheckCircle2 size={16} className="text-green-500" />
+                                                        : <span className="text-xs text-gray-400">Pendente</span>}
+                                                <button onClick={() => removePendingFile(pf.id)} className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"><X size={16} /></button>
                                             </div>
                                         ))}
                                     </div>
                                 )}
                             </div>
 
-                            {/* ═══ SHOP SELECTION ═══ */}
+                            {/* Shop Selection */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Lojas Alvo
-                                </label>
-
-                                {/* All shops toggle */}
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Lojas Alvo</label>
                                 <div className="mb-3">
                                     <label className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl cursor-pointer hover:from-green-100 transition-all">
-                                        <input
-                                            type="radio"
-                                            name="shopTarget"
-                                            checked={allShops}
-                                            onChange={() => { setAllShops(true); setForm(f => ({ ...f, target_shops: [] })); }}
-                                            className="text-green-600 focus:ring-green-500"
-                                        />
+                                        <input type="radio" name="shopTarget" checked={allShops} onChange={() => { setAllShops(true); setForm(f => ({ ...f, target_shops: [] })); }} className="text-green-600" />
                                         <div className="flex items-center gap-2">
                                             <Store size={18} className="text-green-600" />
                                             <div>
@@ -682,80 +641,47 @@ export default function MarketingPage() {
                                         </div>
                                     </label>
                                 </div>
-
-                                {/* Specific shops */}
                                 <label className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-all mb-2">
-                                    <input
-                                        type="radio"
-                                        name="shopTarget"
-                                        checked={!allShops}
-                                        onChange={() => setAllShops(false)}
-                                        className="text-lale-pink focus:ring-lale-pink"
-                                    />
+                                    <input type="radio" name="shopTarget" checked={!allShops} onChange={() => setAllShops(false)} className="text-lale-pink" />
                                     <div className="flex items-center gap-2">
                                         <Target size={18} className="text-lale-orange" />
                                         <div>
                                             <span className="font-medium text-gray-800">Lojas Específicas</span>
                                             <p className="text-xs text-gray-500">
-                                                Selecione quais lojas receberão esta campanha
-                                                {!allShops && form.target_shops.length > 0 && (
-                                                    <span className="ml-1 text-lale-orange font-medium">({form.target_shops.length} selecionada{form.target_shops.length > 1 ? 's' : ''})</span>
-                                                )}
+                                                Selecione quais lojas receberão
+                                                {!allShops && form.target_shops.length > 0 && <span className="ml-1 text-lale-orange font-medium">({form.target_shops.length} selecionada{form.target_shops.length > 1 ? 's' : ''})</span>}
                                             </p>
                                         </div>
                                     </div>
                                 </label>
-
-                                {/* Shop checkboxes (only when specific shops selected) */}
                                 {!allShops && (
                                     <div className="ml-8 border border-gray-200 rounded-xl p-3 space-y-1 max-h-48 overflow-y-auto bg-white">
-                                        {/* Select All / None */}
                                         <div className="flex gap-2 pb-2 mb-2 border-b border-gray-100">
-                                            <button onClick={() => setForm(f => ({ ...f, target_shops: shops.map(s => s.id) }))} className="text-xs text-lale-pink hover:underline font-medium">
-                                                Selecionar todas
-                                            </button>
+                                            <button onClick={() => setForm(f => ({ ...f, target_shops: shops.map(s => s.id) }))} className="text-xs text-lale-pink hover:underline font-medium">Selecionar todas</button>
                                             <span className="text-gray-300">|</span>
-                                            <button onClick={() => setForm(f => ({ ...f, target_shops: [] }))} className="text-xs text-gray-400 hover:underline">
-                                                Limpar
-                                            </button>
+                                            <button onClick={() => setForm(f => ({ ...f, target_shops: [] }))} className="text-xs text-gray-400 hover:underline">Limpar</button>
                                         </div>
                                         {shops.map(shop => (
                                             <label key={shop.id} className="flex items-center gap-2.5 cursor-pointer px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={form.target_shops.includes(shop.id)}
-                                                    onChange={e => {
-                                                        if (e.target.checked) setForm(f => ({ ...f, target_shops: [...f.target_shops, shop.id] }));
-                                                        else setForm(f => ({ ...f, target_shops: f.target_shops.filter(id => id !== shop.id) }));
-                                                    }}
-                                                    className="rounded border-gray-300 text-lale-pink focus:ring-lale-pink"
-                                                />
+                                                <input type="checkbox" checked={form.target_shops.includes(shop.id)} onChange={e => {
+                                                    if (e.target.checked) setForm(f => ({ ...f, target_shops: [...f.target_shops, shop.id] }));
+                                                    else setForm(f => ({ ...f, target_shops: f.target_shops.filter(id => id !== shop.id) }));
+                                                }} className="rounded border-gray-300 text-lale-pink" />
                                                 <Store size={14} className="text-gray-400" />
                                                 <span className="text-sm text-gray-700">{shop.name}</span>
                                             </label>
                                         ))}
-                                        {shops.length === 0 && <p className="text-xs text-gray-400 py-2 text-center">Carregando lojas...</p>}
                                     </div>
                                 )}
                             </div>
 
                             {/* Actions */}
                             <div className="flex gap-3 pt-3 border-t border-gray-100">
-                                <button
-                                    onClick={() => handleCreate('draft')}
-                                    disabled={saving}
-                                    className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                                >
-                                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Edit3 size={16} />}
-                                    Salvar Rascunho
+                                <button onClick={() => handleCreate('draft')} disabled={saving} className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 flex items-center justify-center gap-2 disabled:opacity-50">
+                                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Edit3 size={16} />} Salvar Rascunho
                                 </button>
-                                <button
-                                    onClick={() => handleCreate('active')}
-                                    disabled={saving}
-                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-lale-pink to-lale-orange text-white rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-md disabled:opacity-50"
-                                >
-                                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                                    Publicar Agora
+                                <button onClick={() => handleCreate('active')} disabled={saving} className="flex-1 px-4 py-3 bg-gradient-to-r from-lale-pink to-lale-orange text-white rounded-xl font-medium hover:opacity-90 flex items-center justify-center gap-2 shadow-md disabled:opacity-50">
+                                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} Publicar Agora
                                 </button>
                             </div>
                         </div>
@@ -763,50 +689,31 @@ export default function MarketingPage() {
                 </div>
             )}
 
-            {/* ═══════════════════════════════════════════════════════════════════
-                DETAIL MODAL
-            ═══════════════════════════════════════════════════════════════════ */}
+            {/* ─── DETAIL MODAL ─── */}
             {showDetail && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="h-48 bg-gradient-to-br from-lale-pink/20 to-lale-orange/20 relative">
-                            {showDetail.cover_image_url ? (
-                                <img src={showDetail.cover_image_url} alt="" className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                    <span className="text-6xl">{typeConfig[showDetail.campaign_type]?.emoji || '📢'}</span>
-                                </div>
-                            )}
-                            <button onClick={() => setShowDetail(null)} className="absolute top-3 right-3 bg-white/90 hover:bg-white p-1.5 rounded-lg shadow-sm">
-                                <X size={18} />
-                            </button>
-                            {isExpiring(showDetail) && (
-                                <div className="absolute bottom-3 left-3 bg-amber-500 text-white text-sm font-bold px-3 py-1.5 rounded-lg animate-pulse">
-                                    ⏰ Campanha termina em menos de 3 dias!
-                                </div>
-                            )}
+                            {showDetail.cover_image_url ? <img src={showDetail.cover_image_url} alt="" className="w-full h-full object-cover" />
+                                : <div className="w-full h-full flex items-center justify-center"><span className="text-6xl">{typeConfig[showDetail.campaign_type]?.emoji || '📢'}</span></div>}
+                            <button onClick={() => setShowDetail(null)} className="absolute top-3 right-3 bg-white/90 hover:bg-white p-1.5 rounded-lg shadow-sm"><X size={18} /></button>
                         </div>
                         <div className="p-6 space-y-5">
-                            {/* Title + badges */}
                             <div>
                                 <div className="flex items-center gap-2 flex-wrap mb-2">
                                     {(() => {
                                         const tc = typeConfig[showDetail.campaign_type] || typeConfig.general;
                                         const sc = statusConfig[showDetail.status] || statusConfig.draft;
-                                        const StatusIcon = sc.icon;
-                                        return (
-                                            <>
-                                                <span className={`text-xs font-medium px-2 py-0.5 rounded-lg border ${showDetail.campaign_type === 'black_friday' ? 'bg-gray-900 text-white border-gray-700' : tc.bg + ' ' + tc.color}`}>{tc.emoji} {tc.label}</span>
-                                                <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-lg border ${sc.bg} ${sc.color}`}><StatusIcon size={10} /> {sc.label}</span>
-                                                <span className={`text-xs font-medium ${priorityConfig[showDetail.priority]?.color}`}>⚡ {priorityConfig[showDetail.priority]?.label}</span>
-                                            </>
-                                        );
+                                        const SI = sc.icon;
+                                        return (<>
+                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-lg border ${showDetail.campaign_type === 'black_friday' ? 'bg-gray-900 text-white border-gray-700' : tc.bg + ' ' + tc.color}`}>{tc.emoji} {tc.label}</span>
+                                            <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-lg border ${sc.bg} ${sc.color}`}><SI size={10} /> {sc.label}</span>
+                                            <span className={`text-xs font-medium ${priorityConfig[showDetail.priority]?.color}`}>⚡ {priorityConfig[showDetail.priority]?.label}</span>
+                                        </>);
                                     })()}
                                 </div>
                                 <h2 className="text-2xl font-bold text-gray-900">{showDetail.title}</h2>
                             </div>
-
-                            {/* Dates */}
                             {(showDetail.start_date || showDetail.end_date) && (
                                 <div className="flex items-center gap-3 text-sm text-gray-500">
                                     <Calendar size={16} />
@@ -814,42 +721,24 @@ export default function MarketingPage() {
                                     {showDetail.end_date && ` → ${new Date(showDetail.end_date).toLocaleDateString('pt-BR')}`}
                                 </div>
                             )}
-
-                            {/* Target shops */}
                             <div className="bg-gray-50 rounded-xl p-3">
-                                <div className="flex items-center gap-2 text-sm">
+                                <div className="flex items-center gap-2 text-sm flex-wrap">
                                     <Target size={14} className="text-gray-400" />
-                                    <span className="font-medium text-gray-700">Lojas Alvo:</span>
+                                    <span className="font-medium text-gray-700">Lojas:</span>
                                     {showDetail.target_shops?.length > 0 ? (
-                                        <div className="flex flex-wrap gap-1">
-                                            {showDetail.target_shops.map(sid => (
-                                                <span key={sid} className="px-2 py-0.5 bg-lale-orange/10 text-lale-orange text-xs font-medium rounded-lg">{getShopName(sid)}</span>
-                                            ))}
-                                        </div>
+                                        showDetail.target_shops.map(sid => <span key={sid} className="px-2 py-0.5 bg-lale-orange/10 text-lale-orange text-xs font-medium rounded-lg">{getShopName(sid)}</span>)
                                     ) : (
                                         <span className="text-green-600 font-medium text-xs">✓ Todas as lojas</span>
                                     )}
                                 </div>
                             </div>
-
-                            {/* Description */}
-                            {showDetail.description && (
-                                <div className="bg-gray-50 rounded-xl p-4">
-                                    <p className="text-sm text-gray-700 leading-relaxed">{showDetail.description}</p>
-                                </div>
-                            )}
-
-                            {/* Instructions */}
+                            {showDetail.description && <div className="bg-gray-50 rounded-xl p-4"><p className="text-sm text-gray-700 leading-relaxed">{showDetail.description}</p></div>}
                             {showDetail.instructions && (
                                 <div>
                                     <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2"><FileText size={14} /> Instruções</h4>
-                                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 whitespace-pre-wrap text-sm text-blue-900 font-mono leading-relaxed">
-                                        {showDetail.instructions}
-                                    </div>
+                                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 whitespace-pre-wrap text-sm text-blue-900 font-mono leading-relaxed">{showDetail.instructions}</div>
                                 </div>
                             )}
-
-                            {/* Files */}
                             {showDetail.campaign_files?.length > 0 && (
                                 <div>
                                     <h4 className="text-sm font-semibold text-gray-700 mb-2">Arquivos ({showDetail.campaign_files.length})</h4>
@@ -861,7 +750,7 @@ export default function MarketingPage() {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-gray-900 truncate">{file.file_name}</p>
-                                                    <p className="text-xs text-gray-400">{file.file_type} • {formatFileSize(file.file_size)}</p>
+                                                    <p className="text-xs text-gray-400">{formatFileSize(file.file_size)}</p>
                                                 </div>
                                                 <Download size={16} className="text-gray-400" />
                                             </a>
@@ -869,14 +758,9 @@ export default function MarketingPage() {
                                     </div>
                                 </div>
                             )}
-
-                            {/* Acknowledgements */}
                             <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Store size={16} className="text-green-600" />
-                                        <span className="text-sm font-medium text-green-800">Confirmações das Lojas</span>
-                                    </div>
+                                    <div className="flex items-center gap-2"><Store size={16} className="text-green-600" /><span className="text-sm font-medium text-green-800">Confirmações</span></div>
                                     <span className="text-lg font-bold text-green-700">{showDetail.totalAcknowledgements || 0}</span>
                                 </div>
                                 {showDetail.campaign_acknowledgements?.length > 0 && (
@@ -890,20 +774,12 @@ export default function MarketingPage() {
                                     </div>
                                 )}
                             </div>
-
-                            {/* Actions */}
                             <div className="flex gap-3 pt-2">
                                 {showDetail.status === 'draft' && (
-                                    <button onClick={() => handlePublish(showDetail.id)} className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-medium hover:opacity-90 flex items-center justify-center gap-2 shadow-md">
-                                        <Send size={16} /> Publicar
-                                    </button>
+                                    <button onClick={() => handlePublish(showDetail.id)} className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-medium hover:opacity-90 flex items-center justify-center gap-2 shadow-md"><Send size={16} /> Publicar</button>
                                 )}
-                                <button onClick={() => { setShowDetail(null); startEdit(showDetail); }} className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 flex items-center justify-center gap-2">
-                                    <Edit3 size={16} /> Editar
-                                </button>
-                                <button onClick={() => handleDelete(showDetail.id)} className="px-4 py-3 border border-red-200 rounded-xl text-red-600 hover:bg-red-50 flex items-center justify-center gap-2">
-                                    <Trash2 size={16} />
-                                </button>
+                                <button onClick={() => { setShowDetail(null); startEdit(showDetail); }} className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 flex items-center justify-center gap-2"><Edit3 size={16} /> Editar</button>
+                                <button onClick={() => handleDelete(showDetail.id)} className="px-4 py-3 border border-red-200 rounded-xl text-red-600 hover:bg-red-50 flex items-center justify-center gap-2"><Trash2 size={16} /></button>
                             </div>
                         </div>
                     </div>

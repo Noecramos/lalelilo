@@ -1,0 +1,135 @@
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+    Megaphone, LayoutDashboard, BarChart3,
+    Menu, X, LogOut, Settings
+} from 'lucide-react';
+
+export default function MarketingLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const pathname = usePathname();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const navigation = [
+        { name: 'Campanhas', href: '/marketing', icon: Megaphone },
+        { name: 'Relatórios', href: '/marketing/reports', icon: BarChart3 },
+        { name: 'Configurações', href: '/marketing/settings', icon: Settings },
+    ];
+
+    const isActive = (href: string) => pathname === href;
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            {/* Mobile sidebar backdrop */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
+            {/* Sidebar */}
+            <aside
+                className={`
+                    fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200
+                    transform transition-transform duration-300 ease-in-out
+                    ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    lg:translate-x-0
+                `}
+            >
+                {/* Logo */}
+                <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-gradient-to-br from-lale-pink to-lale-orange rounded-lg flex items-center justify-center">
+                            <Megaphone size={18} className="text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-sm font-bold text-gray-900">Lalelilo</h1>
+                            <p className="text-xs text-gray-400">Marketing Hub</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => setSidebarOpen(false)}
+                        className="lg:hidden text-gray-500 hover:text-gray-700"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {/* Navigation */}
+                <nav className="p-4 space-y-1">
+                    {navigation.map((item) => {
+                        const Icon = item.icon;
+                        const active = isActive(item.href);
+
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                className={`
+                                    flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
+                                    ${active
+                                        ? 'bg-gradient-to-r from-lale-pink to-lale-orange text-white shadow-md'
+                                        : 'text-gray-700 hover:bg-lale-bg-pink hover:text-lale-orange'
+                                    }
+                                `}
+                                onClick={() => setSidebarOpen(false)}
+                            >
+                                <Icon size={20} />
+                                <span className="font-medium">{item.name}</span>
+                            </Link>
+                        );
+                    })}
+                </nav>
+
+                {/* Branding */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 text-center">
+                    <div className="text-xs text-gray-500">
+                        <img src="/lalelilo-logo.jpg" alt="Lalelilo" className="h-8 mx-auto mb-2 opacity-50 hover:opacity-100 transition-all" />
+                        <p>© 2026 Lalelilo • Marketing Hub</p>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Main content */}
+            <div className="lg:pl-64">
+                {/* Top bar */}
+                <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6">
+                    <button
+                        onClick={() => setSidebarOpen(true)}
+                        className="lg:hidden text-gray-500 hover:text-gray-700"
+                    >
+                        <Menu size={24} />
+                    </button>
+
+                    <div className="flex-1 lg:flex-none">
+                        <h1 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                            <Megaphone size={22} className="text-lale-pink" />
+                            Marketing Hub
+                        </h1>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <Link href="/super-admin" className="text-xs text-gray-400 hover:text-lale-orange transition-colors flex items-center gap-1">
+                            <LayoutDashboard size={14} /> Super Admin
+                        </Link>
+                        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-lale-pink to-lale-orange flex items-center justify-center text-white font-medium shadow-sm text-sm">
+                            M
+                        </div>
+                    </div>
+                </header>
+
+                {/* Page content */}
+                <main className="p-4 lg:p-6">
+                    {children}
+                </main>
+            </div>
+        </div>
+    );
+}
