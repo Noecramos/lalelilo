@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 const SALT_ROUNDS = 10;
 
