@@ -222,9 +222,12 @@ export default function OmnichannelPage() {
         if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
 
         try {
+            console.log('[deleteMessage] Deleting message:', messageId);
             const res = await fetch(`/api/messages?id=${messageId}`, { method: 'DELETE' });
+            const data = await res.json();
+            console.log('[deleteMessage] Response:', res.status, data);
+
             if (!res.ok) {
-                const data = await res.json();
                 throw new Error(data.error || 'Failed to delete');
             }
 
@@ -233,7 +236,7 @@ export default function OmnichannelPage() {
             setArchivedMessages(archivedMessages.filter(msg => msg.id !== messageId));
         } catch (e) {
             console.error('Error deleting message:', e);
-            alert('Erro ao excluir mensagem');
+            alert('Erro ao excluir mensagem: ' + (e instanceof Error ? e.message : String(e)));
         }
     };
 

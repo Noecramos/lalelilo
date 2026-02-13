@@ -160,28 +160,72 @@ export async function DELETE(request: NextRequest) {
         const messageId = searchParams.get('id');
         const conversationId = searchParams.get('conversationId');
 
+        console.log('[DELETE /api/messages] messageId:', messageId, 'conversationId:', conversationId);
+        console.log('[DELETE /api/messages] SERVICE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
+
         if (!messageId && !conversationId) {
             return NextResponse.json({ error: 'Missing message id or conversationId' }, { status: 400 });
         }
 
-        let query = supabase.from('messages').delete();
-
         if (conversationId) {
-            query = query.eq('conversation_id', conversationId);
+            // Delete all messages in conversation, then the conversation itself
+            const { data: deletedMsgs, error: msgError } = await supabase
+                .from('messages')
+                .delete()
+                .eq('conversation_id', conversationId)
+                .select('id');
+
+            console.log('[DELETE] Deleted messages:', deletedMsgs?.length, 'error:', msgError?.message);
+
+            if (msgError) {
+                return NextResponse.json({ error: msgError.message, detail: 'Failed to delete messages' }, { status: 500 });
+            }
+
+            // Also delete the conversation record
+            const { error: convError } = await supabase
+                .from('conversations')
+                .delete()
+                .eq('id', conversationId);
+
+            console.log('[DELETE] Conversation delete error:', convError?.message);
+
+            return NextResponse.json({
+                success: true,
+                deleted_messages: deletedMsgs?.length || 0,
+                conversation_deleted: !convError,
+            });
         } else if (messageId) {
-            query = query.eq('id', messageId);
+            // First verify the message exists
+            const { data: existing } = await supabase
+                .from('messages')
+                .select('id')
+                .eq('id', messageId)
+                .single();
+
+            console.log('[DELETE] Message exists:', !!existing);
+
+            const { data: deleted, error } = await supabase
+                .from('messages')
+                .delete()
+                .eq('id', messageId)
+                .select('id');
+
+            console.log('[DELETE] Deleted:', deleted, 'error:', error?.message);
+
+            if (error) {
+                return NextResponse.json({ error: error.message }, { status: 500 });
+            }
+
+            return NextResponse.json({
+                success: true,
+                deleted_count: deleted?.length || 0,
+                message_existed: !!existing,
+            });
         }
 
-        const { error } = await query;
-
-        if (error) {
-            console.error('Error deleting message(s):', error);
-            return NextResponse.json({ error: error.message }, { status: 500 });
-        }
-
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ error: 'No valid parameters' }, { status: 400 });
     } catch (error) {
-        console.error('Unexpected error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        console.error('[DELETE /api/messages] Unexpected error:', error);
+        return NextResponse.json({ error: 'Internal server error', detail: String(error) }, { status: 500 });
     }
 }
