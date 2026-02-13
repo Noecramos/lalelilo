@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
     Megaphone, BarChart3, Settings,
-    Menu, X, LogOut, LayoutDashboard
+    Menu, X, LogOut
 } from 'lucide-react';
 
 export default function MarketingLayout({
@@ -104,14 +104,7 @@ export default function MarketingLayout({
                         );
                     })}
 
-                    {/* Super Admin link */}
-                    <a
-                        href="/super-admin"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-white text-opacity-60 hover:bg-white hover:bg-opacity-20 mt-4 border border-white border-opacity-20"
-                    >
-                        <LayoutDashboard size={20} />
-                        <span className="font-medium">Super Admin</span>
-                    </a>
+
                 </nav>
 
                 {/* Noviapp Branding — Standard footer */}
