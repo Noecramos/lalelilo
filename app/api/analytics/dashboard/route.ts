@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin as supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase-admin';
 
 // GET /api/analytics/dashboard - Get dashboard metrics
 export async function GET(request: NextRequest) {

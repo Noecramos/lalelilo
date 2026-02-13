@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin as supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase } from '@/lib/supabase-admin';
 
 // GET /api/messages - Fetch messages for a specific shop or super-admin
 export async function GET(request: NextRequest) {
