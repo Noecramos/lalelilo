@@ -18,7 +18,9 @@ import {
     TicketCheck,
     Users,
     Package,
-    LogOut
+    LogOut,
+    Warehouse,
+    Megaphone
 } from 'lucide-react';
 
 export default function SuperAdminLayout({
@@ -42,6 +44,8 @@ export default function SuperAdminLayout({
         { name: 'Gamificação', href: '/super-admin/gamification', icon: Trophy },
         { name: 'Checklists', href: '/super-admin/checklists', icon: ClipboardCheck },
         { name: 'Reabastecimento', href: '/super-admin/replenishment', icon: Package },
+        { name: 'Centro Distrib.', href: '/super-admin/cd', icon: Warehouse },
+        { name: 'Marketing', href: '/super-admin/marketing', icon: Megaphone },
         { name: 'Tickets', href: '/super-admin/tickets', icon: TicketCheck },
         { name: 'Equipe', href: '/super-admin/team', icon: Users },
         { name: 'Suporte', href: 'https://wa.me/558183920320', icon: Phone, external: true },

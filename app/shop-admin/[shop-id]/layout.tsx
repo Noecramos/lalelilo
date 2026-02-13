@@ -15,7 +15,8 @@ import {
     Users,
     Phone,
     LogOut,
-    Truck
+    Truck,
+    Megaphone
 } from 'lucide-react';
 
 export default function ShopAdminLayout({
@@ -36,6 +37,7 @@ export default function ShopAdminLayout({
         { name: 'Clientes', href: `/shop-admin/${shopId}/users`, icon: Users },
         { name: 'Estoque', href: `/shop-admin/${shopId}/inventory`, icon: Package },
         { name: 'Reabastecimento', href: `/shop-admin/${shopId}/replenishment`, icon: Truck },
+        { name: 'Marketing', href: `/shop-admin/${shopId}/marketing`, icon: Megaphone },
         { name: 'Mensagens', href: `/shop-admin/${shopId}/messages`, icon: MessageSquare },
         { name: 'Configurações', href: `/shop-admin/${shopId}/settings`, icon: Settings },
         { name: 'Suporte Whats', href: 'https://wa.me/558183920320', icon: Phone, external: true },
