@@ -31,7 +31,8 @@ export default function SuperAdminLayout({
     const pathname = usePathname();
     const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+    const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+    const [manualExpanded, setManualExpanded] = useState<Set<string>>(new Set());
 
     interface NavItem {
         name: string;
@@ -146,7 +147,7 @@ export default function SuperAdminLayout({
                     {navigation.map((item) => {
                         const Icon = item.icon;
                         const groupActive = isGroupActive(item);
-                        const expanded = expandedGroup === item.name || groupActive;
+                        const expanded = collapsedGroups.has(item.name) ? false : (groupActive || manualExpanded.has(item.name));
 
                         if (item.external) {
                             return (
@@ -171,7 +172,15 @@ export default function SuperAdminLayout({
                             const btnStyle = groupActive ? { backgroundColor: 'rgba(255,255,255,0.15)' } : undefined;
                             return (
                                 <div key={item.name}>
-                                    <button onClick={() => setExpandedGroup(expanded ? null : item.name)} className={btnClass} style={btnStyle}>
+                                    <button onClick={() => {
+                                        if (expanded) {
+                                            setCollapsedGroups(prev => new Set([...prev, item.name]));
+                                            setManualExpanded(prev => { const n = new Set(prev); n.delete(item.name); return n; });
+                                        } else {
+                                            setCollapsedGroups(prev => { const n = new Set(prev); n.delete(item.name); return n; });
+                                            setManualExpanded(prev => new Set([...prev, item.name]));
+                                        }
+                                    }} className={btnClass} style={btnStyle}>
                                         <div className="flex items-center gap-3">
                                             <Icon size={20} />
                                             <span className="font-medium">{item.name}</span>
