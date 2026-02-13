@@ -78,7 +78,7 @@ export default function SuperAdminLayout({
                 { name: 'Reabastecimento', href: '/super-admin/replenishment', icon: Package },
             ]
         },
-        { name: 'Suporte', href: 'https://wa.me/558183920320', icon: Phone, external: true },
+        { name: 'Suporte Novix', href: 'https://wa.me/558183920320', icon: Phone, external: true },
     ];
 
     const handleLogout = async () => {
@@ -156,10 +156,10 @@ export default function SuperAdminLayout({
                                     href={item.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-green-400 hover:bg-white hover:bg-opacity-20 mt-4 border border-green-400 border-opacity-30 bg-white bg-opacity-5"
+                                    className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg transition-all mt-4 bg-white text-green-600 font-semibold shadow-md hover:shadow-lg hover:scale-[1.02] text-sm"
                                 >
-                                    <Icon size={20} className="text-green-400" />
-                                    <span className="font-medium">{item.name}</span>
+                                    <Icon size={18} />
+                                    <span>{item.name}</span>
                                 </a>
                             );
                         }
