@@ -299,12 +299,10 @@ export default function CheckoutPage() {
 
                             {/* Payment method */}
                             <Card title="Forma de Pagamento" padding="md">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div className="grid grid-cols-2 gap-3">
                                     {[
                                         { key: 'credit_card', label: 'Crédito' },
-                                        { key: 'debit_card', label: 'Débito' },
                                         { key: 'pix', label: 'PIX' },
-                                        { key: 'cash', label: 'Dinheiro' },
                                     ].map(pm => (
                                         <button
                                             key={pm.key}
@@ -322,7 +320,7 @@ export default function CheckoutPage() {
                             </Card>
 
                             {/* Payment info note */}
-                            {(paymentMethod === 'pix' || paymentMethod === 'credit_card' || paymentMethod === 'debit_card') && (
+                            {(paymentMethod === 'pix' || paymentMethod === 'credit_card') && (
                                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
                                     <Shield size={20} className="text-blue-500 flex-shrink-0 mt-0.5" />
                                     <div>
@@ -371,9 +369,7 @@ export default function CheckoutPage() {
                                         disabled={items.length === 0}
                                     >
                                         <CreditCard size={18} className="mr-2" />
-                                        {paymentMethod === 'credit_card' || paymentMethod === 'debit_card'
-                                            ? 'Continuar para Pagamento'
-                                            : 'Finalizar Pedido'}
+                                        Continuar para Pagamento
                                     </Button>
                                     <p className="text-xs text-gray-500 text-center mt-2">
                                         Ao finalizar, você concorda com nossos termos de uso

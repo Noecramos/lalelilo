@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PaymentForm from '@/components/PaymentForm';
-import { ShoppingBag, ArrowLeft, CheckCircle, XCircle, Shield, Lock } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, CheckCircle, XCircle, Shield, Lock, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { useCart } from '@/lib/cart-context';
