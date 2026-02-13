@@ -1,13 +1,10 @@
 // Lalelilo - Module 1: Store Operations / Replenishment Service
 // Handles stock requests from stores to Distribution Center
 
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { logActivity, createNotification } from './core';
 import { buildReplenishmentStatusMessage } from './waha';
 
-const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
-const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
-const getSupabase = () => createClient(supabaseUrl, supabaseKey);
 
 // Valid status transitions
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -39,7 +36,7 @@ interface CreateReplenishmentParams {
 }
 
 export async function createReplenishmentRequest(params: CreateReplenishmentParams) {
-    const supabase = getSupabase();
+    const supabase = supabaseAdmin;
 
     // Create the request
     const { data: request, error: reqError } = await supabase
@@ -105,7 +102,7 @@ export async function getReplenishmentRequests(filters: {
     status?: string;
     limit?: number;
 }) {
-    const supabase = getSupabase();
+    const supabase = supabaseAdmin;
     let query = supabase
         .from('replenishment_requests')
         .select(`
@@ -126,7 +123,7 @@ export async function getReplenishmentRequests(filters: {
 }
 
 export async function getReplenishmentById(id: string) {
-    const supabase = getSupabase();
+    const supabase = supabaseAdmin;
     return supabase
         .from('replenishment_requests')
         .select(`
@@ -151,7 +148,7 @@ export async function updateReplenishmentStatus(
     changedBy: string,
     notes?: string,
 ) {
-    const supabase = getSupabase();
+    const supabase = supabaseAdmin;
 
     // Get current request
     const { data: request, error: fetchError } = await supabase
@@ -222,7 +219,7 @@ export async function updateReplenishmentStatus(
 // ============================================================================
 
 async function transferInventory(requestId: string) {
-    const supabase = getSupabase();
+    const supabase = supabaseAdmin;
 
     // Get request with items
     const { data: request } = await supabase
