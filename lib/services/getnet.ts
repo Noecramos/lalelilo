@@ -47,6 +47,10 @@ class GetnetService {
     private accessToken: string | null = null;
     private tokenExpiry: number = 0;
 
+    private get isConfigured(): boolean {
+        return !!(this.config.clientId && this.config.clientSecret);
+    }
+
     constructor() {
         this.config = {
             clientId: process.env.GETNET_CLIENT_ID || '',
@@ -56,16 +60,16 @@ class GetnetService {
             apiUrl: process.env.GETNET_API_URL || 'https://api-sbx.globalgetnet.com',
             environment: (process.env.GETNET_ENVIRONMENT as 'sandbox' | 'production') || 'sandbox',
         };
-
-        if (!this.config.clientId || !this.config.clientSecret) {
-            console.warn('⚠️ Getnet credentials not configured');
-        }
     }
 
     /**
      * Get OAuth2 access token
      */
     private async getAccessToken(): Promise<string> {
+        if (!this.isConfigured) {
+            throw new Error('Getnet credentials not configured. Set GETNET_CLIENT_ID and GETNET_CLIENT_SECRET environment variables.');
+        }
+
         // Return cached token if still valid
         if (this.accessToken && Date.now() < this.tokenExpiry) {
             return this.accessToken;
