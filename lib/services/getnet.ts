@@ -279,6 +279,104 @@ class GetnetService {
             return false;
         }
     }
+
+    /**
+     * Create a PIX payment via Getnet
+     * Returns a QR Code and copy-paste code for the customer
+     */
+    async createPixPayment(request: {
+        amount: number;
+        orderId: string;
+        customerId: string;
+        customerName: string;
+        customerDocument: string;
+    }): Promise<{
+        status: 'pending' | 'approved' | 'error';
+        pixCode?: string;
+        qrCodeImage?: string;
+        paymentId?: string;
+        message?: string;
+    }> {
+        try {
+            const token = await this.getAccessToken();
+            const { randomUUID } = await import('crypto');
+            const requestId = randomUUID();
+            const idempotencyKey = randomUUID();
+
+            const payload = {
+                idempotency_key: idempotencyKey,
+                request_id: requestId,
+                order_id: request.orderId,
+                data: {
+                    customer_id: request.customerId,
+                    amount: request.amount, // Already in cents
+                    currency: 'BRL',
+                    payment: {
+                        payment_method: 'PIX',
+                        transaction_type: 'FULL',
+                        pix: {
+                            expiration_date: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min
+                        },
+                    },
+                },
+            };
+
+            const response = await fetch(
+                `${this.config.apiUrl}/dpm/payments-gwproxy/v2/payments`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'x-seller-id': this.config.sellerId,
+                    },
+                    body: JSON.stringify(payload),
+                }
+            );
+
+            console.log('Getnet PIX response status:', response.status);
+            const responseText = await response.text();
+            console.log('Getnet PIX response body:', responseText.substring(0, 500));
+
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                console.error('❌ Failed to parse Getnet PIX response');
+                return {
+                    status: 'error',
+                    message: `API returned non-JSON response (Status ${response.status})`,
+                };
+            }
+
+            if (!response.ok) {
+                console.error('❌ Getnet PIX error:', data);
+                return {
+                    status: 'error',
+                    message: data.message || data.details?.[0]?.description_detail || 'PIX payment failed',
+                };
+            }
+
+            console.log('✅ Getnet PIX payment created:', data);
+
+            // Extract PIX data from response
+            const pixData = data.data?.payment?.pix || data.pix || {};
+            return {
+                status: 'pending',
+                pixCode: pixData.qr_code || pixData.emv || data.additional_data?.pix?.qr_code || '',
+                qrCodeImage: pixData.qr_code_url || pixData.qr_code_image || data.additional_data?.pix?.qr_code_url || '',
+                paymentId: data.payment_id || data.id || '',
+                message: 'PIX QR Code gerado com sucesso',
+            };
+
+        } catch (error) {
+            console.error('❌ Getnet PIX error:', error);
+            return {
+                status: 'error',
+                message: error instanceof Error ? error.message : 'Unknown error',
+            };
+        }
+    }
 }
 
 // Export singleton instance

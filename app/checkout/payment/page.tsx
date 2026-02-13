@@ -33,8 +33,6 @@ function CheckoutPaymentContent() {
     const paramCpf = searchParams.get('cpf');
     const paramMethod = searchParams.get('method') || 'credit_card';
     const { clearCart } = useCart();
-    const [pixLoading, setPixLoading] = useState(false);
-    const [pixCode, setPixCode] = useState('');
 
     const [order, setOrder] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -193,81 +191,14 @@ function CheckoutPaymentContent() {
                                     )}
 
                                     {paymentStatus === 'idle' && paramMethod === 'pix' && (
-                                        <div className="text-center py-6">
-                                            <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl p-8 mb-6">
-                                                <div className="w-48 h-48 mx-auto bg-white rounded-xl flex items-center justify-center mb-4 shadow-inner">
-                                                    {pixLoading ? (
-                                                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lale-orange"></div>
-                                                    ) : pixCode ? (
-                                                        <div className="text-center">
-                                                            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(pixCode)}`} alt="QR Code PIX" className="w-40 h-40" />
-                                                        </div>
-                                                    ) : (
-                                                        <div className="text-gray-400 text-center">
-                                                            <CreditCard size={48} className="mx-auto mb-2 opacity-30" />
-                                                            <p className="text-xs">Clique para gerar</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {pixCode && (
-                                                    <div className="mt-4">
-                                                        <p className="text-xs text-gray-500 mb-2">Código PIX Copia e Cola:</p>
-                                                        <div className="bg-white border border-gray-200 rounded-lg p-3 text-xs font-mono text-gray-600 break-all max-h-20 overflow-y-auto">
-                                                            {pixCode}
-                                                        </div>
-                                                        <button
-                                                            onClick={() => { navigator.clipboard.writeText(pixCode); alert('Código PIX copiado!'); }}
-                                                            className="mt-3 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors"
-                                                        >
-                                                            📋 Copiar Código
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {!pixCode && (
-                                                <button
-                                                    onClick={async () => {
-                                                        setPixLoading(true);
-                                                        try {
-                                                            const res = await fetch('/api/payments/pix', {
-                                                                method: 'POST',
-                                                                headers: { 'Content-Type': 'application/json' },
-                                                                body: JSON.stringify({
-                                                                    amount: order?.total_amount || parseFloat(paramAmount || '0'),
-                                                                    orderId: order?.id || orderId,
-                                                                    customerName: order?.customer_name || paramName || 'Cliente',
-                                                                    customerDocument: order?.customer_document || paramCpf || '',
-                                                                }),
-                                                            });
-                                                            const data = await res.json();
-                                                            if (data.pixCode || data.qr_code) {
-                                                                setPixCode(data.pixCode || data.qr_code);
-                                                            } else if (data.paymentId) {
-                                                                handlePaymentSuccess(data.paymentId);
-                                                            } else {
-                                                                setPixCode(`PIX-${orderId}-${Date.now()}`);
-                                                            }
-                                                        } catch (err) {
-                                                            // Fallback: generate a placeholder
-                                                            setPixCode(`PIX-${orderId}-${Date.now()}`);
-                                                        }
-                                                        setPixLoading(false);
-                                                    }}
-                                                    disabled={pixLoading}
-                                                    className="px-8 py-3 bg-gradient-to-r from-lale-pink to-lale-orange text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all hover:opacity-90 disabled:opacity-50"
-                                                >
-                                                    {pixLoading ? 'Gerando PIX...' : 'Gerar QR Code PIX'}
-                                                </button>
-                                            )}
-                                            {pixCode && (
-                                                <button
-                                                    onClick={() => handlePaymentSuccess(`pix_${orderId}`)}
-                                                    className="mt-4 px-8 py-3 bg-green-500 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all hover:bg-green-600"
-                                                >
-                                                    ✅ Já realizei o pagamento
-                                                </button>
-                                            )}
-                                        </div>
+                                        <PixPaymentFlow
+                                            amount={order?.total_amount || parseFloat(paramAmount || '0')}
+                                            orderId={order?.id || orderId || ''}
+                                            customerName={order?.customer_name || paramName || 'Cliente'}
+                                            customerDocument={order?.customer_document || paramCpf || ''}
+                                            onSuccess={handlePaymentSuccess}
+                                            onError={handlePaymentError}
+                                        />
                                     )}
 
                                     {paymentStatus === 'idle' && paramMethod !== 'pix' && (
@@ -379,6 +310,176 @@ function CheckoutPaymentContent() {
 
             {/* Floating WhatsApp Button */}
             <WhatsAppButton phoneNumber="5581999999999" />
+        </div>
+    );
+}
+
+// PIX Payment Flow Component — fully integrated with Getnet
+function PixPaymentFlow({
+    amount,
+    orderId,
+    customerName,
+    customerDocument,
+    onSuccess,
+    onError,
+}: {
+    amount: number;
+    orderId: string;
+    customerName: string;
+    customerDocument: string;
+    onSuccess: (paymentId: string) => void;
+    onError: (error: string) => void;
+}) {
+    const [loading, setLoading] = useState(true);
+    const [pixCode, setPixCode] = useState('');
+    const [qrCodeImage, setQrCodeImage] = useState('');
+    const [paymentId, setPaymentId] = useState('');
+    const [copied, setCopied] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(30 * 60);
+
+    useEffect(() => {
+        generatePix();
+    }, []);
+
+    // Poll for payment status
+    useEffect(() => {
+        if (!paymentId) return;
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/payments/status/${paymentId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.status === 'approved' || data.status === 'APPROVED') {
+                        clearInterval(interval);
+                        onSuccess(paymentId);
+                    }
+                }
+            } catch (err) { /* retry */ }
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [paymentId]);
+
+    // Countdown
+    useEffect(() => {
+        if (!pixCode || timeLeft <= 0) return;
+        const timer = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    onError('QR Code PIX expirado. Tente novamente.');
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [pixCode]);
+
+    const generatePix = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/payments/pix', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount, orderId, customerName, customerDocument }),
+            });
+            const data = await res.json();
+            if (data.error) { onError(data.error); return; }
+            if (data.pixCode) {
+                setPixCode(data.pixCode);
+                setQrCodeImage(data.qrCodeImage || '');
+                setPaymentId(data.paymentId || '');
+            } else if (data.paymentId) {
+                onSuccess(data.paymentId);
+            } else {
+                onError('Não foi possível gerar o QR Code PIX.');
+            }
+        } catch (err) {
+            onError('Erro ao conectar com o servidor.');
+        }
+        setLoading(false);
+    };
+
+    const copyCode = async () => {
+        try {
+            await navigator.clipboard.writeText(pixCode);
+        } catch {
+            const ta = document.createElement('textarea');
+            ta.value = pixCode;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 3000);
+    };
+
+    const formatTime = (s: number) => {
+        const m = Math.floor(s / 60);
+        return `${m.toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
+    };
+
+    if (loading) {
+        return (
+            <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-lale-orange mx-auto"></div>
+                <p className="mt-4 text-gray-600 font-medium">Gerando QR Code PIX...</p>
+                <p className="mt-1 text-xs text-gray-400">Conectando com Getnet</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="text-center py-4">
+            <div className="mb-4 inline-flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-full px-4 py-1.5">
+                <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-orange-700">Expira em {formatTime(timeLeft)}</span>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-5">
+                <div className="w-52 h-52 mx-auto bg-white rounded-xl flex items-center justify-center shadow-inner p-2">
+                    {qrCodeImage ? (
+                        <img src={qrCodeImage} alt="QR Code PIX" className="w-full h-full object-contain" />
+                    ) : pixCode ? (
+                        <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`}
+                            alt="QR Code PIX"
+                            className="w-full h-full object-contain"
+                        />
+                    ) : null}
+                </div>
+                <p className="mt-4 text-sm font-semibold text-gray-700">Escaneie o QR Code com seu app de banco</p>
+                <p className="mt-1 text-xs text-gray-400">Valor: R$ {amount.toFixed(2)}</p>
+            </div>
+
+            <div className="flex items-center gap-3 mb-5">
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <span className="text-xs text-gray-400 font-medium">ou copie o código</span>
+                <div className="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            {pixCode && (
+                <div>
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-mono text-gray-600 break-all max-h-20 overflow-y-auto text-left mb-3">
+                        {pixCode}
+                    </div>
+                    <button
+                        onClick={copyCode}
+                        className={`w-full px-6 py-3 rounded-xl font-semibold transition-all text-sm ${copied
+                            ? 'bg-green-500 text-white shadow-md'
+                            : 'bg-gradient-to-r from-lale-pink to-lale-orange text-white shadow-md hover:shadow-lg hover:opacity-90'
+                            }`}
+                    >
+                        {copied ? '✅ Código copiado!' : '📋 Copiar código PIX'}
+                    </button>
+                </div>
+            )}
+
+            <div className="mt-5 flex items-center justify-center gap-2 text-sm text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-lale-orange"></div>
+                <span>Aguardando confirmação do pagamento...</span>
+            </div>
         </div>
     );
 }
