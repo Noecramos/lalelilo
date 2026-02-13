@@ -80,11 +80,7 @@ function CheckoutPaymentContent() {
     const handlePaymentError = (error: string) => {
         setPaymentStatus('error');
         setErrorMessage(error);
-        // Reset after 5 seconds
-        setTimeout(() => {
-            setPaymentStatus('idle');
-            setErrorMessage('');
-        }, 5000);
+        // Don't auto-retry — auth/config errors won't fix on retry
     };
 
     if (loading) {
@@ -180,13 +176,23 @@ function CheckoutPaymentContent() {
                                     )}
 
                                     {paymentStatus === 'error' && (
-                                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                                            <XCircle size={24} className="text-red-500 flex-shrink-0 mt-0.5" />
-                                            <div>
-                                                <p className="font-semibold text-red-900">Erro no Pagamento</p>
-                                                <p className="text-sm text-red-700 mt-1">{errorMessage}</p>
-                                                <p className="text-xs text-red-500 mt-2">Tente novamente em instantes...</p>
+                                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                                            <div className="flex items-start gap-3">
+                                                <XCircle size={24} className="text-red-500 flex-shrink-0 mt-0.5" />
+                                                <div>
+                                                    <p className="font-semibold text-red-900">Erro no Pagamento</p>
+                                                    <p className="text-sm text-red-700 mt-1">{errorMessage}</p>
+                                                </div>
                                             </div>
+                                            <button
+                                                onClick={() => {
+                                                    setPaymentStatus('idle');
+                                                    setErrorMessage('');
+                                                }}
+                                                className="mt-3 w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                                            >
+                                                Tentar novamente
+                                            </button>
                                         </div>
                                     )}
 

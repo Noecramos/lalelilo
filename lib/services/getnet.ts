@@ -76,50 +76,40 @@ class GetnetService {
         }
 
         const authUrl = `${this.config.apiUrl}/authentication/oauth2/access_token`;
+        const credentials = Buffer.from(
+            `${this.config.clientId}:${this.config.clientSecret}`
+        ).toString('base64');
 
-        // Try multiple credential combinations since Getnet Global API documentation
-        // is inconsistent about which values are the OAuth client_id and client_secret
-        const credentialCombos = [
-            { id: this.config.clientId, secret: this.config.clientSecret, label: 'clientId:clientSecret' },
-            { id: this.config.sellerId, secret: this.config.clientSecret, label: 'sellerId:clientSecret' },
-            { id: this.config.clientId, secret: this.config.sellerId, label: 'clientId:sellerId' },
-            { id: this.config.sellerId, secret: this.config.clientId, label: 'sellerId:clientId' },
-        ];
+        console.log('🔑 Getnet auth attempt:', {
+            authUrl,
+            clientIdPrefix: this.config.clientId.substring(0, 12) + '...',
+        });
 
-        let lastError = '';
+        try {
+            const response = await fetch(authUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Basic ${credentials}`,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'grant_type=client_credentials&scope=oob',
+            });
 
-        for (const combo of credentialCombos) {
-            const credentials = Buffer.from(`${combo.id}:${combo.secret}`).toString('base64');
-            console.log(`🔑 Trying Getnet auth with ${combo.label}...`);
-
-            try {
-                const response = await fetch(authUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Basic ${credentials}`,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'grant_type=client_credentials&scope=oob',
-                });
-
-                if (response.ok) {
-                    const data: GetnetAuthResponse = await response.json();
-                    this.accessToken = data.access_token;
-                    this.tokenExpiry = Date.now() + (data.expires_in - 300) * 1000;
-                    console.log(`✅ Getnet auth SUCCESS with ${combo.label}`);
-                    return this.accessToken;
-                }
-
+            if (!response.ok) {
                 const errorText = await response.text();
-                console.error(`❌ Getnet auth failed with ${combo.label}:`, response.status, errorText);
-                lastError = errorText;
-            } catch (err) {
-                console.error(`❌ Getnet auth error with ${combo.label}:`, err);
-                lastError = err instanceof Error ? err.message : 'Unknown error';
+                console.error('❌ Getnet auth failed:', response.status, errorText);
+                throw new Error(`Getnet auth failed (${response.status}): ${errorText}`);
             }
-        }
 
-        throw new Error(`Getnet auth failed with all credential combinations. Last error: ${lastError}`);
+            const data: GetnetAuthResponse = await response.json();
+            this.accessToken = data.access_token;
+            this.tokenExpiry = Date.now() + (data.expires_in - 300) * 1000;
+            console.log('✅ Getnet auth SUCCESS');
+            return this.accessToken;
+        } catch (error) {
+            console.error('❌ Getnet authentication error:', error);
+            throw error;
+        }
     }
 
     /**
