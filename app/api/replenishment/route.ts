@@ -28,9 +28,9 @@ export async function POST(req: NextRequest) {
 
         const { clientId, shopId, dcId, requestedBy, items, notes, expectedDelivery } = body;
 
-        if (!clientId || !shopId || !dcId || !requestedBy || !items?.length) {
+        if (!clientId || !shopId || !dcId || !items?.length) {
             return NextResponse.json(
-                { error: 'Missing required fields: clientId, shopId, dcId, requestedBy, items' },
+                { error: 'Missing required fields: clientId, shopId, dcId, items' },
                 { status: 400 }
             );
         }

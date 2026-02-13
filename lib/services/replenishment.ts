@@ -45,7 +45,7 @@ export async function createReplenishmentRequest(params: CreateReplenishmentPara
             client_id: params.clientId,
             shop_id: params.shopId,
             dc_id: params.dcId,
-            requested_by: params.requestedBy,
+            requested_by: params.requestedBy || null,
             status: 'requested',
             notes: params.notes,
             expected_delivery: params.expectedDelivery,

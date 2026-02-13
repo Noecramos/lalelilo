@@ -68,6 +68,7 @@ export default function ShopReplenishmentPage({ params }: { params: Promise<{ 's
 
     // Form state
     const [products, setProducts] = useState<Product[]>([]);
+    const [dcId, setDcId] = useState<string | null>(null);
     const [formNotes, setFormNotes] = useState('');
     const [expectedDelivery, setExpectedDelivery] = useState('');
     const [formItems, setFormItems] = useState<{ product_id: string; size: string; quantity_requested: number }[]>([]);
@@ -76,7 +77,22 @@ export default function ShopReplenishmentPage({ params }: { params: Promise<{ 's
     useEffect(() => {
         fetchRequests();
         fetchProducts();
+        fetchDC();
     }, []);
+
+    const fetchDC = async () => {
+        try {
+            const res = await fetch(`/api/distribution-centers?client_id=${CLIENT_ID}`);
+            const data = await res.json();
+            if (data?.length > 0) {
+                setDcId(data[0].id);
+            } else if (data?.data?.length > 0) {
+                setDcId(data.data[0].id);
+            }
+        } catch (e) {
+            console.error('Error fetching DC:', e);
+        }
+    };
 
     // ─── Data Fetching ────────────────────────────────────────────────────
     const fetchRequests = async () => {
@@ -123,6 +139,10 @@ export default function ShopReplenishmentPage({ params }: { params: Promise<{ 's
             alert('Adicione pelo menos um item com quantidade válida');
             return;
         }
+        if (!dcId) {
+            alert('❌ Centro de distribuição não encontrado. Verifique a configuração.');
+            return;
+        }
 
         setSubmitting(true);
         try {
@@ -132,23 +152,24 @@ export default function ShopReplenishmentPage({ params }: { params: Promise<{ 's
                 body: JSON.stringify({
                     clientId: CLIENT_ID,
                     shopId: shopId,
-                    dcId: 'dc-default',
-                    requestedBy: 'shop',
+                    dcId: dcId,
+                    requestedBy: null,
                     items: validItems,
                     notes: formNotes,
                     expectedDelivery: expectedDelivery || undefined,
                 }),
             });
 
-            if (!res.ok) throw new Error('Failed to create');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || 'Failed to create');
 
             setShowForm(false);
             resetForm();
             fetchRequests();
             alert('✅ Pedido de reabastecimento enviado! A equipe será notificada.');
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
-            alert('❌ Erro ao criar pedido');
+            alert('❌ Erro ao criar pedido: ' + (e?.message || ''));
         } finally {
             setSubmitting(false);
         }
