@@ -90,9 +90,12 @@ export default function SuperAdminLayout({
     const isActive = (href: string) => pathname === href;
     const isGroupActive = (item: NavItem) => {
         if (item.children) {
-            return item.children.some(c => pathname === c.href || pathname.startsWith(c.href + '/'));
+            return item.children.some(c => {
+                if (c.href === '/super-admin') return pathname === '/super-admin';
+                return pathname === c.href || pathname.startsWith(c.href + '/');
+            });
         }
-        return pathname === item.href || pathname.startsWith(item.href + '/');
+        return pathname === item.href;
     };
 
     return (
@@ -161,47 +164,30 @@ export default function SuperAdminLayout({
                         }
 
                         if (item.children) {
+                            const btnClass = groupActive
+                                ? 'w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all bg-white bg-opacity-20 text-white font-semibold'
+                                : 'w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all text-white hover:bg-white hover:bg-opacity-10';
                             return (
                                 <div key={item.name}>
-                                    <button
-                                        onClick={() => setExpandedGroup(expanded ? null : item.name)}
-                                        className={`
-                                            w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all
-                                            ${groupActive
-                                                ? 'bg-white bg-opacity-20 text-white font-semibold'
-                                                : 'text-white hover:bg-white hover:bg-opacity-10'
-                                            }
-                                        `}
-                                    >
+                                    <button onClick={() => setExpandedGroup(expanded ? null : item.name)} className={btnClass}>
                                         <div className="flex items-center gap-3">
                                             <Icon size={20} />
                                             <span className="font-medium">{item.name}</span>
                                         </div>
-                                        <svg
-                                            className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                        >
+                                        <svg className={'w-4 h-4 transition-transform ' + (expanded ? 'rotate-180' : '')} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </button>
                                     {expanded && (
-                                        <div className="ml-3 mt-1 space-y-0.5 border-l border-white border-opacity-20 pl-3">
+                                        <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-white border-opacity-20 pl-3">
                                             {item.children.map((child) => {
                                                 const ChildIcon = child.icon;
                                                 const childActive = isActive(child.href);
+                                                const childClass = childActive
+                                                    ? 'flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-sm bg-white text-gray-800 shadow-md font-semibold'
+                                                    : 'flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-sm text-white text-opacity-80 hover:bg-white hover:bg-opacity-10';
                                                 return (
-                                                    <Link
-                                                        key={child.href}
-                                                        href={child.href}
-                                                        className={`
-                                                            flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-sm
-                                                            ${childActive
-                                                                ? 'bg-white text-gray-800 shadow-md font-semibold'
-                                                                : 'text-white text-opacity-80 hover:bg-white hover:bg-opacity-10'
-                                                            }
-                                                        `}
-                                                        onClick={() => setSidebarOpen(false)}
-                                                    >
+                                                    <Link key={child.href} href={child.href} className={childClass} onClick={() => setSidebarOpen(false)}>
                                                         <ChildIcon size={16} />
                                                         <span>{child.name}</span>
                                                     </Link>
@@ -213,19 +199,12 @@ export default function SuperAdminLayout({
                             );
                         }
 
+                        const linkClass = isActive(item.href)
+                            ? 'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all bg-white text-gray-800 shadow-md font-semibold'
+                            : 'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-white hover:bg-white hover:bg-opacity-20';
+
                         return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
-                  ${isActive(item.href)
-                                        ? 'bg-white text-gray-800 shadow-md font-semibold'
-                                        : 'text-white hover:bg-white hover:bg-opacity-20'
-                                    }
-                `}
-                                onClick={() => setSidebarOpen(false)}
-                            >
+                            <Link key={item.name} href={item.href} className={linkClass} onClick={() => setSidebarOpen(false)}>
                                 <Icon size={20} />
                                 <span className="font-medium">{item.name}</span>
                             </Link>
