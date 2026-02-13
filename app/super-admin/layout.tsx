@@ -133,8 +133,8 @@ export default function SuperAdminLayout({
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-4 pb-8 space-y-1 overflow-y-auto" style={{
-                    maxHeight: 'calc(100vh - 16rem)',
+                <nav className="p-4 pb-24 space-y-1 overflow-y-auto" style={{
+                    maxHeight: 'calc(100vh - 4rem)',
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none'
                 }}>
@@ -164,12 +164,14 @@ export default function SuperAdminLayout({
                         }
 
                         if (item.children) {
+                            const baseBtn = 'w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all text-white';
                             const btnClass = groupActive
-                                ? 'w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all bg-white bg-opacity-20 text-white font-semibold'
-                                : 'w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all text-white hover:bg-white hover:bg-opacity-10';
+                                ? baseBtn + ' font-semibold'
+                                : baseBtn + ' hover:bg-white/10';
+                            const btnStyle = groupActive ? { backgroundColor: 'rgba(255,255,255,0.15)' } : undefined;
                             return (
                                 <div key={item.name}>
-                                    <button onClick={() => setExpandedGroup(expanded ? null : item.name)} className={btnClass}>
+                                    <button onClick={() => setExpandedGroup(expanded ? null : item.name)} className={btnClass} style={btnStyle}>
                                         <div className="flex items-center gap-3">
                                             <Icon size={20} />
                                             <span className="font-medium">{item.name}</span>
@@ -185,7 +187,7 @@ export default function SuperAdminLayout({
                                                 const childActive = isActive(child.href);
                                                 const childClass = childActive
                                                     ? 'flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-sm bg-white text-gray-800 shadow-md font-semibold'
-                                                    : 'flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-sm text-white text-opacity-80 hover:bg-white hover:bg-opacity-10';
+                                                    : 'flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-sm text-white/80 hover:bg-white/10';
                                                 return (
                                                     <Link key={child.href} href={child.href} className={childClass} onClick={() => setSidebarOpen(false)}>
                                                         <ChildIcon size={16} />
