@@ -31,23 +31,52 @@ export default function SuperAdminLayout({
     const pathname = usePathname();
     const router = useRouter();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
 
-    const navigation = [
-        { name: 'Visão Geral', href: '/super-admin', icon: LayoutDashboard },
+    interface NavItem {
+        name: string;
+        href: string;
+        icon: any;
+        external?: boolean;
+        children?: { name: string; href: string; icon: any }[];
+    }
+
+    const navigation: NavItem[] = [
+        {
+            name: 'Visão Geral', href: '/super-admin', icon: LayoutDashboard,
+            children: [
+                { name: 'Dashboard', href: '/super-admin', icon: LayoutDashboard },
+                { name: 'Analytics', href: '/super-admin/analytics', icon: BarChart3 },
+                { name: 'Relatórios', href: '/super-admin/reports', icon: FileText },
+            ]
+        },
         { name: 'Lojas', href: '/super-admin/shops', icon: Store },
         { name: 'Clientes', href: '/super-admin/users', icon: Crown },
-        { name: 'CRM', href: '/super-admin/crm', icon: Users },
-        { name: 'Central Msgs', href: '/super-admin/omnichannel', icon: MessageSquare },
-        { name: 'Chat Interno', href: '/super-admin/messages', icon: Phone },
-        { name: 'Analytics', href: '/super-admin/analytics', icon: BarChart3 },
-        { name: 'Relatórios', href: '/super-admin/reports', icon: FileText },
-        { name: 'Gamificação', href: '/super-admin/gamification', icon: Trophy },
-        { name: 'Checklists', href: '/super-admin/checklists', icon: ClipboardCheck },
-        { name: 'Reabastecimento', href: '/super-admin/replenishment', icon: Package },
-        { name: 'Centro Distrib.', href: '/super-admin/cd', icon: Warehouse },
+        {
+            name: 'CRM', href: '/super-admin/crm', icon: Users,
+            children: [
+                { name: 'Contatos', href: '/super-admin/crm', icon: Users },
+                { name: 'Central Msgs', href: '/super-admin/omnichannel', icon: MessageSquare },
+                { name: 'Chat Interno', href: '/super-admin/messages', icon: Phone },
+                { name: 'Atribuição', href: '/super-admin/crm/assign', icon: Users },
+            ]
+        },
         { name: 'Marketing', href: '/super-admin/marketing', icon: Megaphone },
-        { name: 'Tickets', href: '/super-admin/tickets', icon: TicketCheck },
-        { name: 'Equipe', href: '/super-admin/team', icon: Users },
+        { name: 'Gamificação', href: '/super-admin/gamification', icon: Trophy },
+        {
+            name: 'Manutenção', href: '/super-admin/checklists', icon: ClipboardCheck,
+            children: [
+                { name: 'Checklists', href: '/super-admin/checklists', icon: ClipboardCheck },
+                { name: 'Tickets', href: '/super-admin/tickets', icon: TicketCheck },
+            ]
+        },
+        {
+            name: 'Centro Distrib.', href: '/super-admin/cd', icon: Warehouse,
+            children: [
+                { name: 'Estoque CD', href: '/super-admin/cd', icon: Warehouse },
+                { name: 'Reabastecimento', href: '/super-admin/replenishment', icon: Package },
+            ]
+        },
         { name: 'Suporte', href: 'https://wa.me/558183920320', icon: Phone, external: true },
     ];
 
@@ -59,6 +88,12 @@ export default function SuperAdminLayout({
     };
 
     const isActive = (href: string) => pathname === href;
+    const isGroupActive = (item: NavItem) => {
+        if (item.children) {
+            return item.children.some(c => pathname === c.href || pathname.startsWith(c.href + '/'));
+        }
+        return pathname === item.href || pathname.startsWith(item.href + '/');
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -107,11 +142,8 @@ export default function SuperAdminLayout({
                     `}</style>
                     {navigation.map((item) => {
                         const Icon = item.icon;
-                        const active = isActive(item.href);
-
-                        if (item.name.startsWith('divider')) {
-                            return null; // Remove dividers
-                        }
+                        const groupActive = isGroupActive(item);
+                        const expanded = expandedGroup === item.name || groupActive;
 
                         if (item.external) {
                             return (
@@ -128,13 +160,66 @@ export default function SuperAdminLayout({
                             );
                         }
 
+                        if (item.children) {
+                            return (
+                                <div key={item.name}>
+                                    <button
+                                        onClick={() => setExpandedGroup(expanded ? null : item.name)}
+                                        className={`
+                                            w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all
+                                            ${groupActive
+                                                ? 'bg-white bg-opacity-20 text-white font-semibold'
+                                                : 'text-white hover:bg-white hover:bg-opacity-10'
+                                            }
+                                        `}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Icon size={20} />
+                                            <span className="font-medium">{item.name}</span>
+                                        </div>
+                                        <svg
+                                            className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </button>
+                                    {expanded && (
+                                        <div className="ml-3 mt-1 space-y-0.5 border-l border-white border-opacity-20 pl-3">
+                                            {item.children.map((child) => {
+                                                const ChildIcon = child.icon;
+                                                const childActive = isActive(child.href);
+                                                return (
+                                                    <Link
+                                                        key={child.href}
+                                                        href={child.href}
+                                                        className={`
+                                                            flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-sm
+                                                            ${childActive
+                                                                ? 'bg-white text-gray-800 shadow-md font-semibold'
+                                                                : 'text-white text-opacity-80 hover:bg-white hover:bg-opacity-10'
+                                                            }
+                                                        `}
+                                                        onClick={() => setSidebarOpen(false)}
+                                                    >
+                                                        <ChildIcon size={16} />
+                                                        <span>{child.name}</span>
+                                                    </Link>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        }
+
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
                                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
-                  ${active
+                  ${isActive(item.href)
                                         ? 'bg-white text-gray-800 shadow-md font-semibold'
                                         : 'text-white hover:bg-white hover:bg-opacity-20'
                                     }
