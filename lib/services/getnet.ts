@@ -92,7 +92,7 @@ class GetnetService {
                     'Authorization': `Basic ${credentials}`,
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: 'grant_type=client_credentials&scope=oob',
+                body: 'grant_type=client_credentials',
             });
 
             if (!response.ok) {
