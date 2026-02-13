@@ -152,3 +152,36 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+// DELETE /api/messages - Delete a message by ID or all messages in a conversation
+export async function DELETE(request: NextRequest) {
+    try {
+        const searchParams = request.nextUrl.searchParams;
+        const messageId = searchParams.get('id');
+        const conversationId = searchParams.get('conversationId');
+
+        if (!messageId && !conversationId) {
+            return NextResponse.json({ error: 'Missing message id or conversationId' }, { status: 400 });
+        }
+
+        let query = supabase.from('messages').delete();
+
+        if (conversationId) {
+            query = query.eq('conversation_id', conversationId);
+        } else if (messageId) {
+            query = query.eq('id', messageId);
+        }
+
+        const { error } = await query;
+
+        if (error) {
+            console.error('Error deleting message(s):', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    }
+}

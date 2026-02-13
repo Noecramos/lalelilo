@@ -222,15 +222,15 @@ export default function OmnichannelPage() {
         if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
 
         try {
-            const { error } = await supabase
-                .from('messages')
-                .delete()
-                .eq('id', messageId);
-
-            if (error) throw error;
+            const res = await fetch(`/api/messages?id=${messageId}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to delete');
+            }
 
             // Update local state
             setMessages(messages.filter(msg => msg.id !== messageId));
+            setArchivedMessages(archivedMessages.filter(msg => msg.id !== messageId));
         } catch (e) {
             console.error('Error deleting message:', e);
             alert('Erro ao excluir mensagem');
@@ -482,13 +482,15 @@ export default function OmnichannelPage() {
                                     <button
                                         onClick={async () => {
                                             if (confirm('Arquivar esta conversa?')) {
-                                                const { error } = await supabase
-                                                    .from('messages')
-                                                    .update({ archived: true })
-                                                    .eq('conversation_id', selectedConv);
-
-                                                if (!error && selectedConv) {
-                                                    fetchMessages(selectedConv);
+                                                try {
+                                                    const res = await fetch(`/api/messaging`, {
+                                                        method: 'PUT',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ action: 'archive_conversation', conversationId: selectedConv }),
+                                                    });
+                                                    if (selectedConv) fetchMessages(selectedConv);
+                                                } catch (e) {
+                                                    console.error('Error archiving:', e);
                                                 }
                                             }
                                         }}
@@ -502,14 +504,14 @@ export default function OmnichannelPage() {
                                     <button
                                         onClick={async () => {
                                             if (confirm('Excluir esta conversa e todas as mensagens?')) {
-                                                const { error } = await supabase
-                                                    .from('messages')
-                                                    .delete()
-                                                    .eq('conversation_id', selectedConv);
-
-                                                if (!error) {
-                                                    setSelectedConv(null);
-                                                    fetchConversations();
+                                                try {
+                                                    const res = await fetch(`/api/messages?conversationId=${selectedConv}`, { method: 'DELETE' });
+                                                    if (res.ok) {
+                                                        setSelectedConv(null);
+                                                        fetchConversations();
+                                                    }
+                                                } catch (e) {
+                                                    console.error('Error deleting conversation:', e);
                                                 }
                                             }
                                         }}
