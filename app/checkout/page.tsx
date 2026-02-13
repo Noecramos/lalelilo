@@ -89,7 +89,10 @@ export default function CheckoutPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || 'Erro ao criar pedido');
+                const errorMsg = data.details
+                    ? `${data.error}: ${data.details}${data.hint ? ` (hint: ${data.hint})` : ''}`
+                    : (data.error || 'Erro ao criar pedido');
+                throw new Error(errorMsg);
             }
 
             const orderId = data.order?.id || data.id;

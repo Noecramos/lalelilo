@@ -74,6 +74,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
+        console.log('[POST /api/orders] Received body:', JSON.stringify(body, null, 2));
 
         const {
             shop_id,
@@ -100,9 +101,11 @@ export async function POST(request: NextRequest) {
         } = body;
 
         const clientId = body.client_id || DEFAULT_CLIENT_ID;
+        console.log('[POST /api/orders] Using client_id:', clientId);
 
         // Validation
         if (!customer_name || !customer_phone || !items || items.length === 0) {
+            console.log('[POST /api/orders] Validation failed:', { customer_name, customer_phone, itemsLength: items?.length });
             return NextResponse.json(
                 { error: 'Missing required fields: customer_name, customer_phone, items' },
                 { status: 400 }
@@ -120,52 +123,57 @@ export async function POST(request: NextRequest) {
         // Extract address fields from delivery_address if provided
         const addr = delivery_address || {};
 
+        const insertPayload = {
+            order_number: orderNumber,
+            shop_id: shop_id || null,
+            client_id: clientId,
+            customer_name,
+            customer_email: customer_email || null,
+            customer_phone,
+            customer_cep: customer_cep || addr.cep || null,
+            customer_address: customer_address || addr.address || null,
+            customer_city: customer_city || addr.city || null,
+            customer_state: customer_state || addr.state || null,
+            customer_neighborhood: customer_neighborhood || addr.neighborhood || null,
+            customer_complement: customer_complement || addr.complement || null,
+            order_type,
+            status: 'pending',
+            subtotal: parseFloat(computedSubtotal) || 0,
+            delivery_fee: parseFloat(computedDelivery) || 0,
+            discount: parseFloat(discount || 0),
+            total_amount: parseFloat(computedTotal) || 0,
+            payment_method: payment_method || 'pix',
+            payment_status: 'pending',
+            items,
+            customer_notes: customer_notes || null,
+        };
+
+        console.log('[POST /api/orders] Insert payload:', JSON.stringify(insertPayload, null, 2));
+
         // Create order
         const { data: order, error } = await supabaseAdmin
             .from('orders')
-            .insert({
-                order_number: orderNumber,
-                shop_id: shop_id || null,
-                client_id: clientId,
-                customer_name,
-                customer_email: customer_email || null,
-                customer_phone,
-                customer_cep: customer_cep || addr.cep || null,
-                customer_address: customer_address || addr.address || null,
-                customer_city: customer_city || addr.city || null,
-                customer_state: customer_state || addr.state || null,
-                customer_neighborhood: customer_neighborhood || addr.neighborhood || null,
-                customer_complement: customer_complement || addr.complement || null,
-                order_type,
-                status: 'pending',
-                subtotal: parseFloat(computedSubtotal) || 0,
-                delivery_fee: parseFloat(computedDelivery) || 0,
-                discount: parseFloat(discount || 0),
-                total_amount: parseFloat(computedTotal) || 0,
-                payment_method: payment_method || 'pix',
-                payment_status: 'pending',
-                items,
-                customer_notes: customer_notes || null,
-            })
+            .insert(insertPayload)
             .select()
             .single();
 
         if (error) {
-            console.error('Error creating order:', error);
+            console.error('[POST /api/orders] Supabase error:', JSON.stringify(error));
             return NextResponse.json(
-                { error: 'Failed to create order', details: error.message },
+                { error: 'Failed to create order', details: error.message, code: error.code, hint: error.hint },
                 { status: 500 }
             );
         }
 
+        console.log('[POST /api/orders] Order created:', order.id, order.order_number);
         return NextResponse.json({
             success: true,
             order
         }, { status: 201 });
-    } catch (error) {
-        console.error('Unexpected error:', error);
+    } catch (error: any) {
+        console.error('[POST /api/orders] Unexpected error:', error?.message || error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: 'Internal server error', details: error?.message || String(error) },
             { status: 500 }
         );
     }
