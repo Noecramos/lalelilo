@@ -22,13 +22,19 @@
 const SHORT_LIVED_TOKEN = process.env.META_ACCESS_TOKEN || 'PASTE_YOUR_TOKEN_HERE';
 // ═══════════════════════════════════════════════════
 
-const APP_ID = process.env.META_APP_ID || '1474772427771940';
-const APP_SECRET = process.env.META_APP_SECRET || '8824960d2dfb80cdedf11972bafca3f2';
-const PAGE_ID = process.env.META_PAGE_ID || '1503236119762968';
+const APP_ID = process.env.META_APP_ID || '';
+const APP_SECRET = process.env.META_APP_SECRET || '';
+const PAGE_ID = process.env.META_PAGE_ID || '';
 
 async function main() {
     console.log('🔑 Meta Long-Lived Token Generator');
     console.log('═══════════════════════════════════\n');
+
+    if (!APP_ID || !APP_SECRET || !PAGE_ID) {
+        console.log('❌ Missing environment variables!');
+        console.log('   Make sure META_APP_ID, META_APP_SECRET, and META_PAGE_ID are set in .env.local');
+        process.exit(1);
+    }
 
     if (SHORT_LIVED_TOKEN === 'PASTE_YOUR_TOKEN_HERE') {
         console.log('❌ Please paste your short-lived token in the script first!');
