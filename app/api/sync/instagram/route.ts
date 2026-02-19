@@ -95,10 +95,17 @@ export async function GET(req: NextRequest) {
         const convData = await convRes.json();
 
         if (convData.error) {
+            // Common error: app not configured for IG messaging
+            const isCapabilityError = convData.error.code === 3 || convData.error.message?.includes('capability');
             return NextResponse.json({
-                success: false,
+                success: !isCapabilityError, // treat "no conversations" as success
                 channel: 'instagram',
-                error: convData.error.message,
+                conversations: 0,
+                new_messages: 0,
+                error: isCapabilityError
+                    ? 'Instagram Messaging precisa ser ativado no app Meta. Vá em developers.facebook.com > App > Casos de uso > Responder mensagens no Instagram.'
+                    : convData.error.message,
+                ig_account: IG_ACCOUNT_ID,
             });
         }
 
