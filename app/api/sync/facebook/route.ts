@@ -111,17 +111,17 @@ export async function GET(req: NextRequest) {
     }
 
     if (!PAGE_TOKEN) {
-        return NextResponse.json({ error: 'META_PAGE_TOKEN not configured' }, { status: 500 });
+        return NextResponse.json({ success: false, channel: 'facebook', error: 'META_PAGE_TOKEN not configured. Generate a token with pages_messaging permission.' });
     }
 
     try {
-        // Fetch conversations from Facebook
-        const fbUrl = `https://graph.facebook.com/v21.0/${PAGE_ID}/conversations?fields=id,messages.limit(10){message,from,created_time}&limit=25&access_token=${PAGE_TOKEN}`;
+        // Fetch Messenger conversations from Facebook
+        const fbUrl = `https://graph.facebook.com/v21.0/${PAGE_ID}/conversations?platform=MESSENGER&fields=id,snippet,updated_time,participants,message_count,messages.limit(10){message,from,created_time}&limit=25&access_token=${PAGE_TOKEN}`;
         const fbRes = await fetch(fbUrl);
         const fbData = await fbRes.json();
 
         if (fbData.error) {
-            return NextResponse.json({ error: fbData.error.message }, { status: 500 });
+            return NextResponse.json({ success: false, channel: 'facebook', error: fbData.error.message });
         }
 
         let totalConversations = 0;
