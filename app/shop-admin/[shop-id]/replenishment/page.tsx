@@ -468,7 +468,7 @@ export default function ShopReplenishmentPage({ params }: { params: Promise<{ 's
                                                             className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
                                                         >
                                                             <option value="">Tamanho</option>
-                                                            {(selectedProduct?.sizes || ['PP', 'P', 'M', 'G', 'GG', '2', '4', '6', '8', '10', '12']).map(s => (
+                                                            {(selectedProduct?.sizes?.length ? selectedProduct.sizes : ['PP', 'P', 'M', 'G', 'GG', '1', '2', '3', '4', '6', '8', '10', '12', '14', '16']).map(s => (
                                                                 <option key={s} value={s}>{s}</option>
                                                             ))}
                                                         </select>
