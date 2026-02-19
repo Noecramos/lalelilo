@@ -3,7 +3,7 @@
  * 
  * SOAP/XML-based API for stock management, products, orders, and customers.
  * Base URL: https://webapi.microvix.com.br/1.0/api/integracao
- * Auth: Basic (user: linx_b2c, password: linx_b2c + API key)
+ * Auth: Basic (credentials via env vars MICROVIX_USER + MICROVIX_PASSWORD + MICROVIX_API_KEY)
  * 
  * Docs: https://developers.linkapi.solutions/docs/microvix
  */
@@ -11,8 +11,8 @@
 // ─── Configuration ─────────────────────────────────────────────────────────────
 
 const MICROVIX_BASE_URL = process.env.MICROVIX_BASE_URL || 'https://webapi.microvix.com.br/1.0/api/integracao';
-const MICROVIX_USER = process.env.MICROVIX_USER || 'linx_b2c';
-const MICROVIX_PASSWORD = process.env.MICROVIX_PASSWORD || 'linx_b2c';
+const MICROVIX_USER = process.env.MICROVIX_USER || '';
+const MICROVIX_PASSWORD = process.env.MICROVIX_PASSWORD || '';
 const MICROVIX_KEY = process.env.MICROVIX_API_KEY || '';
 const MICROVIX_GROUP = process.env.MICROVIX_GROUP || '';
 
