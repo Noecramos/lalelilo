@@ -34,19 +34,25 @@ export default function LocationPage() {
     const fetchShops = async () => {
         setLoading(true);
         try {
-            // TODO: Replace with actual API call
-            setTimeout(() => {
-                setShops([
-                    { id: '1', name: 'Lalelilo Centro', address: 'Rua do Comércio, 123', city: 'Recife', state: 'PE', phone: '(81) 3333-4444', distance: 1.2, is_open: true },
-                    { id: '2', name: 'Lalelilo Boa Viagem', address: 'Av. Boa Viagem, 456', city: 'Recife', state: 'PE', phone: '(81) 3333-5555', distance: 3.5, is_open: true },
-                    { id: '3', name: 'Lalelilo Shopping', address: 'Shopping Recife, Loja 78', city: 'Recife', state: 'PE', phone: '(81) 3333-6666', distance: 5.8, is_open: true },
-                    { id: '4', name: 'Lalelilo Olinda', address: 'Rua do Sol, 789', city: 'Olinda', state: 'PE', phone: '(81) 3333-7777', distance: 8.2, is_open: false },
-                    { id: '5', name: 'Lalelilo Jaboatão', address: 'Av. Barreto de Menezes, 321', city: 'Jaboatão', state: 'PE', phone: '(81) 3333-8888', distance: 12.5, is_open: true },
-                ]);
-                setLoading(false);
-            }, 800);
+            const response = await fetch('/api/shops');
+            const data = await response.json();
+
+            if (data.success && data.shops) {
+                const mappedShops = data.shops.map((shop: any) => ({
+                    id: shop.id,
+                    name: shop.name,
+                    address: shop.address || 'Endereço não informado',
+                    city: shop.city || '',
+                    state: shop.state || '',
+                    phone: shop.whatsapp || shop.phone || '',
+                    distance: undefined,
+                    is_open: shop.is_active,
+                }));
+                setShops(mappedShops);
+            }
         } catch (error) {
             console.error('Error fetching shops:', error);
+        } finally {
             setLoading(false);
         }
     };

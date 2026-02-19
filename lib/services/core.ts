@@ -122,7 +122,10 @@ export async function markNotificationSent(id: string, error?: string) {
 // NOTIFICATION PROCESSOR (runs inside Next.js — no n8n)
 // ============================================================================
 
-import { sendText } from './waha';
+import { sendText as cloudSendText } from './whatsapp-cloud';
+import { sendText as wahaSendTextFn } from './waha';
+const _useCloudApi = !!(process.env.WHATSAPP_CLOUD_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
+const sendText = _useCloudApi ? cloudSendText : wahaSendTextFn;
 
 export async function processNotificationQueue() {
     const { data: notifications, error } = await getPendingNotifications(20);

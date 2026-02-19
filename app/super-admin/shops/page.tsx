@@ -98,6 +98,10 @@ export default function ShopsManagementPage() {
                     city: shop.city,
                     state: shop.state,
                     phone: shop.phone,
+                    whatsapp: shop.whatsapp || null,
+                    email: shop.email || null,
+                    address: shop.address || null,
+                    cnpj: shop.cnpj || null,
                     is_active: shop.is_active,
                 }),
             });

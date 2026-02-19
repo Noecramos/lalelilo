@@ -11,7 +11,12 @@ import {
     buildAssignmentConfirmation
 } from './gemini';
 import { findOrCreateContact, assignLeadToShop } from './crm';
-import { sendText as wahaSendText } from './waha';
+import { sendText as cloudSendText } from './whatsapp-cloud';
+import { sendText as wahaSendTextFn } from './waha';
+
+// Use Cloud API if configured, otherwise fall back to WAHA
+const useCloudApi = !!(process.env.WHATSAPP_CLOUD_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
+const wahaSendText = useCloudApi ? cloudSendText : wahaSendTextFn;
 
 const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
 const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();

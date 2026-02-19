@@ -9,8 +9,9 @@ export default function Footer() {
     const isAdmin = pathname?.startsWith('/super-admin') || pathname?.startsWith('/shop-admin');
     const isCheckout = pathname?.startsWith('/checkout');
     const isNovix = pathname?.startsWith('/novix');
+    const isAuth = pathname === '/login' || pathname === '/register';
 
-    if (isAdmin || isCheckout || isNovix) return null;
+    if (isAdmin || isCheckout || isNovix || isAuth) return null;
 
     return (
         <footer className="py-6 mt-12">

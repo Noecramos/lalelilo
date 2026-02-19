@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Card } from '@/components/ui';
 import {
     MessageSquare, Phone, Instagram, Facebook, Send, Search,
     Filter, Clock, CheckCheck, User, Building2, RefreshCw,
-    Edit, Trash, Check, X, Archive
+    Edit, Trash, Check, X, Archive, Wifi, WifiOff, AlertTriangle
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -44,6 +44,15 @@ interface Message {
     archived?: boolean;
 }
 
+interface SyncChannelResult {
+    channel: string;
+    success: boolean;
+    new_messages?: number;
+    conversations?: number;
+    error?: string;
+    session_status?: string;
+}
+
 const channelIcons = {
     whatsapp: Phone,
     instagram: Instagram,
@@ -54,6 +63,12 @@ const channelColors = {
     whatsapp: 'text-green-600 bg-green-50',
     instagram: 'text-pink-600 bg-pink-50',
     facebook: 'text-blue-600 bg-blue-50',
+};
+
+const channelLabels = {
+    whatsapp: 'WhatsApp',
+    instagram: 'Instagram',
+    facebook: 'Facebook',
 };
 
 export default function OmnichannelPage() {
@@ -70,9 +85,8 @@ export default function OmnichannelPage() {
     const [showArchived, setShowArchived] = useState(false);
     const [archivedMessages, setArchivedMessages] = useState<Message[]>([]);
     const [syncing, setSyncing] = useState(false);
-    const [syncResult, setSyncResult] = useState<string | null>(null);
-
-
+    const [syncResults, setSyncResults] = useState<SyncChannelResult[]>([]);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         fetchConversations();
@@ -101,6 +115,11 @@ export default function OmnichannelPage() {
         }
     }, [selectedConv]);
 
+    useEffect(() => {
+        // Auto-scroll to bottom when messages change
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
+
     const fetchConversations = async () => {
         try {
             const { data, error } = await supabase
@@ -124,7 +143,6 @@ export default function OmnichannelPage() {
 
     const fetchMessages = async (conversationId: string) => {
         try {
-            // Fetch all messages (archived column may not exist yet)
             const { data, error } = await supabase
                 .from('messages')
                 .select('*')
@@ -133,8 +151,6 @@ export default function OmnichannelPage() {
 
             if (error) throw error;
 
-
-            // Separate archived and active messages
             const active = (data || []).filter(msg => !msg.archived);
             const archived = (data || []).filter(msg => msg.archived);
 
@@ -151,6 +167,65 @@ export default function OmnichannelPage() {
         } catch (e) {
             console.error('Error fetching messages:', e);
         }
+    };
+
+    const syncAllChannels = async () => {
+        setSyncing(true);
+        setSyncResults([]);
+        const results: SyncChannelResult[] = [];
+
+        // 1. Sync WhatsApp via WAHA
+        try {
+            const waRes = await fetch('/api/sync/whatsapp?secret=lalelilo_verify_2026');
+            const waData = await waRes.json();
+            results.push({
+                channel: 'whatsapp',
+                success: waData.success === true,
+                new_messages: waData.new_messages || 0,
+                conversations: waData.conversations || 0,
+                error: waData.error,
+                session_status: waData.session_status,
+            });
+        } catch (e: any) {
+            results.push({ channel: 'whatsapp', success: false, error: e.message });
+        }
+
+        // 2. Sync Facebook via Graph API
+        try {
+            const fbRes = await fetch('/api/sync/facebook?secret=lalelilo_verify_2026');
+            const fbData = await fbRes.json();
+            results.push({
+                channel: 'facebook',
+                success: fbData.success === true,
+                new_messages: fbData.new_messages || 0,
+                conversations: fbData.conversations || 0,
+                error: fbData.error,
+            });
+        } catch (e: any) {
+            results.push({ channel: 'facebook', success: false, error: e.message });
+        }
+
+        // 3. Instagram (uses same Meta webhook — no separate sync endpoint yet)
+        // Instagram messages come through webhook only
+        const igConversations = conversations.filter(c => c.channel_type === 'instagram').length;
+        results.push({
+            channel: 'instagram',
+            success: igConversations > 0,
+            conversations: igConversations,
+            new_messages: 0,
+            error: igConversations === 0 ? 'Mensagens do Instagram chegam via webhook em tempo real' : undefined,
+        });
+
+        setSyncResults(results);
+
+        // Refresh conversations list
+        await fetchConversations();
+        if (selectedConv) await fetchMessages(selectedConv);
+
+        setSyncing(false);
+
+        // Clear results after 8 seconds
+        setTimeout(() => setSyncResults([]), 8000);
     };
 
     const sendMessage = async () => {
@@ -175,7 +250,6 @@ export default function OmnichannelPage() {
             setMessages([...messages, data]);
             setNewMessage('');
 
-            // Update conversation last_message_at
             await supabase
                 .from('conversations')
                 .update({ last_message_at: new Date().toISOString() })
@@ -203,7 +277,6 @@ export default function OmnichannelPage() {
 
             if (error) throw error;
 
-            // Update local state
             setMessages(messages.map(msg =>
                 msg.id === messageId ? { ...msg, content: editedContent } : msg
             ));
@@ -224,16 +297,13 @@ export default function OmnichannelPage() {
         if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
 
         try {
-            console.log('[deleteMessage] Deleting message:', messageId);
             const res = await fetch(`/api/messages?id=${messageId}`, { method: 'DELETE' });
             const data = await res.json();
-            console.log('[deleteMessage] Response:', res.status, data);
 
             if (!res.ok) {
                 throw new Error(data.error || 'Failed to delete');
             }
 
-            // Update local state
             setMessages(messages.filter(msg => msg.id !== messageId));
             setArchivedMessages(archivedMessages.filter(msg => msg.id !== messageId));
         } catch (e) {
@@ -247,7 +317,6 @@ export default function OmnichannelPage() {
             const messageToArchive = messages.find(msg => msg.id === messageId);
             if (!messageToArchive) return;
 
-            // Mark as archived in database
             const { error } = await supabase
                 .from('messages')
                 .update({ archived: true })
@@ -255,7 +324,6 @@ export default function OmnichannelPage() {
 
             if (error) throw error;
 
-            // Move to archived list
             setArchivedMessages([...archivedMessages, { ...messageToArchive, archived: true }]);
             setMessages(messages.filter(msg => msg.id !== messageId));
         } catch (e) {
@@ -264,26 +332,6 @@ export default function OmnichannelPage() {
         }
     };
 
-    const loadArchivedMessages = async () => {
-        if (!selectedConv) return;
-
-        try {
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('conversation_id', selectedConv)
-                .eq('archived', true)
-                .order('created_at', { ascending: true });
-
-            if (error) throw error;
-            setArchivedMessages(data || []);
-        } catch (e) {
-            console.error('Error loading archived messages:', e);
-        }
-    };
-
-
-
     // Filter conversations
     let filtered = conversations;
     if (filter !== 'all') {
@@ -291,8 +339,8 @@ export default function OmnichannelPage() {
     }
     if (search) {
         filtered = filtered.filter(c =>
-            c.contacts.name?.toLowerCase().includes(search.toLowerCase()) ||
-            c.contacts.phone?.includes(search)
+            c.contacts?.name?.toLowerCase().includes(search.toLowerCase()) ||
+            c.contacts?.phone?.includes(search)
         );
     }
 
@@ -311,7 +359,7 @@ export default function OmnichannelPage() {
         <div className="min-h-screen pb-6">
             {/* Header */}
             <div className="mb-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                             <MessageSquare className="text-lale-orange" size={32} />
@@ -321,42 +369,37 @@ export default function OmnichannelPage() {
                             WhatsApp, Instagram e Facebook em um só lugar
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        {syncResult && (
-                            <span className={`text-xs px-3 py-1 rounded-full ${syncResult.startsWith('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                {syncResult}
-                            </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {/* Sync Results */}
+                        {syncResults.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                                {syncResults.map((r) => (
+                                    <span
+                                        key={r.channel}
+                                        className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${r.success
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-yellow-100 text-yellow-700'
+                                            }`}
+                                        title={r.error || `${r.new_messages} novas msgs`}
+                                    >
+                                        {r.success ? <Wifi size={10} /> : <AlertTriangle size={10} />}
+                                        {channelLabels[r.channel as keyof typeof channelLabels]}:
+                                        {r.success
+                                            ? ` +${r.new_messages} msgs`
+                                            : ' ⚠'
+                                        }
+                                    </span>
+                                ))}
+                            </div>
                         )}
+
                         <button
-                            onClick={async () => {
-                                setSyncing(true);
-                                setSyncResult(null);
-                                try {
-                                    // Sync Facebook/Instagram messages
-                                    const fbRes = await fetch('/api/sync/facebook?secret=lalelilo_verify_2026');
-                                    const fbData = await fbRes.json();
-
-                                    if (fbData.success) {
-                                        setSyncResult(`✅ ${fbData.new_messages || 0} novas msgs (${fbData.conversations || 0} conversas)`);
-                                    } else {
-                                        setSyncResult(`❌ ${fbData.error || 'Erro na sincronização'}`);
-                                    }
-
-                                    // Refresh conversations list
-                                    await fetchConversations();
-                                    if (selectedConv) await fetchMessages(selectedConv);
-                                } catch (e: any) {
-                                    setSyncResult(`❌ ${e.message}`);
-                                }
-                                setSyncing(false);
-                                // Clear result after 5 seconds
-                                setTimeout(() => setSyncResult(null), 5000);
-                            }}
+                            onClick={syncAllChannels}
                             disabled={syncing}
                             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-lale-pink to-lale-orange text-white rounded-lg text-sm font-medium hover:opacity-90 transition-all disabled:opacity-50 shadow-sm"
                         >
                             <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
-                            {syncing ? 'Sincronizando...' : 'Sincronizar Mensagens'}
+                            {syncing ? 'Sincronizando...' : 'Sincronizar Tudo'}
                         </button>
                         <button
                             onClick={fetchConversations}
@@ -371,7 +414,7 @@ export default function OmnichannelPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-4 gap-4 mb-6">
-                <Card padding="md" className="text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => setFilter('all')}>
+                <Card padding="md" className={`text-center cursor-pointer hover:shadow-md transition-shadow ${filter === 'all' ? 'ring-2 ring-lale-orange' : ''}`} onClick={() => setFilter('all')}>
                     <MessageSquare size={24} className="text-gray-600 mx-auto mb-2" />
                     <p className="text-2xl font-bold text-gray-900">{conversations.length}</p>
                     <p className="text-xs text-gray-500">Total</p>
@@ -381,21 +424,21 @@ export default function OmnichannelPage() {
                         </span>
                     )}
                 </Card>
-                <Card padding="md" className="text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => setFilter('whatsapp')}>
+                <Card padding="md" className={`text-center cursor-pointer hover:shadow-md transition-shadow ${filter === 'whatsapp' ? 'ring-2 ring-green-500' : ''}`} onClick={() => setFilter(filter === 'whatsapp' ? 'all' : 'whatsapp')}>
                     <Phone size={24} className="text-green-600 mx-auto mb-2" />
                     <p className="text-2xl font-bold text-gray-900">
                         {conversations.filter(c => c.channel_type === 'whatsapp').length}
                     </p>
                     <p className="text-xs text-gray-500">WhatsApp</p>
                 </Card>
-                <Card padding="md" className="text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => setFilter('instagram')}>
+                <Card padding="md" className={`text-center cursor-pointer hover:shadow-md transition-shadow ${filter === 'instagram' ? 'ring-2 ring-pink-500' : ''}`} onClick={() => setFilter(filter === 'instagram' ? 'all' : 'instagram')}>
                     <Instagram size={24} className="text-pink-600 mx-auto mb-2" />
                     <p className="text-2xl font-bold text-gray-900">
                         {conversations.filter(c => c.channel_type === 'instagram').length}
                     </p>
                     <p className="text-xs text-gray-500">Instagram</p>
                 </Card>
-                <Card padding="md" className="text-center cursor-pointer hover:shadow-md transition-shadow" onClick={() => setFilter('facebook')}>
+                <Card padding="md" className={`text-center cursor-pointer hover:shadow-md transition-shadow ${filter === 'facebook' ? 'ring-2 ring-blue-500' : ''}`} onClick={() => setFilter(filter === 'facebook' ? 'all' : 'facebook')}>
                     <Facebook size={24} className="text-blue-600 mx-auto mb-2" />
                     <p className="text-2xl font-bold text-gray-900">
                         {conversations.filter(c => c.channel_type === 'facebook').length}
@@ -424,7 +467,7 @@ export default function OmnichannelPage() {
                                 onClick={() => setFilter('all')}
                                 className="mt-2 text-xs text-lale-orange hover:underline"
                             >
-                                Limpar filtro
+                                Limpar filtro ({channelLabels[filter]})
                             </button>
                         )}
                     </div>
@@ -434,11 +477,14 @@ export default function OmnichannelPage() {
                             <div className="text-center py-12 px-4">
                                 <MessageSquare size={48} className="mx-auto text-gray-400 mb-3" />
                                 <p className="text-gray-500">Nenhuma conversa encontrada</p>
+                                <p className="text-sm text-gray-400 mt-2">
+                                    Clique em &quot;Sincronizar Tudo&quot; para buscar mensagens
+                                </p>
                             </div>
                         ) : (
                             filtered.map((conv) => {
-                                const ChannelIcon = channelIcons[conv.channel_type];
-                                const channelColor = channelColors[conv.channel_type];
+                                const ChannelIcon = channelIcons[conv.channel_type] || MessageSquare;
+                                const channelColor = channelColors[conv.channel_type] || 'text-gray-600 bg-gray-50';
                                 return (
                                     <div
                                         key={conv.id}
@@ -453,7 +499,7 @@ export default function OmnichannelPage() {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between mb-1">
                                                     <h4 className="font-semibold text-gray-900 truncate">
-                                                        {conv.contacts.name || conv.contacts.phone || 'Sem nome'}
+                                                        {conv.contacts?.name || conv.contacts?.phone || 'Sem nome'}
                                                     </h4>
                                                     {conv.unread_count > 0 && (
                                                         <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
@@ -461,7 +507,15 @@ export default function OmnichannelPage() {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${channelColor}`}>
+                                                        {conv.channel_type}
+                                                    </span>
+                                                    {conv.contacts?.phone && (
+                                                        <span className="text-xs text-gray-400">{conv.contacts.phone}</span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
                                                     <Clock size={12} />
                                                     {new Date(conv.last_message_at).toLocaleString('pt-BR')}
                                                 </p>
@@ -490,15 +544,15 @@ export default function OmnichannelPage() {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className={`p-2 rounded-lg ${channelColors[selectedConversation.channel_type]}`}>
-                                        {React.createElement(channelIcons[selectedConversation.channel_type], { size: 20 })}
+                                        {React.createElement(channelIcons[selectedConversation.channel_type] || MessageSquare, { size: 20 })}
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-900">
-                                            {selectedConversation.contacts.name || selectedConversation.contacts.phone || 'Sem nome'}
+                                            {selectedConversation.contacts?.name || selectedConversation.contacts?.phone || 'Sem nome'}
                                         </h3>
                                         <p className="text-sm text-gray-600 capitalize">
                                             {selectedConversation.channel_type}
-                                            {selectedConversation.contacts.phone && ` • ${selectedConversation.contacts.phone}`}
+                                            {selectedConversation.contacts?.phone && ` • ${selectedConversation.contacts.phone}`}
                                         </p>
                                     </div>
                                 </div>
@@ -526,7 +580,7 @@ export default function OmnichannelPage() {
                                         onClick={async () => {
                                             if (confirm('Arquivar esta conversa?')) {
                                                 try {
-                                                    const res = await fetch(`/api/messaging`, {
+                                                    await fetch(`/api/messaging`, {
                                                         method: 'PUT',
                                                         headers: { 'Content-Type': 'application/json' },
                                                         body: JSON.stringify({ action: 'archive_conversation', conversationId: selectedConv }),
@@ -586,65 +640,98 @@ export default function OmnichannelPage() {
                                 </div>
                             ) : !showArchived ? (
                                 // Active messages
-                                messages.map((msg) => (
-                                    <div
-                                        key={msg.id}
-                                        className={`flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'} mb-4`}
-                                    >
-                                        {/* Message bubble */}
+                                <>
+                                    {messages.map((msg) => (
                                         <div
-                                            className={`max-w-[70%] rounded-lg p-3 ${msg.sender_type === 'agent'
-                                                ? 'bg-purple-600 text-white'
-                                                : 'bg-white text-gray-900 border border-gray-200'
-                                                }`}
+                                            key={msg.id}
+                                            className={`flex ${msg.sender_type === 'agent' ? 'justify-end' : 'justify-start'} mb-4`}
+                                            onMouseEnter={() => setHoveredMessageId(msg.id)}
+                                            onMouseLeave={() => setHoveredMessageId(null)}
                                         >
-                                            {editingMessageId === msg.id ? (
-                                                <div className="space-y-2">
-                                                    <textarea
-                                                        value={editedContent}
-                                                        onChange={(e) => setEditedContent(e.target.value)}
-                                                        className="w-full p-2 text-sm border border-gray-300 rounded text-gray-900 focus:ring-2 focus:ring-lale-orange focus:border-transparent"
-                                                        rows={3}
-                                                        autoFocus
-                                                    />
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => saveEditMessage(msg.id)}
-                                                            className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 flex items-center gap-1"
-                                                        >
-                                                            <Check size={12} /> Salvar
-                                                        </button>
-                                                        <button
-                                                            onClick={cancelEdit}
-                                                            className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 flex items-center gap-1"
-                                                        >
-                                                            <X size={12} /> Cancelar
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    {msg.content && msg.content.trim() !== '' ? (
-                                                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                            <div className="relative group">
+                                                <div
+                                                    className={`max-w-[70%] min-w-[120px] rounded-lg p-3 ${msg.sender_type === 'agent'
+                                                        ? 'bg-purple-600 text-white'
+                                                        : 'bg-white text-gray-900 border border-gray-200'
+                                                        }`}
+                                                >
+                                                    {editingMessageId === msg.id ? (
+                                                        <div className="space-y-2">
+                                                            <textarea
+                                                                value={editedContent}
+                                                                onChange={(e) => setEditedContent(e.target.value)}
+                                                                className="w-full p-2 text-sm border border-gray-300 rounded text-gray-900 focus:ring-2 focus:ring-lale-orange focus:border-transparent"
+                                                                rows={3}
+                                                                autoFocus
+                                                            />
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => saveEditMessage(msg.id)}
+                                                                    className="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 flex items-center gap-1"
+                                                                >
+                                                                    <Check size={12} /> Salvar
+                                                                </button>
+                                                                <button
+                                                                    onClick={cancelEdit}
+                                                                    className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 flex items-center gap-1"
+                                                                >
+                                                                    <X size={12} /> Cancelar
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     ) : (
-                                                        <p className="text-sm italic text-gray-400">Mídia enviada</p>
+                                                        <>
+                                                            {msg.content && msg.content.trim() !== '' ? (
+                                                                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                                            ) : (
+                                                                <p className="text-sm italic text-gray-400">Mídia enviada</p>
+                                                            )}
+                                                            {msg.media_url && (
+                                                                <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
+                                                            )}
+                                                            <div className="flex items-center justify-end gap-1 mt-1">
+                                                                <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-200' : 'text-gray-500'}`}>
+                                                                    {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                                                </p>
+                                                                {msg.sender_type === 'agent' && msg.status === 'delivered' && (
+                                                                    <CheckCheck size={14} />
+                                                                )}
+                                                            </div>
+                                                        </>
                                                     )}
-                                                    {msg.media_url && (
-                                                        <img src={msg.media_url} alt="Media" className="mt-2 rounded-lg max-w-full" />
-                                                    )}
-                                                    <div className="flex items-center justify-end gap-1 mt-1">
-                                                        <p className={`text-xs ${msg.sender_type === 'agent' ? 'text-purple-200' : 'text-gray-500'}`}>
-                                                            {new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                                                        </p>
-                                                        {msg.sender_type === 'agent' && msg.status === 'delivered' && (
-                                                            <CheckCheck size={14} />
-                                                        )}
+                                                </div>
+
+                                                {/* Message actions (hover) */}
+                                                {hoveredMessageId === msg.id && editingMessageId !== msg.id && (
+                                                    <div className={`absolute top-0 ${msg.sender_type === 'agent' ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'} flex gap-1 px-1`}>
+                                                        <button
+                                                            onClick={() => startEditMessage(msg.id, msg.content)}
+                                                            className="p-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                                                            title="Editar"
+                                                        >
+                                                            <Edit size={12} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => archiveMessage(msg.id)}
+                                                            className="p-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
+                                                            title="Arquivar"
+                                                        >
+                                                            <Archive size={12} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteMessage(msg.id)}
+                                                            className="p-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                                                            title="Excluir"
+                                                        >
+                                                            <Trash size={12} />
+                                                        </button>
                                                     </div>
-                                                </>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))
+                                    ))}
+                                    <div ref={messagesEndRef} />
+                                </>
                             ) : (
                                 // Archived messages view
                                 <>
@@ -702,7 +789,7 @@ export default function OmnichannelPage() {
                                     placeholder="Digite sua mensagem..."
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
-                                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
                                     className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-lale-orange focus:border-transparent"
                                 />
                                 <button

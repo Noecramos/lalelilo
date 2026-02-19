@@ -2,8 +2,13 @@
 // WhatsApp (WAHA) + Instagram + Facebook — unified inbox
 
 import { createClient } from '@supabase/supabase-js';
+import { sendText as cloudSendText } from './whatsapp-cloud';
 import { sendText as wahaSendText } from './waha';
 import { upsertContact } from './crm';
+
+// Determine which WhatsApp API to use
+const useCloudApi = !!(process.env.WHATSAPP_CLOUD_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
+const whatsappSendText = useCloudApi ? cloudSendText : wahaSendText;
 
 const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
 const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
@@ -136,7 +141,7 @@ export async function sendMessage(params: {
     switch (conv.channel_type) {
         case 'whatsapp':
             if (contact?.phone) {
-                const result = await wahaSendText({ phone: contact.phone, text: params.content });
+                const result = await whatsappSendText({ phone: contact.phone, text: params.content });
                 if (result.error) sendError = result.error;
                 externalId = result.id || '';
             }
