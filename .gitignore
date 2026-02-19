@@ -95,6 +95,9 @@ deploy.zip
 
 # Secret scanning temp files
 expressions.txt
+.*token*.txt
+.vercel-env-temp*
+.env.vercel.local
 
 # Editor and OS
 .idea/
