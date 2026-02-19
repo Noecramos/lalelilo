@@ -52,7 +52,7 @@ export default function MessagesPage() {
                 .channel(`convo_${selectedShop}`)
                 .on(
                     'postgres_changes',
-                    { event: 'INSERT', schema: 'public', table: 'messages' },
+                    { event: 'INSERT', schema: 'public', table: 'internal_messages' },
                     () => fetchMessages(selectedShop)
                 )
                 .subscribe();
@@ -155,7 +155,7 @@ export default function MessagesPage() {
             .channel('admin_messages_list')
             .on(
                 'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'messages' },
+                { event: 'INSERT', schema: 'public', table: 'internal_messages' },
                 () => fetchConversations()
             )
             .subscribe();

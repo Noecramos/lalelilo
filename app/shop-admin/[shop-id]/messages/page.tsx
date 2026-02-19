@@ -39,7 +39,7 @@ export default function ShopMessagesPage({
                 {
                     event: 'INSERT',
                     schema: 'public',
-                    table: 'messages'
+                    table: 'internal_messages'
                 },
                 (payload) => {
                     const newMsg = payload.new as Message;

@@ -1,55 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase-admin';
 
-// GET /api/messages - Fetch messages for a specific shop or super-admin
+// GET /api/messages - Fetch internal messages for super-admin or shop
 export async function GET(request: NextRequest) {
-    // Debug: Check if service Key is available (don't log the actual key)
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        console.error('CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in environment variables');
-        return NextResponse.json({ error: 'Configuration Error: Missing Service Role Key' }, { status: 500 });
+        console.error('CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing');
+        return NextResponse.json({ error: 'Configuration Error' }, { status: 500 });
     }
 
     try {
         const searchParams = request.nextUrl.searchParams;
-        const shopId = searchParams.get('shopId'); // If present, fetching for this shop
+        const shopId = searchParams.get('shopId');
         const isAdmin = searchParams.get('isAdmin') === 'true';
 
         let query = supabase
-            .from('messages')
+            .from('internal_messages')
             .select('*')
             .order('created_at', { ascending: true });
 
         if (isAdmin) {
-            // Super Admin: Fetch all messages OR specific conversation if shopId provided
             if (shopId) {
-                // Fetch conversation with specific shop
+                // Admin viewing conversation with specific shop
                 query = query.or(`sender_id.eq.${shopId},recipient_id.eq.${shopId}`);
             } else {
-                // Fetch "recent" messages for list view? 
-                // Alternatively, client filters. For now fetch last 500 to keep it simple
+                // Admin viewing all messages for conversation list
                 query = query.limit(500);
             }
         } else if (shopId) {
-            // Shop Admin: Fetch messages for this shop AND broadcasts
-            // We need to be careful with UUID vs Slug. shopId passed here is likely a UUID if called from internal logic,
-            // but if called from frontend using slug, we need to handle that.
+            // Shop viewing its own messages + broadcasts
+            let targetShopId = shopId;
 
-            let targetShopId = shopId || '';
-
-            // Simple check: is it a valid UUID? If not, treat as slug.
             const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetShopId);
-
-            if (!isUuid && targetShopId) {
+            if (!isUuid) {
                 const { data: shop } = await supabase
                     .from('shops')
                     .select('id')
                     .eq('slug', targetShopId)
                     .single();
-
                 if (shop) {
                     targetShopId = shop.id;
                 } else {
-                    return NextResponse.json({ messages: [] }); // or error
+                    return NextResponse.json({ messages: [] });
                 }
             }
 
@@ -61,7 +52,7 @@ export async function GET(request: NextRequest) {
         const { data: messages, error } = await query;
 
         if (error) {
-            console.error('Error fetching messages:', error);
+            console.error('Error fetching internal messages:', error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -72,13 +63,12 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST /api/messages - Send a new message
+// POST /api/messages - Send a new internal message
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { sender_type, sender_id, recipient_id, content, is_broadcast } = body;
 
-        // Validation
         if (!content || !sender_type || !sender_id || !recipient_id) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
@@ -94,7 +84,6 @@ export async function POST(request: NextRequest) {
                     .select('id')
                     .eq('slug', sender_id)
                     .single();
-
                 if (shop) {
                     finalSenderId = shop.id;
                 }
@@ -102,7 +91,7 @@ export async function POST(request: NextRequest) {
         }
 
         const { data: message, error } = await supabase
-            .from('messages')
+            .from('internal_messages')
             .insert({
                 sender_type,
                 sender_id: finalSenderId,
@@ -115,7 +104,7 @@ export async function POST(request: NextRequest) {
             .single();
 
         if (error) {
-            console.error('Error sending message:', error);
+            console.error('Error sending internal message:', error);
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -137,7 +126,7 @@ export async function PUT(request: NextRequest) {
         }
 
         const { error } = await supabase
-            .from('messages')
+            .from('internal_messages')
             .update({ read_at: read_at || new Date().toISOString() })
             .in('id', message_ids);
 
@@ -153,79 +142,30 @@ export async function PUT(request: NextRequest) {
     }
 }
 
-// DELETE /api/messages - Delete a message by ID or all messages in a conversation
+// DELETE /api/messages - Delete a message
 export async function DELETE(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams;
         const messageId = searchParams.get('id');
-        const conversationId = searchParams.get('conversationId');
 
-        console.log('[DELETE /api/messages] messageId:', messageId, 'conversationId:', conversationId);
-        console.log('[DELETE /api/messages] SERVICE_KEY exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-        if (!messageId && !conversationId) {
-            return NextResponse.json({ error: 'Missing message id or conversationId' }, { status: 400 });
+        if (!messageId) {
+            return NextResponse.json({ error: 'Missing message id' }, { status: 400 });
         }
 
-        if (conversationId) {
-            // Delete all messages in conversation, then the conversation itself
-            const { data: deletedMsgs, error: msgError } = await supabase
-                .from('messages')
-                .delete()
-                .eq('conversation_id', conversationId)
-                .select('id');
+        const { data: deleted, error } = await supabase
+            .from('internal_messages')
+            .delete()
+            .eq('id', messageId)
+            .select('id');
 
-            console.log('[DELETE] Deleted messages:', deletedMsgs?.length, 'error:', msgError?.message);
-
-            if (msgError) {
-                return NextResponse.json({ error: msgError.message, detail: 'Failed to delete messages' }, { status: 500 });
-            }
-
-            // Also delete the conversation record
-            const { error: convError } = await supabase
-                .from('conversations')
-                .delete()
-                .eq('id', conversationId);
-
-            console.log('[DELETE] Conversation delete error:', convError?.message);
-
-            return NextResponse.json({
-                success: true,
-                deleted_messages: deletedMsgs?.length || 0,
-                conversation_deleted: !convError,
-            });
-        } else if (messageId) {
-            // First verify the message exists
-            const { data: existing } = await supabase
-                .from('messages')
-                .select('id')
-                .eq('id', messageId)
-                .single();
-
-            console.log('[DELETE] Message exists:', !!existing);
-
-            const { data: deleted, error } = await supabase
-                .from('messages')
-                .delete()
-                .eq('id', messageId)
-                .select('id');
-
-            console.log('[DELETE] Deleted:', deleted, 'error:', error?.message);
-
-            if (error) {
-                return NextResponse.json({ error: error.message }, { status: 500 });
-            }
-
-            return NextResponse.json({
-                success: true,
-                deleted_count: deleted?.length || 0,
-                message_existed: !!existing,
-            });
+        if (error) {
+            console.error('Error deleting message:', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        return NextResponse.json({ error: 'No valid parameters' }, { status: 400 });
+        return NextResponse.json({ success: true, deleted_count: deleted?.length || 0 });
     } catch (error) {
-        console.error('[DELETE /api/messages] Unexpected error:', error);
-        return NextResponse.json({ error: 'Internal server error', detail: String(error) }, { status: 500 });
+        console.error('Unexpected error:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
