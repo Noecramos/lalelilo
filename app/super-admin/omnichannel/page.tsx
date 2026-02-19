@@ -205,16 +205,20 @@ export default function OmnichannelPage() {
             results.push({ channel: 'facebook', success: false, error: e.message });
         }
 
-        // 3. Instagram (uses same Meta webhook — no separate sync endpoint yet)
-        // Instagram messages come through webhook only
-        const igConversations = conversations.filter(c => c.channel_type === 'instagram').length;
-        results.push({
-            channel: 'instagram',
-            success: igConversations > 0,
-            conversations: igConversations,
-            new_messages: 0,
-            error: igConversations === 0 ? 'Mensagens do Instagram chegam via webhook em tempo real' : undefined,
-        });
+        // 3. Sync Instagram via Graph API
+        try {
+            const igRes = await fetch('/api/sync/instagram?secret=lalelilo_verify_2026');
+            const igData = await igRes.json();
+            results.push({
+                channel: 'instagram',
+                success: igData.success === true,
+                new_messages: igData.new_messages || 0,
+                conversations: igData.conversations || 0,
+                error: igData.error,
+            });
+        } catch (e: any) {
+            results.push({ channel: 'instagram', success: false, error: e.message });
+        }
 
         setSyncResults(results);
 
@@ -377,8 +381,8 @@ export default function OmnichannelPage() {
                                     <span
                                         key={r.channel}
                                         className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${r.success
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-yellow-100 text-yellow-700'
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-yellow-100 text-yellow-700'
                                             }`}
                                         title={r.error || `${r.new_messages} novas msgs`}
                                     >
