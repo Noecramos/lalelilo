@@ -87,25 +87,52 @@ export default function OmnichannelPage() {
     const [syncing, setSyncing] = useState(false);
     const [syncResults, setSyncResults] = useState<SyncChannelResult[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const selectedConvRef = useRef<string | null>(null);
+
+    // Keep ref in sync with state
+    useEffect(() => {
+        selectedConvRef.current = selectedConv;
+    }, [selectedConv]);
 
     useEffect(() => {
         fetchConversations();
 
         // Realtime subscription for new messages
         const channel = supabase
-            .channel('omnichannel_messages')
+            .channel('omnichannel_realtime')
             .on(
                 'postgres_changes',
                 { event: 'INSERT', schema: 'public', table: 'messages' },
                 () => {
                     fetchConversations();
-                    if (selectedConv) fetchMessages(selectedConv);
+                    if (selectedConvRef.current) fetchMessages(selectedConvRef.current);
+                }
+            )
+            .on(
+                'postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'messages' },
+                () => {
+                    if (selectedConvRef.current) fetchMessages(selectedConvRef.current);
+                }
+            )
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'conversations' },
+                () => {
+                    fetchConversations();
                 }
             )
             .subscribe();
 
+        // Polling fallback every 10 seconds for reliability
+        const pollInterval = setInterval(() => {
+            fetchConversations();
+            if (selectedConvRef.current) fetchMessages(selectedConvRef.current);
+        }, 10000);
+
         return () => {
             supabase.removeChannel(channel);
+            clearInterval(pollInterval);
         };
     }, []);
 
