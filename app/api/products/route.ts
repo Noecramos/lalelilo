@@ -80,7 +80,10 @@ export async function POST(request: NextRequest) {
             image_url,
             images,
             sizes,
-            colors
+            colors,
+            product_type,
+            product_tier,
+            gender
         } = body;
 
         // Validation
@@ -91,7 +94,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Check if slug already exists for this client
+        // Check if slug already exists for this client, auto-append suffix if needed
+        let finalSlug = slug;
         const { data: existingProduct } = await supabaseAdmin
             .from('products')
             .select('id')
@@ -100,10 +104,7 @@ export async function POST(request: NextRequest) {
             .single();
 
         if (existingProduct) {
-            return NextResponse.json(
-                { error: 'Product with this slug already exists' },
-                { status: 409 }
-            );
+            finalSlug = `${slug}-${Date.now()}`;
         }
 
         // Create product
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
                 client_id,
                 category_id,
                 name,
-                slug,
+                slug: finalSlug,
                 description,
                 price: parseFloat(price),
                 compare_at_price: compare_at_price ? parseFloat(compare_at_price) : null,
@@ -124,6 +125,9 @@ export async function POST(request: NextRequest) {
                 images: images || [],
                 sizes: sizes || [],
                 colors: colors || [],
+                product_type: product_type || null,
+                product_tier: product_tier || null,
+                gender: gender || 'unisex',
                 is_active: true
             })
             .select()
