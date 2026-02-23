@@ -76,6 +76,7 @@ export default function SuperAdminLayout({
             children: [
                 { name: 'Estoque CD', href: '/super-admin/cd', icon: Warehouse },
                 { name: 'Reabastecimento', href: '/super-admin/replenishment', icon: Package },
+                { name: 'Produtos', href: '/super-admin/products', icon: Package },
             ]
         },
         { name: 'Suporte Novix', href: 'https://wa.me/558183920320', icon: Phone, external: true },
