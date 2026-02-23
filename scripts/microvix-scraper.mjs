@@ -22,12 +22,39 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, '..', 'data', 'microvix');
 
+// Load credentials from .env.local
+function loadEnv() {
+    const envPath = path.join(__dirname, '..', '.env.local');
+    if (!fs.existsSync(envPath)) {
+        console.error('❌ .env.local not found! Create it with MICROVIX_USERNAME and MICROVIX_PASSWORD');
+        process.exit(1);
+    }
+    const content = fs.readFileSync(envPath, 'utf8');
+    const env = {};
+    content.split('\n').forEach(line => {
+        if (line.startsWith('#') || !line.includes('=')) return;
+        const i = line.indexOf('=');
+        let k = line.substring(0, i).trim();
+        let v = line.substring(i + 1).trim();
+        if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1);
+        env[k] = v;
+    });
+    return env;
+}
+
+const env = loadEnv();
+
 const CONFIG = {
     loginUrl: 'https://erp.microvix.com.br/',
     dashboardUrl: 'https://linx.microvix.com.br/v4/home/index2.asp',
-    username: 'ia.lalelilo',
-    password: 'Lalelilo@2026',
+    username: env.MICROVIX_USERNAME || '',
+    password: env.MICROVIX_PASSWORD || '',
 };
+
+if (!CONFIG.username || !CONFIG.password) {
+    console.error('❌ Missing MICROVIX_USERNAME or MICROVIX_PASSWORD in .env.local');
+    process.exit(1);
+}
 
 function ensureDir(dir) {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
