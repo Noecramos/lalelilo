@@ -309,7 +309,7 @@ function CheckoutPaymentContent() {
                 <div className="container mx-auto px-4">
                     <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 object-contain opacity-40" />
                     <p className="text-xs text-gray-400">
-                        © 2026 Novix Online • Powered by Noviapp AI Systems ®
+                        © 2026 Noviapp AI Systems ®
                     </p>
                 </div>
             </footer>

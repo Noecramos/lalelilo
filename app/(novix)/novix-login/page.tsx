@@ -115,7 +115,7 @@ export default function NovixLogin() {
                 <div className="text-center mt-6">
                     <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 opacity-40" />
                     <p className="text-sm text-gray-500">
-                        © 2026 Novix Online • Powered by Noviapp AI Systems ®
+                        © 2026 Noviapp AI Systems ®
                     </p>
                 </div>
             </div>

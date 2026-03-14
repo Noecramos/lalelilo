@@ -249,7 +249,7 @@ function CheckoutSuccessContent() {
                             Pedido realizado em {new Date().toLocaleString('pt-BR')}
                         </p>
                         <p className="text-xs text-gray-300 mt-1">
-                            © 2026 Novix Online • Powered by Noviapp AI Systems ®
+                            © 2026 Noviapp AI Systems ®
                         </p>
                     </footer>
                 </div>

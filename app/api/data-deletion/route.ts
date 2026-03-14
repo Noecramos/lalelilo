@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
             Facebook/Instagram account has been removed from our systems.</p>
             <p>If you have any questions, contact us at <a href="mailto:noecramos@gmail.com">noecramos@gmail.com</a></p>
             <hr/>
-            <p style="color: #999; font-size: 12px;">Lalelilo by Novix Online • Powered by Noviapp AI Systems ®</p>
+            <p style="color: #999; font-size: 12px;">Lalelilo • Powered by Noviapp AI Systems ®</p>
         </body>
         </html>
     `, {

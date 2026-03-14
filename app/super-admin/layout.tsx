@@ -145,7 +145,7 @@ export default function SuperAdminLayout({
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-4 pb-24 space-y-1 overflow-y-auto" style={{
+                <nav className="p-4 pb-44 space-y-1 overflow-y-auto" style={{
                     maxHeight: 'calc(100vh - 4rem)',
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none'
@@ -238,7 +238,7 @@ export default function SuperAdminLayout({
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white border-opacity-20 text-center bg-pink-800 pointer-events-none">
                     <div className="bg-white/20 rounded-lg p-3 text-xs text-white pointer-events-auto">
                         <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 opacity-90" style={{ filter: 'brightness(0) invert(1)' }} />
-                        <p>© 2026 Novix Online • Powered by Noviapp AI Systems ®</p>
+                        <p>© 2026 Noviapp AI Systems ®</p>
                         <a href="https://www.noviapp.com.br" target="_blank" rel="noopener noreferrer" className="block mt-1 text-white hover:underline">
                             www.noviapp.com.br
                         </a>

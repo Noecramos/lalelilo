@@ -86,7 +86,11 @@ export default function ShopAdminLayout({
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-4 space-y-1">
+                <nav className="p-4 pb-44 space-y-1 overflow-y-auto" style={{
+                    maxHeight: 'calc(100vh - 4rem)',
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none'
+                }}>
                     {navigation.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.href);
@@ -130,7 +134,7 @@ export default function ShopAdminLayout({
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 text-center">
                     <div className="text-xs text-gray-500">
                         <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 opacity-50 grayscale hover:grayscale-0 transition-all" />
-                        <p>© 2026 Novix Online • Powered by Noviapp AI Systems ®</p>
+                        <p>© 2026 Noviapp AI Systems ®</p>
                         <a href="https://www.noviapp.com.br" target="_blank" rel="noopener noreferrer" className="block mt-1 text-lale-orange hover:underline">
                             www.noviapp.com.br
                         </a>

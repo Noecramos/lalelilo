@@ -67,7 +67,7 @@ export default function NovixLayout({
             {/* Footer */}
             <footer className="mt-auto py-6 text-center">
                 <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 opacity-40" />
-                <p className="text-sm text-gray-500">© 2026 Novix Online • Powered by Noviapp AI Systems ®</p>
+                <p className="text-sm text-gray-500">© 2026 Noviapp AI Systems ®</p>
             </footer>
         </div>
     );
