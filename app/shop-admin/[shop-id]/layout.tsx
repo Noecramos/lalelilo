@@ -133,7 +133,7 @@ export default function ShopAdminLayout({
                 {/* Noviapp Branding */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 text-center">
                     <div className="text-xs text-gray-500">
-                        <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 opacity-50 grayscale hover:grayscale-0 transition-all" />
+                        <img src="/noviapp-logo.png" alt="Noviapp" className="h-6 mx-auto mb-2 opacity-70 hover:opacity-100 transition-all" />
                         <p>© 2026 Noviapp AI Systems ®</p>
                         <a href="https://www.noviapp.com.br" target="_blank" rel="noopener noreferrer" className="block mt-1 text-lale-orange hover:underline">
                             www.noviapp.com.br
