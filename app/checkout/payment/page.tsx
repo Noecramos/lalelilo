@@ -307,7 +307,7 @@ function CheckoutPaymentContent() {
             {/* Footer */}
             <footer className="mt-8 py-6 text-center border-t border-gray-100 bg-white">
                 <div className="container mx-auto px-4">
-                    <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 object-contain opacity-40" />
+                    <img src="/noviapp-logo.png" alt="Noviapp" className="h-8 mx-auto mb-2 object-contain" />
                     <p className="text-xs text-gray-400">
                         © 2026 Noviapp AI Systems ®
                     </p>

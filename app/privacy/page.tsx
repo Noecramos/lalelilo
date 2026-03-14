@@ -95,7 +95,7 @@ export default function PrivacyPolicyPage() {
                 </div>
 
                 <div className="mt-10 pt-6 border-t border-gray-200 text-center">
-                    <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 object-contain opacity-40" />
+                    <img src="/noviapp-logo.png" alt="Noviapp" className="h-8 mx-auto mb-2 object-contain" />
                     <p className="text-xs text-gray-400">
                         © 2026 Noviapp AI Systems ®
                     </p>

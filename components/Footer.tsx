@@ -24,8 +24,8 @@ export default function Footer() {
                         <span>•</span>
                         <Link href="http://localhost:3001/candidatos" target="_blank" rel="noopener noreferrer" className="hover:text-lale-pink transition-colors font-medium">Trabalhe Conosco</Link>
                     </div>
-                    <img src="/noviapp-logo.png" alt="Noviapp" className="h-6 object-contain opacity-60 mt-2" />
-                    <p className="text-xs text-gray-400">© 2026 Noviapp AI Systems ®</p>
+                    <img src="/noviapp-logo.png" alt="Noviapp" className="h-8 object-contain mt-2" />
+                    <p className="text-xs text-gray-500">© 2026 Noviapp AI Systems ®</p>
                 </div>
             </div>
         </footer>

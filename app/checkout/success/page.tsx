@@ -244,7 +244,7 @@ function CheckoutSuccessContent() {
 
                     {/* Footer */}
                     <footer className="mt-8 text-center pb-8">
-                        <img src="/noviapp-logo.png" alt="Noviapp" className="h-5 mx-auto mb-2 object-contain opacity-40" />
+                        <img src="/noviapp-logo.png" alt="Noviapp" className="h-8 mx-auto mb-2 object-contain" />
                         <p className="text-xs text-gray-400">
                             Pedido realizado em {new Date().toLocaleString('pt-BR')}
                         </p>
