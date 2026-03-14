@@ -16,8 +16,15 @@ export default function Footer() {
     return (
         <footer className="py-6 mt-12">
             <div className="container mx-auto px-4">
-                <div className="flex flex-col items-center gap-2 text-center">
-                    <img src="/noviapp-logo.png" alt="Noviapp" className="h-6 object-contain opacity-60" />
+                <div className="flex flex-col items-center gap-4 text-center">
+                    <div className="flex justify-center flex-wrap gap-4 text-sm text-gray-500">
+                        <Link href="/privacy" className="hover:text-lale-pink transition-colors">Privacidade</Link>
+                        <span>•</span>
+                        <Link href="/terms" className="hover:text-lale-pink transition-colors">Termos de Uso</Link>
+                        <span>•</span>
+                        <Link href="http://localhost:3001/candidatos" target="_blank" rel="noopener noreferrer" className="hover:text-lale-pink transition-colors font-medium">Trabalhe Conosco</Link>
+                    </div>
+                    <img src="/noviapp-logo.png" alt="Noviapp" className="h-6 object-contain opacity-60 mt-2" />
                     <p className="text-xs text-gray-400">© 2026 Novix Online • Powered by Noviapp AI Systems ®</p>
                 </div>
             </div>

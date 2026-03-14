@@ -1,0 +1,23 @@
+{
+    "name": "antigravity-mcp-server",
+    "version": "1.0.0",
+    "description": "MCP Server for Antigravity projects — Supabase, WAHA WhatsApp, and deployment tools",
+    "type": "module",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "dev": "tsx src/index.ts"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.12.1",
+        "@supabase/supabase-js": "^2.93.3",
+        "dotenv": "^16.4.7",
+        "zod": "^3.24.2"
+    },
+    "devDependencies": {
+        "tsx": "^4.19.3",
+        "typescript": "^5.7.3",
+        "@types/node": "^20.17.0"
+    }
+}

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateShop, authenticateSuperAdmin } from '@/lib/auth';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+import { verifyPassword } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
 export async function POST(req: NextRequest) {
@@ -44,7 +46,62 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // Shop login
+        // Check if it's a regional manager login (novix_managers table)
+        const { data: manager } = await supabaseAdmin
+            .from('novix_managers')
+            .select('*')
+            .eq('username', identifier)
+            .eq('is_active', true)
+            .single();
+
+        if (manager) {
+            // Verify manager password
+            if (!manager.password_hash) {
+                return NextResponse.json(
+                    { error: 'Senha não configurada. Contate o administrador.' },
+                    { status: 401 }
+                );
+            }
+
+            const isValid = await verifyPassword(password, manager.password_hash);
+            if (!isValid) {
+                return NextResponse.json(
+                    { error: 'Senha incorreta' },
+                    { status: 401 }
+                );
+            }
+
+            // Update last login
+            await supabaseAdmin
+                .from('novix_managers')
+                .update({ last_login: new Date().toISOString() })
+                .eq('id', manager.id);
+
+            // Set session cookie
+            const cookieStore = await cookies();
+            cookieStore.set('auth_session', JSON.stringify({
+                role: 'regional_manager',
+                managerId: manager.id,
+                username: manager.username,
+                name: manager.name,
+                managed_shop_ids: manager.managed_shop_ids || []
+            }), {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 60 * 60 * 24 * 7
+            });
+
+            return NextResponse.json({
+                success: true,
+                role: 'regional_manager',
+                managerId: manager.id,
+                username: manager.username,
+                name: manager.name
+            });
+        }
+
+        // Shop login (fallback)
         const result = await authenticateShop(identifier, password);
 
         if (!result.success) {

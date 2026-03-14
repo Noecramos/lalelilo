@@ -135,6 +135,7 @@ export async function POST(req: NextRequest) {
                                 message: content,
                                 contactName: senderName,
                                 channelType: 'whatsapp',
+                                inboundChannel: 'cloud', // message came via Cloud API — reply via Cloud API
                             });
                         } catch (e) {
                             console.error('[WhatsApp Webhook] Bot error:', e);

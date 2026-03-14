@@ -38,6 +38,7 @@ export default function ShopAdminLayout({
         { name: 'Estoque', href: `/shop-admin/${shopId}/inventory`, icon: Package },
         { name: 'Reabastecimento', href: `/shop-admin/${shopId}/replenishment`, icon: Truck },
         { name: 'Marketing', href: `/shop-admin/${shopId}/marketing`, icon: Megaphone },
+        { name: 'Colaboradores', href: `/shop-admin/${shopId}/colaboradores`, icon: Users },
         { name: 'Mensagens', href: `/shop-admin/${shopId}/messages`, icon: MessageSquare },
         { name: 'Configurações', href: `/shop-admin/${shopId}/settings`, icon: Settings },
         { name: 'Suporte Whats', href: 'https://wa.me/558183920320', icon: Phone, external: true },

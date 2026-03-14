@@ -1,0 +1,13 @@
+{
+    "servers": {
+        "antigravity": {
+            "type": "stdio",
+            "command": "npx",
+            "args": [
+                "tsx",
+                "mcp-server/src/index.ts"
+            ],
+            "env": {}
+        }
+    }
+}

@@ -12,17 +12,18 @@ import {
 } from './gemini';
 import { findOrCreateContact, assignLeadToShop } from './crm';
 import { sendText as cloudSendText } from './whatsapp-cloud';
-import { sendText as wahaSendTextFn } from './waha';
+import { sendText as wahaSendText } from './waha';
 
-// Use Cloud API if configured, otherwise fall back to WAHA
-const useCloudApi = !!(process.env.WHATSAPP_CLOUD_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
-const wahaSendText = useCloudApi ? cloudSendText : wahaSendTextFn;
+// Whether WhatsApp Cloud API credentials are configured
+const cloudApiAvailable = !!(process.env.WHATSAPP_CLOUD_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
 
 const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
 const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
 const getSupabase = () => createClient(supabaseUrl, supabaseKey);
 
 const CLIENT_ID = process.env.DEFAULT_CLIENT_ID || '';
+
+type SendTextFn = (params: { phone: string; text: string }) => Promise<unknown>;
 
 interface ConversationState {
     id: string;
@@ -43,7 +44,15 @@ export async function handleBotMessage(params: {
     message: string;
     contactName?: string;
     channelType: 'whatsapp' | 'instagram' | 'facebook';
+    inboundChannel?: 'waha' | 'cloud'; // which inbound channel received the message
 }): Promise<{ success: boolean; response?: string; error?: string }> {
+    // Route replies back through the same channel the message arrived on.
+    // If message came via Cloud API, reply via Cloud API.
+    // Otherwise (WAHA or unspecified), reply via WAHA.
+    const sendText: SendTextFn = (params.inboundChannel === 'cloud' && cloudApiAvailable)
+        ? cloudSendText
+        : wahaSendText;
+
     try {
         const supabase = getSupabase();
 
@@ -62,13 +71,13 @@ export async function handleBotMessage(params: {
 
         // 2. Check if contact already has a shop assigned
         if (contact.assigned_shop_id) {
-            // Contact already assigned, just acknowledge
+            // Contact already assigned, just acknowledge with AI response
             const response = await analyzeMessage(params.message, {
                 contactName: contact.name || undefined,
             });
 
             if (params.channelType === 'whatsapp') {
-                await wahaSendText({ phone: params.phone, text: response.text });
+                await sendText({ phone: params.phone, text: response.text });
             }
 
             return { success: true, response: response.text };
@@ -79,10 +88,10 @@ export async function handleBotMessage(params: {
 
         // 4. Handle based on current state
         if (state.state === 'awaiting_shop_selection') {
-            return await handleShopSelection(params.phone, params.message, state, params.channelType);
+            return await handleShopSelection(params.phone, params.message, state, params.channelType, sendText);
         } else {
             // New conversation - start shop selection flow
-            return await startShopSelectionFlow(params.phone, contact.name || undefined, contact.id, params.channelType);
+            return await startShopSelectionFlow(params.phone, contact.name || undefined, contact.id, params.channelType, sendText);
         }
 
     } catch (error) {
@@ -98,7 +107,8 @@ async function startShopSelectionFlow(
     phone: string,
     contactName: string | undefined,
     contactId: string,
-    channelType: 'whatsapp' | 'instagram' | 'facebook'
+    channelType: 'whatsapp' | 'instagram' | 'facebook',
+    sendText: SendTextFn
 ): Promise<{ success: boolean; response: string }> {
     const supabase = getSupabase();
 
@@ -130,7 +140,7 @@ async function startShopSelectionFlow(
 
     // Send menu
     if (channelType === 'whatsapp') {
-        await wahaSendText({ phone, text: menuMessage });
+        await sendText({ phone, text: menuMessage });
     }
 
     return { success: true, response: menuMessage };
@@ -143,7 +153,8 @@ async function handleShopSelection(
     phone: string,
     message: string,
     state: ConversationState,
-    channelType: 'whatsapp' | 'instagram' | 'facebook'
+    channelType: 'whatsapp' | 'instagram' | 'facebook',
+    sendText: SendTextFn
 ): Promise<{ success: boolean; response: string }> {
     const supabase = getSupabase();
     const shops = state.context.shops || [];
@@ -189,7 +200,7 @@ async function handleShopSelection(
 
         // Send confirmation
         if (channelType === 'whatsapp') {
-            await wahaSendText({ phone, text: confirmationMessage });
+            await sendText({ phone, text: confirmationMessage });
         }
 
         return { success: true, response: confirmationMessage };
@@ -213,7 +224,7 @@ Enquanto isso, pode me contar o que você procura? 😊`;
         // TODO: Notify super admin
 
         if (channelType === 'whatsapp') {
-            await wahaSendText({ phone, text: escalationMessage });
+            await sendText({ phone, text: escalationMessage });
         }
 
         return { success: true, response: escalationMessage };
@@ -236,7 +247,7 @@ Ou me diga qual loja é mais próxima de você! 📍`;
         .eq('id', state.id);
 
     if (channelType === 'whatsapp') {
-        await wahaSendText({ phone, text: retryMessage });
+        await sendText({ phone, text: retryMessage });
     }
 
     return { success: true, response: retryMessage };

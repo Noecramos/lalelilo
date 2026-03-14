@@ -48,7 +48,8 @@ export async function POST(req: NextRequest) {
             phone,
             message,
             contactName: senderName,
-            channelType: 'whatsapp'
+            channelType: 'whatsapp',
+            inboundChannel: 'waha', // message came via WAHA — reply via WAHA
         });
     }
 

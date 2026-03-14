@@ -35,6 +35,8 @@ export default function LoginPage() {
                 // Redirect based on role
                 if (data.role === 'super_admin') {
                     router.push('/super-admin');
+                } else if (data.role === 'regional_manager') {
+                    router.push(`/gestao-lojas/${data.managerId}`);
                 } else if (data.role === 'shop') {
                     router.push(`/shop-admin/${data.slug}`);
                 }

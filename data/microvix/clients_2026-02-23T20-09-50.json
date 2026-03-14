@@ -1,0 +1,452 @@
+[
+  {
+    "Código": "23394",
+    "Nome": "yngrid",
+    "Documento": "713.851.914-14",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(81) 99664-5949",
+    "E-mail": ""
+  },
+  {
+    "Código": "23392",
+    "Nome": "TATIANE EMILIA",
+    "Documento": "781.411.844-15",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23393",
+    "Nome": "ELAINE DOS SANTOS XAVIER",
+    "Documento": "709.782.904-45",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23388",
+    "Nome": "Thiago",
+    "Documento": "096.836.494-24",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(81) 97335-3694",
+    "E-mail": ""
+  },
+  {
+    "Código": "23387",
+    "Nome": "ana beatriz",
+    "Documento": "128.358.104-39",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23386",
+    "Nome": "LILIAN MARIA DE MOURA",
+    "Documento": "036.437.844-14",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23385",
+    "Nome": "RAFAELLA BARBOSA DE OLIVEIRA",
+    "Documento": "088.653.574-36",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(81) 99657-7502",
+    "E-mail": ""
+  },
+  {
+    "Código": "23384",
+    "Nome": "williane",
+    "Documento": "703.697.794-95",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23381",
+    "Nome": "EDVALDO XAVIER DA SILVA",
+    "Documento": "021.767.374-07",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23382",
+    "Nome": "EHLAYNNE MENDES DE OLIVEIRA",
+    "Documento": "084.954.304-52",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23383",
+    "Nome": "VERANICE PINHEIRO",
+    "Documento": "484.824.634-20",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23380",
+    "Nome": "girlane ferreira da silva",
+    "Documento": "013.679.044-55",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23379",
+    "Nome": "LUCINEIA SILVA DO NASCIMENTO",
+    "Documento": "519.464.914-20",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23378",
+    "Nome": "FITLOG TRANSPORTES E LOGISTICA LTDA",
+    "Documento": "31.423.169/0002-69",
+    "Inscrição Estadual": "",
+    "Tipo": "Cliente/Fornec/Transp",
+    "Telefone": "(11) 2212-5862",
+    "E-mail": "fernando@fitlogistica.com.br"
+  },
+  {
+    "Código": "23377",
+    "Nome": "CLEO ASSIS",
+    "Documento": "078.043.114-60",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23376",
+    "Nome": "ludmila",
+    "Documento": "129.050.734-11",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23374",
+    "Nome": "ERIKA KARINNE DE ALCANTARA",
+    "Documento": "116.270.084-03",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(87) 99618-3233",
+    "E-mail": ""
+  },
+  {
+    "Código": "23375",
+    "Nome": "JULIANA MORENO",
+    "Documento": "105.486.464-06",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23373",
+    "Nome": "ROSANGELA/MARIA",
+    "Documento": "108.052.684-64",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23372",
+    "Nome": "RENATA/ MARIA CECILIA",
+    "Documento": "107.711.734-58",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23371",
+    "Nome": "CLARYSSA MARIA DO NASCIMENTO",
+    "Documento": "130.902.874-55",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23370",
+    "Nome": "LINDA MARIA/ ICARO",
+    "Documento": "279.977.154-87",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23369",
+    "Nome": "kaynara Apolinaria",
+    "Documento": "099.632.914-57",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23368",
+    "Nome": "ITHAELY MARIA DA SILVA NASCIMENTO",
+    "Documento": "136.252.524-30",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(81) 99208-4489",
+    "E-mail": ""
+  },
+  {
+    "Código": "23367",
+    "Nome": "Elizabeth Ferreira Costa",
+    "Documento": "117.060.574-58",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(81) 98596-8180",
+    "E-mail": ""
+  },
+  {
+    "Código": "23366",
+    "Nome": "Rafela/ Mariana",
+    "Documento": "702.422.964-08",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23363",
+    "Nome": "Bianca Arraujo",
+    "Documento": "134.648.124-56",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23364",
+    "Nome": "RAFAELA",
+    "Documento": "077.252.464-52",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23365",
+    "Nome": "MARISTELA QUITERIA DOS SANTOS MENDONÇA",
+    "Documento": "018.003.434-00",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(81) 98847-1931",
+    "E-mail": ""
+  },
+  {
+    "Código": "23362",
+    "Nome": "elizane  mae de arthur 6 anos",
+    "Documento": "121.730.504-19",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(81) 99282-0189",
+    "E-mail": ""
+  },
+  {
+    "Código": "23361",
+    "Nome": "THAIS SOUZA SILVA",
+    "Documento": "166.025.774-33",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(81) 99498-6138",
+    "E-mail": ""
+  },
+  {
+    "Código": "23360",
+    "Nome": "HANNAH BARROS",
+    "Documento": "090.513.794-98",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(83) 98795-8643",
+    "E-mail": ""
+  },
+  {
+    "Código": "23359",
+    "Nome": "ana paula",
+    "Documento": "041.722.964-08",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23357",
+    "Nome": "SEVERINA KATIA DOS SANTOS",
+    "Documento": "071.265.234-59",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23358",
+    "Nome": "katianne",
+    "Documento": "900.578.804-68",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23356",
+    "Nome": "EDITE FRANÇA",
+    "Documento": "023.245.804-97",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(83) 99981-6817",
+    "E-mail": ""
+  },
+  {
+    "Código": "23355",
+    "Nome": "silvania maria vô de israel 22/04",
+    "Documento": "260.718.418-52",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23354",
+    "Nome": "AMANDA/ ARTHUR RAFAEL",
+    "Documento": "703.941.354-07",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23353",
+    "Nome": "JESSIKA/ JOAÕ MIGUEL",
+    "Documento": "104.824.684-16",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23351",
+    "Nome": "KAMYLA FEIJO",
+    "Documento": "057.653.204-57",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(83) 98792-9698",
+    "E-mail": ""
+  },
+  {
+    "Código": "23352",
+    "Nome": "GEANDSON ALTIERES QUERINO DE SOUZA",
+    "Documento": "102.117.654-06",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "(81) 98538-2032",
+    "E-mail": ""
+  },
+  {
+    "Código": "23350",
+    "Nome": "ana alicia",
+    "Documento": "784.450.004-20",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23348",
+    "Nome": "cassia pereira",
+    "Documento": "520.097.694-49",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23349",
+    "Nome": "mallyla/maria vitoria",
+    "Documento": "041.287.604-39",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23347",
+    "Nome": "Michelle",
+    "Documento": "095.914.774-81",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23346",
+    "Nome": "Alda Lucia",
+    "Documento": "819.220.434-00",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23343",
+    "Nome": "erivaldo francisco batista",
+    "Documento": "082.004.344-35",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23344",
+    "Nome": "WILIANS SOARES DA SILVA",
+    "Documento": "115.363.854-17",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23345",
+    "Nome": "Alice Correia",
+    "Documento": "150.123.694-67",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  },
+  {
+    "Código": "23342",
+    "Nome": "ADRIELY XAVIER",
+    "Documento": "164.299.974-13",
+    "Inscrição Estadual": "ISENTO",
+    "Tipo": "Cliente",
+    "Telefone": "",
+    "E-mail": ""
+  }
+]

@@ -58,10 +58,10 @@ export default function SuperAdminLayout({
             children: [
                 { name: 'Contatos', href: '/super-admin/crm', icon: Users },
                 { name: 'Central Msgs', href: '/super-admin/omnichannel', icon: MessageSquare },
-                { name: 'Chat Interno', href: '/super-admin/messages', icon: Phone },
                 { name: 'Atribuição', href: '/super-admin/crm/assign', icon: Users },
             ]
         },
+        { name: 'Chat Interno', href: '/super-admin/messages', icon: Phone },
         { name: 'Marketing', href: '/super-admin/marketing', icon: Megaphone },
         { name: 'Gamificação', href: '/super-admin/gamification', icon: Trophy },
         {

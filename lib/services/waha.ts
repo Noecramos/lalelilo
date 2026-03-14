@@ -48,7 +48,7 @@ async function wahaFetch(endpoint: string, body: Record<string, unknown>): Promi
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                ...(WAHA_API_KEY ? { 'Authorization': `Bearer ${WAHA_API_KEY}` } : {}),
+                ...(WAHA_API_KEY ? { 'X-Api-Key': WAHA_API_KEY } : {}),
             },
             body: JSON.stringify(body),
         });
@@ -72,9 +72,10 @@ async function wahaFetch(endpoint: string, body: Record<string, unknown>): Promi
 export async function sendText({ phone, text, session }: SendTextParams): Promise<WahaResponse> {
     const chatId = `${formatPhone(phone)}@c.us`;
     const sessionName = session || WAHA_SESSION;
-    return wahaFetch(`/api/${sessionName}/sendText`, {
+    return wahaFetch(`/api/sendText`, {
         chatId,
         text,
+        session: sessionName,
     });
 }
 
@@ -84,10 +85,11 @@ export async function sendText({ phone, text, session }: SendTextParams): Promis
 export async function sendImage({ phone, imageUrl, caption, session }: SendImageParams): Promise<WahaResponse> {
     const chatId = `${formatPhone(phone)}@c.us`;
     const sessionName = session || WAHA_SESSION;
-    return wahaFetch(`/api/${sessionName}/sendImage`, {
+    return wahaFetch(`/api/sendImage`, {
         chatId,
         file: { url: imageUrl },
         caption: caption || '',
+        session: sessionName,
     });
 }
 
@@ -97,11 +99,12 @@ export async function sendImage({ phone, imageUrl, caption, session }: SendImage
 export async function sendDocument({ phone, documentUrl, fileName, caption, session }: SendDocumentParams): Promise<WahaResponse> {
     const chatId = `${formatPhone(phone)}@c.us`;
     const sessionName = session || WAHA_SESSION;
-    return wahaFetch(`/api/${sessionName}/sendFile`, {
+    return wahaFetch(`/api/sendFile`, {
         chatId,
         file: { url: documentUrl },
         fileName: fileName || 'document',
         caption: caption || '',
+        session: sessionName,
     });
 }
 
