@@ -53,7 +53,15 @@ export default function SuperAdminLayout({
             ]
         },
         { name: 'Lojas', href: '/super-admin/shops', icon: Store },
-        { name: 'Gestão de Lojas', href: '/gestao-lojas', icon: Building2 },
+        {
+            name: 'Gestão de Lojas', href: '/super-admin/gestao-lojas', icon: Building2,
+            children: [
+                { name: 'Dashboard', href: '/super-admin/gestao-lojas', icon: Building2 },
+                { name: 'Minhas Lojas', href: '/super-admin/gestao-lojas/lojas', icon: Store },
+                { name: 'Colaboradores', href: '/super-admin/gestao-lojas/colaboradores', icon: Users },
+                { name: 'Chat Gestão', href: '/super-admin/gestao-lojas/chat', icon: MessageSquare },
+            ]
+        },
         { name: 'Clientes', href: '/super-admin/users', icon: Crown },
         {
             name: 'CRM', href: '/super-admin/crm', icon: Users,
