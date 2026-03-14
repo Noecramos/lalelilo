@@ -20,7 +20,8 @@ import {
     Package,
     LogOut,
     Warehouse,
-    Megaphone
+    Megaphone,
+    Building2
 } from 'lucide-react';
 
 export default function SuperAdminLayout({
@@ -52,6 +53,7 @@ export default function SuperAdminLayout({
             ]
         },
         { name: 'Lojas', href: '/super-admin/shops', icon: Store },
+        { name: 'Gestão de Lojas', href: '/gestao-lojas', icon: Building2 },
         { name: 'Clientes', href: '/super-admin/users', icon: Crown },
         {
             name: 'CRM', href: '/super-admin/crm', icon: Users,
