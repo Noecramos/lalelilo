@@ -213,7 +213,7 @@ export default function SuperAdminLayout({
 
                         const linkClass = isActive(item.href)
                             ? 'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all bg-white text-gray-800 shadow-md font-semibold'
-                            : 'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-white hover:bg-white hover:bg-opacity-20';
+                            : 'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-white hover:bg-white/15';
 
                         return (
                             <Link key={item.name} href={item.href} className={linkClass} onClick={() => setSidebarOpen(false)}>
